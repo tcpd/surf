@@ -1,0 +1,12 @@
+Can we assume the same person will not contest from 2 different parties in the same year?
+e.g. for the 4 DEVI LAL's in 1989, I suppose we can assume that the first 2 Devi Lal's are different, but 1 and 3 and 4 could be the same?
+   1989-HARYANA-ROHTAK-JD-1-390243
+   1989-HARYANA-SIRSA-IND-10-715
+   1989-PUNJAB-FEROZEPUR-JD-3-123064
+   1989-RAJASTHAN-SIKAR-JD-1-375855
+
+What about by-elections?
+
+Are there any rows that we can drop at the outset that don't matter? e.g. to detect frivolous independents, we might
+filter rows: PARTY=IND && Votes < 1000 and Position > 1 (This condition brings down rows from 77K to 62K)
+

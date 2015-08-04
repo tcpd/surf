@@ -1,0 +1,376 @@
+<html>
+<head>
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.dataTables.js"></script>
+    <script src="js/json2.js"></script>
+	<script src="js/papaparse.min.js"></script>
+    <link href="css/jquery.dataTables.css" rel="stylesheet" type="text/css"/>
+
+	<link href="css/fonts/font-awesome/css/font-awesome.css" rel="stylesheet">
+	<link href="css/fonts/font-awesome/css/font-awesome-4.3.min.css" rel="stylesheet">
+
+    <link href="css/epadd.css" rel="stylesheet" type="text/css"/>
+    <link href="css/theme.css" rel="stylesheet" type="text/css"/>
+	<style>
+		#filter { display: none; width: 600px; margin:auto; text-align:left; padding: 10px; border: solid 1px rgba(127,127,127,0.5); }
+		#controls { display: none; font-size: 20px; font-variant: small-caps; }
+	</style>
+</head>
+<body style="text-align:center">
+
+<br/>
+<div id="heading">
+	<h2>
+		<span id="message"></span>
+		<i id="spinner" style="" class="fa fa-spinner fa-spin"></i>
+	</h2>
+</div>
+
+<div id="controls">
+	<a href="" style="display:none" id="show_fields">Show by Field</a>
+	&nbsp;
+	&nbsp;
+	<a href="" style="display:none" id="show_rows">Show all rows</a>
+</div>
+
+<h2 style="font-size:14px;style="display:none" id="filter"> </h2>
+<br/>
+
+<div id="fields" style="width:600px; margin: auto"> </div>
+
+<div id="rows" style="margin: 10px;">
+</div>
+
+<script>
+"use strict";
+
+var PER_FIELD_DATA = [], DATA = [], FIELDS = [], ROWS = [], PID;
+
+$('#show_fields').click(function() { 
+	var url = location.href;
+	url = url.replace(/rows=1/g, '');
+	window.open (url, '_blank');
+});
+
+$('#show_rows').click(function() { 
+	var url = (location.href) + (location.search ? '&': '?') + ('rows=1');
+	window.open (url, '_blank');
+});
+
+function LOG(s) { 
+	if (console) console.log(s); 
+}
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    	results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function filter(fields, data) {
+	LOG ('filtering data rows = ' + data.length);
+	var filter_str = '';
+	for (var f in fields) {
+		var field = fields[f];
+		// check if this field has a filter
+		var val = getParameterByName(field);
+		if (val || val === 0) {
+			LOG ('looking for rows where ' + field + ' = ' + val);
+			var new_data = [];
+			var count = 0;
+		    for (var i in data) { 
+				if (data[i][field] === val) {
+					new_data.push(data[i]);
+				}
+			}
+			LOG ('filter ' + field + '=' + val + ' reduced dataset from ' + data.length + ' to ' + new_data.length); 
+			filter_str += field + ' = ' + val + ' (' + DATA.length + ' &rarr; ' + new_data.length + ' rows) <br/>';
+			data = new_data;
+		}
+	}
+		
+	if (filter_str) {
+		filter_str = 'Filters: <br/>' + filter_str;
+		$('#filter').html(filter_str); 	
+		$('#filter').fadeIn(); 
+	}
+	LOG ('filtered data rows = ' + data.length);
+	return data;
+}
+
+function identify_fields(data) {
+	LOG ('identifying fields');
+	var fields = [];
+	for (field in data[0]) { if (field) fields.push(field); } // eliminate fields with the empty name 
+	LOG ('fields = ' + fields);
+	var avail_counts = [];
+	for (var f in fields) { 
+		var field = fields[f]; 
+		if (!field) { continue; } 
+		var avail_count = 0;
+		for (var d in data) { 
+			var val = data[d][field];
+			if (val === 0 || val) avail_count++;
+		}
+		avail_counts.push([field, avail_count]);
+	}
+
+    // sort profile_arr by freq
+    avail_counts.sort(function(a, b){
+        var a1 = a[1], b1 = b[1];
+        if (a1 == b1) return 0;
+        return a1 > b1 ? -1: 1;
+    });
+
+	fields = $.map(avail_counts, function(n) { return n[0]; });
+	return fields;
+}
+
+function setup(data) {
+	DATA = data;
+	do_names();
+	$('#message').html('Profiling ' + SRC + ' (' + DATA.length + ' records)...');
+	FIELDS = identify_fields(DATA); 
+	LOG('FIELDS are ' + FIELDS);
+
+	var old_data_len = DATA.length;
+	DATA = filter (FIELDS, DATA);
+		
+	if (DATA.length != old_data_len) {
+		PID = new_pid();
+		LOG ('data != old_data, saving to cache with new PID ' + PID);
+		try {
+			var str = JSON.stringify({DATA: DATA});
+			LOG ("stringified length is " + str.length);
+			localStorage[PID] = str;
+			str = null;
+		} catch(e) { LOG ("error saving to cache: " + e); }
+	} else {
+		LOG ('reusing previous PID ' + PID);
+	}
+		
+	if (getParameterByName("rows")) {
+		populate_row_table(); 
+		$('#show_field_tables').show();
+	} else {
+		compute_and_populate_fields(); 
+		$('#show_rows').show();
+	}
+	$('#controls').fadeIn(); 
+}
+
+function compute_and_populate_fields() {
+
+	if ($('#table0').length > 0) return;
+	LOG ('setting up fields')
+
+	var nrows = DATA.length;
+	for (var f in FIELDS) { 
+		var field = FIELDS[f]; 
+		LOG ('processing field ' + field);
+		try {
+			var profile = {};
+			for (var i in DATA) { 
+				var val = DATA[i][field];
+				if (val !== 0 && !val) val = 'Unavailable';
+				if (profile[val]) {profile[val]++;} else { profile[val] = 1; }
+			}
+
+			// convert profile to profile_arr
+			var profile_arr = [];
+			for (val in profile) { profile_arr.push([val, profile[val]]); }
+
+			// sort profile_arr by freq
+			profile_arr.sort(function(a, b){
+   	         var a1 = a[1], b1 = b[1];
+	            if (a1 == b1) return 0;
+   		         return a1 > b1 ? -1: 1;
+			});
+			PER_FIELD_DATA[f] = profile_arr;
+		
+		} catch (e) { 
+			document.write('crash! ' + e); 
+		}
+	}
+
+	$('#message').html('Profile of ' + SRC + ' (' + DATA.length + ' records)');
+	DATA = null;
+	populate_field_tables(); 
+}
+
+// to be used in field mode only
+function open_filtered_link(e) {
+	var val = $(e.target).text();
+	LOG ('val = ' + val);
+	var field =	$(e.target).closest('.field').attr('data-fieldname');
+	LOG ('field = ' + field);
+	var url = (location.href) + (location.search ? '&': '?') + (field + '=' + encodeURIComponent(val));
+	window.open (url, '_blank');
+}
+
+function populate_field_tables() {
+	// show field tables
+	for (var f in PER_FIELD_DATA) {
+		var desc = '#table' + f;
+		var field = FIELDS[f];
+		var click_to_filter = function ( data, type, full, meta ) {
+				return '<span class="clickable" style="cursor:pointer">' + data + '</span>';
+			};
+
+		var $e1 = $('<br/><br/><hr/><br/><br/>');
+
+		// better be sure field name does not have a quote!
+		var $e2 = $('<div class="field" data-fieldname="' + field + '" style="margin:auto;width:600px"><h2>' + (parseInt(f)+1) + '. ' + field + '</h2><br/><table class="dataTable" id="table' + f + '" style="display:none"> <thead><th>Field value</th><th>Occurrences</th></thead> <tbody> </tbody> </table></div><br/>');
+
+	 	$('#fields').append($e2).append($e1);
+		$(desc).dataTable({
+			data: PER_FIELD_DATA[f],
+			pagingType: 'simple',
+			columnDefs: [{ className: "dt-right", "targets": [ 1 ] },{width: "430px", targets: 0}, {targets: 0, render:click_to_filter}],
+			order:[[1, 'desc'], [0, 'asc']], // col 1 (entity message count), descending
+			// be careful here, f might have changed by the time this callback is called.
+			fnInitComplete: function(f) { return function() { $(desc).fadeIn(); $('#table' + f).on("click", ".clickable", open_filtered_link); PER_FIELD_DATA[f] = null;}}(f)
+		});
+	}
+	$('#spinner').fadeOut();
+}
+
+function populate_row_table() {
+	$('#message').html('Profile of ' + SRC + ' (' + DATA.length + ' records)');
+	if ($('#table-rows').length > 0) return;
+
+	LOG ('showing rows');
+	// convert data to rows 2d array 
+	ROWS = [];
+	for (var d in DATA) {
+		var row = [];
+		for (var f in FIELDS) {
+			var val =  DATA[d][FIELDS[f]];
+			if (val !== 0 && !val) { val = '-'; }
+			row.push(val);
+		}
+		ROWS.push(row);
+		DATA[d] = null; // to save memory
+	}
+
+	var $e3 = $('<h2>All rows</h2><table class="dataTable" id="table-rows" style="display:none"> <thead></thead> <tbody> </tbody> </table>');
+	for (var x in FIELDS)
+	 	$('thead', $e3).append($('<th>' + FIELDS[x] + '</th>'));
+
+	$('#rows').append($e3);
+		
+	$('#table-rows').dataTable({
+		data: ROWS,
+		pagingType: 'simple',
+		columnDefs: [{ className: "dt-right", "targets": [67] }], // need this for some reason...
+		fnInitComplete: function() { $('#table-rows').fadeIn(); $('#spinner').fadeOut();}
+	});
+	
+}
+
+var SRC = getParameterByName('src');
+SRC = 'GE.csv';
+
+function do_names() {
+	LOG ('doing names');
+	var tokens = {};
+	var freq = {};
+	for (var d in DATA) {
+		var name = DATA[d].Name;
+		if (!name)
+			continue;
+		name = name.replace(/\./g, '');
+		name = name.replace(/\"/g, '');
+		name = name.replace(/\(/g, '');
+		name = name.replace(/\)/g, '');
+		var tokens = name.split(/[ -/\.]/);
+		tokens = tokens.map(function(x) { if (!x) return ''; return x.toUpperCase(); });
+		$(tokens).each (function(i, t) { 
+			if (!t) return; 
+			if (freq[t]) { freq[t]++ } else { freq[t] = 1; }
+		});
+	}
+	var sorted = sort_by_val(freq);
+	LOG (sorted.length + ' unique tokens');
+	// $(sorted).each (function(i, o) { LOG (o[1] + " - " + o[0]); });
+
+	var prefix_freq = {}, suffix_freq = {}, prefix_detail = {}, suffix_detail = {};
+	var sortedTokens = ($(Object.keys(freq)).map(function(i,o){ return o; })).sort();
+	for (var i in sortedTokens) { 
+		if (!sortedTokens.hasOwnProperty(i)) // this is possible because of functions
+			continue;
+		var prefix = sortedTokens[i];
+		if (!prefix) {
+			LOG ('warning : undefined token'); continue;
+		}
+		if (prefix.length < 2)
+			continue;
+		for (var j = parseInt(i)+1; j < sortedTokens.length; j++) {
+			var y = sortedTokens[j]; 
+			if (y.length < prefix.length+2)
+				continue;
+			if (y.indexOf(prefix) == 0) {
+				var suffix = y.substring(prefix.length); 
+				if (prefix_freq[prefix]) { prefix_freq[prefix]++; prefix_detail[prefix].push(suffix); } else { prefix_freq[prefix] = 1; prefix_detail[prefix] = [suffix]; } 
+				if (suffix_freq[suffix]) { suffix_freq[suffix]++; suffix_detail[suffix].push(prefix); } else {  suffix_freq[suffix] = 1; suffix_detail[suffix] = [prefix];} 
+				// LOG ('prefix: ' + x + ' (' + freq[x] + ') of ' + y + ' (' + freq[y] + ')');
+			} else 
+				break;
+		}
+	}
+
+	var sorted_prefix_freq_arr = sort_by_val(prefix_freq);
+	var sorted_suffix_freq_arr = sort_by_val(prefix_freq);
+	$(sorted_prefix_freq_arr).each(function(i, o) { if (o[1] < 2) { return; } LOG(o + ' ' + prefix_detail[o[0]]); });
+	$(sorted_suffix_freq_arr).each(function(i, o) { if (o[1] < 2) { return; } LOG(o + ' ' + suffix_detail[o[0]]); });
+	// LOG ('prefixes ' + sorted_prefix_freq_arr);
+	// LOG ('suffixes ' + sorted_suffix_freq_arr);
+}
+
+// sorts by descending val
+function sort_by_val(map) {
+	var arr = [];
+	for (var key in map) { arr.push([key, map[key]]); }
+
+	// sort profile_arr by freq
+	arr.sort(function(a, b){
+    	var a1 = a[1], b1 = b[1];
+    	if (a1 == b1) return 0;
+        	return a1 > b1 ? -1: 1;
+	});
+	return arr;
+}
+
+function new_pid() { "pid-" + (1 + Math.floor(Math.random() * 20000000)); }
+
+	var inited = false;
+	var pid = getParameterByName("pid");
+	LOG ("pid is " + PID);
+
+	if (pid) {
+		PID = pid;
+		try { 
+			var saved = JSON.parse(localStorage[PID]);
+			var data = saved.DATA;
+			inited = true;
+			setup(data);
+		} catch (e) { 
+			// delete the old one and use a new PID. inited must be false.
+			localStorage.removeItem(PID); PID = new_pid(); 
+		}
+	} else 
+		PID = new_pid();
+
+if (!inited) {
+	$('#message').html('Loading ' + SRC + '...');
+	Papa.parse(SRC, {
+		download: true,
+		header: true,
+		complete: function(results) { setup(results.data); }
+});
+}
+</script>
+
+</body>
+</html>

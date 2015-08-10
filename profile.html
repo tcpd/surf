@@ -33,7 +33,7 @@
 	<a href="" style="display:none" id="show_rows">Show all rows</a>
 </div>
 
-<h2 style="font-size:14px;style="display:none" id="filter"> </h2>
+<h2 style="font-size:14px;display:none" id="filter"> </h2>
 <br/>
 
 <div id="fields" style="width:600px; margin: auto"> </div>
@@ -284,7 +284,7 @@ function do_names() {
 		name = name.replace(/\"/g, '');
 		name = name.replace(/\(/g, '');
 		name = name.replace(/\)/g, '');
-		var tokens = name.split(/[ -/\.]/);
+		tokens = name.split(/[ -/\.]/);
 		tokens = tokens.map(function(x) { if (!x) return ''; return x.toUpperCase(); });
 		$(tokens).each (function(i, t) { 
 			if (!t) return; 

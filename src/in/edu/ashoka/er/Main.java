@@ -9,10 +9,74 @@ import org.apache.commons.csv.CSVRecord;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
+
+class Row implements Comparable<Row> {
+    String name, cname, tname, stname, sex, state, pc, party;
+    int year = -1, position = -1, votes = -1, rowNum;
+
+    public Row(String name, String sex, String year, String state, String pc, String party, String position, String votes) {
+        this.name = name; this.sex = sex; this.state = state; this.pc = pc; this.party = party;
+        try { this.year = Integer.parseInt(year); } catch (NumberFormatException nfe ) { }
+        try { this.position = Integer.parseInt(position); } catch (NumberFormatException nfe ) { }
+        try { this.votes = Integer.parseInt(votes); } catch (NumberFormatException nfe ) { }
+    }
+
+    public void setCname(String cname) { this.cname = cname;}
+    public void setTname(String tname) { this.tname = tname;}
+    public void setSTname(String stname) { this.stname = stname;}
+
+    public String toString() {
+        return name + "->" + cname + "->" + tname + "->" + stname + " " + sex + "-" + year + "-" + state + "-" + pc + "-" + party + "-" + position + "-" + votes;
+    }
+
+    public static int nameSimilarity (Row row1, Row row2) {
+        if (row1.name.equals(row2.name))
+            return 10;
+        if (row1.cname.equals(row2.cname))
+            return 9;
+        if (row1.tname.equals(row2.tname))
+            return 8;
+        if (row1.stname.equals(row2.stname))
+            return 7;
+        // else something based on edit distance
+        return 0;
+    }
+
+    public static int similarity (Row row1, Row row2) {
+        int result = nameSimilarity(row1, row2);
+        if (row1.year == row2.year)
+            result += 5;
+        if (row1.state.equals(row2.state))
+            result += 5;
+        if (row1.pc.equals(row2.pc))
+            result += 5;
+        return 0;
+    }
+
+    public int compareTo(Row other)
+    {
+        // lower positions first
+        if (position != other.position)
+            return (position < other.position) ? -1 : 1;
+        // more votes first
+        if (votes != other.votes)
+            return (votes > other.votes) ? -1 : 1;
+
+        // otherwise, more or less random (don't really expect positions and votes to be exactly the same....
+        return toString().compareTo(other.toString());
+    }
+
+    public int hashCode() {
+        return state.hashCode() ^ pc.hashCode() ^ year;
+    }
+
+    public boolean equals (Object other) {
+        if (!(other instanceof Row)) return false;
+        Row r1 = (Row) other;
+        return /* name.equals(r1.name) && state.equals(r1.state) && */ pc.equals(r1.pc) && (year == r1.year) && party.equals(r1.party) && !party.equals("IND");
+    }
+}
 
 public class Main {
 
@@ -38,9 +102,12 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-        Multiset<String> names = HashMultiset.create();
-        Multimap<String, String> namesToInfo = HashMultimap.create();
+        // terminology: name, cname (canonical name), tname (name after tokenization), stname (name after tokenization, with sorted tokens)
+        Multiset<String> cnames = HashMultiset.create();
+        Multimap<String, Row> nameToRows = HashMultimap.create(), cnameToRows = HashMultimap.create();
+        Set<Row> allRows = new LinkedHashSet<>();
         int nRows = 0;
+        Multiset<String> pcs = HashMultiset.create();
 //        Reader in = new FileReader("GE.csv");
         // read the names from CSV
         Iterable<CSVRecord> records = CSVParser.parse(new File("GE.csv"), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
@@ -49,56 +116,72 @@ public class Main {
             if (name == null)
                 continue;
 
-            String votesStr = record.get("Votes");
-            int votes = 100000;
-            try { votes = Integer.parseInt(votesStr); } catch (NumberFormatException nfe) { }
-//            if ("IND".equals(record.get("Party")) && votes < 1000 && !"1".equals(record.get("Position")))
- //               continue;
             nRows++;
             name = name.toUpperCase();
-            names.add(name);
+            String cname = canonicalize(name);
+            cnames.add(cname);
+            String pc = record.get("PC_name");
+            String state = record.get("State_name");
+            Row r = new Row(name, record.get("Sex"), record.get("Year"), record.get("State_name"), pc, record.get("Party"), record.get("Position"), record.get("Votes"));
+            if (!record.get("Party").equals(record.get("Party_dup"))) {
+                 out.println ("Warning: party and party dup not the same! row=" + r + " Party_dup=" + record.get("Party_dup") + " row#: " + nRows);
+            }
+            if (!record.get("Year").equals(record.get("Year_dup"))) {
+                out.println ("Warning: year and year dup not the same! row=" + r + " dup=" + record.get("Year_dup") + " row#: " + nRows);
+            }
 
-            namesToInfo.put(name, record.get("Sex") + "-" + record.get("Year") + "-" + record.get("State_name") + "-" + record.get("PC_name") + "-" + record.get("Party") + "-" + record.get("Position") + "-" + record.get("Votes"));
+            r.setCname(cname);
+            cnameToRows.put(cname, r);
+            if (allRows.contains(r))
+                out.println ("Warning: exactly same name, same year, same PC " + r);
+            else {
+                allRows.add(r);
+                if (!allRows.contains(r))
+                    out.println ("Warning: exactly same name, same year, same PC " + r);
+            }
+
+            pcs.add(state + "-" + pc);
         }
 
+        int count = 0;
+        List<String> list = new ArrayList(pcs.elementSet());
+        Collections.sort(list);
+        for (String pc: list)
+            out.println (count++ + "PC: " + pc + " count: " + pcs.count(pc));
 
+        // now names and namesToInfo is setup
 
         // tokenize the names
         Multiset<String> tokens = HashMultiset.create();
         int nSingleNames = 0;
-        for (String name: names) {
+        for (String name: cnames) {
             StringTokenizer st = new StringTokenizer(name, DELIMITERS);
             if (st.countTokens() == 1) {
                 nSingleNames++;
-                for (String s: namesToInfo.get(name))
-                    if (s.contains("-1-")) {
-                        out.println ("Wow: " + name + " won " + s);
+                for (Row info: cnameToRows.get(name))
+                    if (info.position == 1) {
+                        out.println ("Wow: single name " + name + " won " + info);
                     }
             }
 
             while (st.hasMoreElements()) {
                 String token = st.nextToken();
-                if (token.length() > 1)
+                if (token.length() > 1) // ignore single letter tokens...
                     tokens.add(token);
             }
         }
 
-        out.println("\n\n------------------------- " + nRows + " rows, " + names.elementSet().size() + " unique names, " + nSingleNames + " single word names\n\n");
-        for (String n : Multisets.copyHighestCountFirst(names).elementSet()) {
-            out.println(n + ": " + names.count(n));
-            if (names.count(n) > 1) {
-                List<String> infoList = new ArrayList<>(namesToInfo.get(n));
-                Collections.sort(infoList);
-                for (String info: infoList)
-                    out.println ("   " + info);
-            }
+        out.println("\n\n------------------------- " + nRows + " rows, " + cnames.elementSet().size() + " unique names, " + nSingleNames + " single word names\n\n");
+        for (String n : Multisets.copyHighestCountFirst(cnames).elementSet()) {
+            out.println(n + ": " + cnames.count(n));
+            if (cnames.count(n) > 1)
+                printNameDetail(nameToRows, n);
         }
 
-        out.println("\n\n------------------------- " + tokens.size() + " tokens\n\n");
+        out.println("\n\n------------------------- " + tokens.size() + " tokens, " + tokens.elementSet().size() + " unique");
         for (String n : Multisets.copyHighestCountFirst(tokens).elementSet()) {
             out.println(n + ": " + tokens.count(n));
         }
-
 
         // detect prefixes
 
@@ -139,10 +222,15 @@ public class Main {
             }
         }
 
-        out.println("\n\n------------------------- newly delimited names\n\n");
-        for (String name: names.elementSet()) {
+        out.println("\n\n------------------------- newly tokenized names\n\n");
+        Multimap<String, String> tnameToCname = HashMultimap.create();
+        Multimap<String, String> stnameToCname = HashMultimap.create();
+        Map<String, String> cnameToTname = new LinkedHashMap<>();
+        Map<String, String> newNameToSortedNewName = new LinkedHashMap<>();
+
+        for (String cname: cnames.elementSet()) {
             List<String> result = new ArrayList<>();
-            StringTokenizer st = new StringTokenizer(name, DELIMITERS);
+            StringTokenizer st = new StringTokenizer(cname, DELIMITERS);
             while (st.hasMoreElements()) {
                 String token = st.nextToken();
                 if (token.length() <= 1)
@@ -150,8 +238,59 @@ public class Main {
                 else
                     result.addAll(splitToken(token, prefixesToMatch, suffixesToMatch));
             }
-            out.println (name + " -> " + Joiner.on(" ").join(result) + " (" + names.count(name) + " row(s))");
+
+            List<String> sortedResult = new ArrayList<>(result);
+            Collections.sort(sortedResult);
+
+            String tname =  Joiner.on(" ").join(result);
+            String stname =  Joiner.on(" ").join(sortedResult);
+            tnameToCname.put(tname, cname);
+            stnameToCname.put(stname, cname);
+            //cnameToTname.put(cname, tname);
+            newNameToSortedNewName.put(tname, stname);
+            for (Row r: cnameToRows.get(cname)) {
+                r.setTname(tname);
+                r.setSTname(stname);
+            }
+
+            out.println (cname + " -> " + " (" + cnames.count(cname) + " row(s))");
         }
+
+        out.println("\n\n------------------------- newly tokenized names (same token order)\n\n");
+        count = 0;
+        for (String newName: tnameToCname.keySet())
+            if (tnameToCname.get(newName).size() > 1)
+            {
+                Collection<String> originals = tnameToCname.get(newName);
+                out.println (++count + ". tokenized: " + newName);
+
+                for (String original: originals) {
+                    int rowCount = cnames.count(original);
+                    String rowCountStr = "";
+                    if (rowCount > 1)
+                        rowCountStr = " #nrows: " + rowCount;
+                    out.println (original + rowCountStr);
+                }
+            }
+
+        out.println("\n\n------------------------- newly tokenized names (sorted)\n\n");
+        count = 0;
+        for (String sorted: stnameToCname.keySet())
+            if (stnameToCname.get(sorted).size() > 1)
+            {
+                Collection<String> cnamesSet = stnameToCname.get(sorted);
+                out.println(++count + ". canonical: " + sorted);
+                for (String cname: cnamesSet) {
+                    /*
+                    int rowCount = names.count(original);
+                    String rowCountStr = "";
+                    if (rowCount > 1)
+                        rowCountStr = " #nrows: " + rowCount;
+                    out.println (original + rowCountStr);
+                    */
+                    printNameDetail(cnameToRows, cname);
+                }
+            }
     }
 
     public static List<String> splitToken(String token, Multiset<String> prefixesToMatch, Multiset<String> suffixesToMatch)
@@ -181,5 +320,33 @@ public class Main {
             }
         }
         return result;
+    }
+
+    public static void printNameDetail(Multimap<String, Row> namesToInfo, String n) {
+        List<Row> rows = new ArrayList<>(namesToInfo.get(n));
+        Collections.sort(rows);
+        for (Row row: rows)
+            out.println ("   " + row);
+    }
+
+    public static String canonicalize(String s)
+    {
+        // remove successive, duplicate chars, e.g.
+        //  LOOK MAN SINGH RAI
+        // LOKMAN SINGH RAI
+        s = s.replaceAll("TH", "T").replaceAll("GH", "G").replaceAll("BH", "B").replaceAll("DH", "D").replaceAll("JH", "J").replaceAll("KH", "K").replaceAll("MH", "M").replaceAll("PH", "P").replaceAll("SH", "S").replaceAll("ZH", "Z");
+        s = s.replaceAll("AU", "OU").replaceAll("OO", "U").replaceAll("EE", "I"); // .replaceAll("YU", "U");
+        char prev = ' ';
+        StringBuilder result = new StringBuilder();
+        for (char c : s.toCharArray())
+        {
+            if (c != prev)
+                result.append(c);
+            prev = c;
+        }
+        if (!s.equals(result.toString()))
+            out.println ("canonical: " + s + " -> " + result + "-");
+
+        return result.toString();
     }
 }

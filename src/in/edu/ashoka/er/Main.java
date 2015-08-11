@@ -317,31 +317,42 @@ public class Main {
                     printNameDetail(cnameToRows, cname);
             }
 
-        out.println(SEPARATOR + "closely related names (sorted, 1 edit distance)\n\n");
-        Multimap<String, String> tokenToSt = HashMultimap.create();
-        for (String stname: stnames) {
+        out.println(SEPARATOR + "similar related (st) names (1 edit distance)\n\n");
+        Multimap<String, Integer> tokenToStIdx = HashMultimap.create();
+        for (int i = 0; i < stnames.size(); i++) {
+            String stname = stnames.get(i);
             StringTokenizer st = new StringTokenizer(stname, DELIMITERS);
             while (st.hasMoreTokens()) {
                 String tok = st.nextToken();
                 if (tok.length() < 3)
                     continue;
-                tokenToSt.put(tok, stname);
+                tokenToStIdx.put(tok, i);
             }
         }
 
-        for (String stname: stnames) {
-            Set<String> stnamesToCompareWith = new LinkedHashSet<String>();
+        for (int i = 0; i < stnames.size(); i++) {
+            String stname = stnames.get(i);
+            Set<Integer> stnamesToCompareWith = new LinkedHashSet<Integer>();
             StringTokenizer st = new StringTokenizer(stname, DELIMITERS);
             while (st.hasMoreTokens()) {
                 String tok = st.nextToken();
                 if (tok.length() < 3)
                     continue;
-                stnamesToCompareWith.addAll(tokenToSt.get(tok));
+                Collection<Integer> c = tokenToStIdx.get(tok);
+                if (c.size() > 500)
+                    continue;
+                stnamesToCompareWith.addAll(c);
             }
 
-            for (String stname1 : stnamesToCompareWith) {
+            for (Integer j : stnamesToCompareWith) {
+                if (j <= i)
+                    continue;
+                String stname1 = stnames.get(j);
+                if (Math.abs(stname.length() - stname1.length()) > 1)
+                    continue; // edit distance can't be less than 1
+
                 if (editDistance(stname.replaceAll(" ", ""), stname1.replaceAll(" ", "")) == 1) {
-                    out.println("similar but not exactly same (st)names: \n");
+                    out.println(++count + ". similar but not exactly same (st)names: \n");
                    // out.println("  canonical: " + stname);
                     Collection<String> cnamesSet = stnameToCname.get(stname);
                     for (String cname: cnamesSet)

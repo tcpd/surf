@@ -93,23 +93,6 @@ public class Main {
     private static String DELIMITERS = " -.,;:/'\\t<>\"`()@1234567890";
     private static PrintStream out = System.out;
     private static String SEPARATOR = "========================================\n";
-    private static Multiset<String> findPrefixes(List<String> sortedTokenList) {
-        Multiset<String> prefixes = HashMultiset.create();
-
-        for (int i = 0; i < sortedTokenList.size(); i++) {
-            String tok_i = sortedTokenList.get(i);
-            for (int j = i + 1; j < sortedTokenList.size(); j++) {
-                String tok_j = sortedTokenList.get(j);
-                if (!tok_j.startsWith(tok_i))
-                    break;
-                if (tok_j.length() < tok_i.length() + 2)
-                    continue;
-                // tok_j starts with tok_i and is significantly longer, so tok_i could be a prefix
-                prefixes.add(tok_i);
-            }
-        }
-        return prefixes;
-    }
 
     private static Multiset<String> generateTokens(Collection<String> cnames) {
         // tokenize the names
@@ -128,14 +111,6 @@ public class Main {
         }
         out.println("nSingleTokens: " + nSingleNames);
         return tokens;
-    }
-
-    private static Map<String, List<String>> tokenize(Collection<String> strings, Multiset<String> validTokens) {
-        Map<String, List<String>> map = new LinkedHashMap<>();
-
-        for (String s: strings)
-            map.put(s, tokenize(s, validTokens));
-        return map;
     }
 
     /** splits an entire string into tokens */
@@ -202,13 +177,7 @@ public class Main {
 
             r.setCname(cname);
             cnameToRows.put(cname, r);
-            if (allRows.contains(r))
-                out.println ("Warning: exactly same name, same year, same PC " + r);
-            else {
-                allRows.add(r);
-                if (!allRows.contains(r))
-                    out.println ("Warning: exactly same name, same year, same PC " + r);
-            }
+            allRows.add(r);
 
             pcs.add(state + "-" + pc);
         }
@@ -346,7 +315,12 @@ public class Main {
             }
         }
 
-        // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < 1, ignoring spaces.
+        // set up nonSpaceStnames, computed only once for efficiency. its expensive to do this in the inner loop
+        List<String> nonSpaceStnames = new ArrayList<>();
+        for (int i = 0; i < stnames.size(); i++)
+            nonSpaceStnames.add(stnames.get(i).replaceAll(" ", ""));
+
+            // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < 1, ignoring spaces.
         // only check with stnames after it, because we want to report a pair of stnames A and B only once (A-B, not B-A)
         for (int i = 0; i < stnames.size(); i++) {
             String stname = stnames.get(i);
@@ -366,21 +340,22 @@ public class Main {
                 }
             }
 
+            String nonSpaceStname = nonSpaceStnames.get(i);
             // check each one of stNameIdxsToCompareWith for edit distance = 1
             for (Integer j : stNameIdxsToCompareWith) {
                 String stname1 = stnames.get(j);
+                String nonSpaceStname1 = nonSpaceStnames.get(j);
 
                 // now compare stname with stname1
                 {
-                    if (Math.abs(stname.length() - stname1.length()) > 1)
+                    if (Math.abs(nonSpaceStname.length() - nonSpaceStname1.length()) > 1)
                         continue; // optimization: don't bother to compute edit distance if the lengths differ by more than 1
 
-                    if (editDistance(stname.replaceAll(" ", ""), stname1.replaceAll(" ", "")) == 1) { // remember to remove spaces before comparing edit distance of stname stname1
+                    if (editDistance(nonSpaceStname, nonSpaceStname1) == 1) { // remember to remove spaces before comparing edit distance of stname stname1
                         // ok, we found something that looks close enough
                         out.println(++count + ". similar but not exactly same (st)names: \n");
                         // out.println("  canonical: " + stname);
                         printRowsWithStName(stnameToCname, cnameToRows, stname);
-                        out.println("  -- and -- ");
                         printRowsWithStName(stnameToCname, cnameToRows, stname1);
                     }
                 }

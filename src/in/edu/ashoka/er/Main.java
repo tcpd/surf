@@ -3,7 +3,6 @@ package in.edu.ashoka.er;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.MultiHashtable;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -86,16 +85,6 @@ class Row implements Comparable<Row> {
             return "";
         String x = fields.get(s);
         return (x != null) ? x : "";
-    }
-
-    public int hashCode() {
-        return state.hashCode() ^ pc.hashCode() ^ year;
-    }
-
-    public boolean equals (Object other) {
-        if (!(other instanceof Row)) return false;
-        Row r1 = (Row) other;
-        return /* name.equals(r1.name) && state.equals(r1.state) && */ pc.equals(r1.pc) && (year == r1.year) && party.equals(r1.party) && !party.equals("IND");
     }
 }
 
@@ -224,25 +213,45 @@ public class Main {
             pcs.add(state + "-" + pc);
         }
 
-        checkSame(allRows, "Party", "Party_dup");
-        checkSame(allRows, "Year", "Year_dup");
+        // perform some consistency checks
+        {
+            // these rows are supposed to be exact duplicates
+            checkSame(allRows, "Party", "Party_dup");
+            checkSame(allRows, "Year", "Year_dup");
 
-        checkConsistentField(allRows, "PC_name", "State_name");
-        printCloseValuesForField(allRows, "PC_name", "State_name");
-        printCloseValuesForField(allRows, "Party", null);
+            // check: {Name, year, PC} unique?
+            // if not, it means multiple people with the same name are contesting in the same PC in the same year -- not impossible.
+            checkUnique(allRows, "Name", "Year", "PC_name");
 
-        checkUnique (allRows, "Name", "Year", "PC_name");
+            // for every year and PC_name combo, there must be exactly one winner (POS=1)
+            Collection<Row> winners = select(allRows, "Position", "1");
+            checkUnique(winners, "Year", "PC_name");
+            // should also check that every occurrence of Year-PCname has at least one winner
 
-        // for every year and PC_name combo, there must be exactly one row with POS=1
-        Collection<Row> winners = select(allRows, "Position", "1");
-        checkUnique (winners, "Year", "PC_name");
-        // should also check that Year-PCname has at least one winner
+            Collection<Row> nonIndependents = selectNot(allRows, "Party", "IND");
+
+            // check: among the non-independents, is {year, PC, Party} unique?
+            // if not, it means same party has multiple candidates in the same year in the same PC!!
+            checkUnique(nonIndependents, "Year", "PC_name", "Party");
+
+            // Check if every <year, PC> has at least 2 unique rows (otherwise its a walkover!)
+            checkMinRows(nonIndependents, 2, "Year", "PC_name");
+
+            // given a PC_name, does it uniquely determine the state?
+            checkConsistentField(allRows, "PC_name", "State_name");
+
+            // Look for misspelt PC names? (Also provide state_name in the output for debugging)
+            printCloseValuesForField(allRows, "PC_name", "State_name");
+
+            // Look for misspelt Party names
+            printCloseValuesForField(allRows, "Party", null);
+        }
 
         int count = 0;
         List<String> list = new ArrayList(pcs.elementSet());
         Collections.sort(list);
 
-        // now names and namesToInfo is setup
+        // now names and cnameToRows is setup
 
         out.println(SEPARATOR + nRows + " rows, " + cnames.elementSet().size() + " unique cnames");
         /*
@@ -261,7 +270,8 @@ public class Main {
         }
         */
 
-        out.println(SEPARATOR + " newly tokenized names\n\n");
+        // set up tname and stname fields (tokenized and sorted-tokenized)
+        // out.println(SEPARATOR + " newly tokenized names\n\n");
         Multimap<String, String> tnameToCname = HashMultimap.create(), stnameToCname = HashMultimap.create();
 
         for (String cname: cnames.elementSet()) {
@@ -278,9 +288,11 @@ public class Main {
                 r.setSTname(stname);
             }
 
-            out.println (cname + " -> " + " (" + cnames.count(cname) + " row(s))");
+           // out.println (cname + " -> " + " (" + cnames.count(cname) + " row(s))");
         }
 
+        /*
+        // print out newly tokenized names
         out.println(SEPARATOR + " newly tokenized names (same token order)\n\n");
         count = 0;
         for (String newName: tnameToCname.keySet())
@@ -297,10 +309,9 @@ public class Main {
                     out.println (original + rowCountStr);
                 }
             }
+        */
 
-        out.println(SEPARATOR + "newly tokenized names (sorted)\n\n");
-        count = 0;
-        // print in sorted order, so longer stnames first (we probably have higher confidence in them)
+        // sort stnames list, so longer stnames appear first (we probably have higher confidence in them)
         List<String> stnames = new ArrayList<>(stnameToCname.keySet());
         Collections.sort(stnames, new Comparator<String>() {
             public int compare(String s1, String s2) {
@@ -308,65 +319,83 @@ public class Main {
             }
         });
 
+        out.println(SEPARATOR + "sorted and tokenized names (stnames)\n\n");
+        count = 0;
         for (String stname: stnames)
             if (stnameToCname.get(stname).size() > 1)
             {
-                Collection<String> cnamesSet = stnameToCname.get(stname);
-                out.println(++count + ". canonical: " + stname);
-                for (String cname: cnamesSet)
-                    printNameDetail(cnameToRows, cname);
+                out.println(++count + "."); // + ". canonical: " + stname);
+                printRowsWithStName(stnameToCname, cnameToRows, stname);
             }
 
-        out.println(SEPARATOR + "similar related (st) names (1 edit distance)\n\n");
+        // note: no reset of count.
+        out.println(SEPARATOR + "similar related (st) names (edit distance = 1)\n\n");
+
+        // setup tokenToStIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
         Multimap<String, Integer> tokenToStIdx = HashMultimap.create();
-        for (int i = 0; i < stnames.size(); i++) {
-            String stname = stnames.get(i);
-            StringTokenizer st = new StringTokenizer(stname, DELIMITERS);
-            while (st.hasMoreTokens()) {
-                String tok = st.nextToken();
-                if (tok.length() < 3)
-                    continue;
-                tokenToStIdx.put(tok, i);
+        {
+            for (int i = 0; i < stnames.size(); i++) {
+                String stname = stnames.get(i);
+                StringTokenizer st = new StringTokenizer(stname, DELIMITERS);
+                while (st.hasMoreTokens()) {
+                    String tok = st.nextToken();
+                    if (tok.length() < 3)
+                        continue;
+                    tokenToStIdx.put(tok, i);
+                }
             }
         }
 
+        // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < 1, ignoring spaces.
+        // only check with stnames after it, because we want to report a pair of stnames A and B only once (A-B, not B-A)
         for (int i = 0; i < stnames.size(); i++) {
             String stname = stnames.get(i);
-            Set<Integer> stnamesToCompareWith = new LinkedHashSet<Integer>();
-            StringTokenizer st = new StringTokenizer(stname, DELIMITERS);
-            while (st.hasMoreTokens()) {
-                String tok = st.nextToken();
-                if (tok.length() < 3)
-                    continue;
-                Collection<Integer> c = tokenToStIdx.get(tok);
-                if (c.size() > 500)
-                    continue;
-                stnamesToCompareWith.addAll(c);
+
+            // compute the indexes of the stnames that we should compare this stname with, based on common tokens
+            Set<Integer> stNameIdxsToCompareWith = new LinkedHashSet<>();
+            {
+                StringTokenizer st = new StringTokenizer(stname, DELIMITERS);
+                while (st.hasMoreTokens()) {
+                    String tok = st.nextToken();
+                    if (tok.length() < 3)
+                        continue;
+                    Collection<Integer> c = tokenToStIdx.get(tok);
+                    for (Integer j: c)
+                        if (j > i)
+                            stNameIdxsToCompareWith.add(j);
+                }
             }
 
-            for (Integer j : stnamesToCompareWith) {
-                if (j <= i)
-                    continue;
+            // check each one of stNameIdxsToCompareWith for edit distance = 1
+            for (Integer j : stNameIdxsToCompareWith) {
                 String stname1 = stnames.get(j);
-                if (Math.abs(stname.length() - stname1.length()) > 1)
-                    continue; // edit distance can't be less than 1
 
-                if (editDistance(stname.replaceAll(" ", ""), stname1.replaceAll(" ", "")) == 1) {
-                    out.println(++count + ". similar but not exactly same (st)names: \n");
-                   // out.println("  canonical: " + stname);
-                    Collection<String> cnamesSet = stnameToCname.get(stname);
-                    for (String cname: cnamesSet)
-                        printNameDetail(cnameToRows, cname);
-                    out.println ("  -- and -- ");
-                    // out.println("  canonical: " + stname);
-                    cnamesSet = stnameToCname.get(stname1);
-                    for (String cname: cnamesSet)
-                        printNameDetail(cnameToRows, cname);
+                // now compare stname with stname1
+                {
+                    if (Math.abs(stname.length() - stname1.length()) > 1)
+                        continue; // optimization: don't bother to compute edit distance if the lengths differ by more than 1
+
+                    if (editDistance(stname.replaceAll(" ", ""), stname1.replaceAll(" ", "")) == 1) { // remember to remove spaces before comparing edit distance of stname stname1
+                        // ok, we found something that looks close enough
+                        out.println(++count + ". similar but not exactly same (st)names: \n");
+                        // out.println("  canonical: " + stname);
+                        printRowsWithStName(stnameToCname, cnameToRows, stname);
+                        out.println("  -- and -- ");
+                        printRowsWithStName(stnameToCname, cnameToRows, stname1);
+                    }
                 }
             }
         }
     }
 
+    private static void printRowsWithStName(Multimap<String, String> stnameToCname, Multimap<String, Row> cnameToRows, String stname)
+    {
+        Collection<String> cnamesSet = stnameToCname.get(stname);
+        for (String cname : cnamesSet) {
+            printNameDetail(cnameToRows, cname);
+            out.println();
+        }
+    }
     // check the best way to break up this token, if any, based on the prefix/suffix with the highest count
     // returns an array with 1 token (unchanged, original) or 2 tokens. never more than 2 tokens.
     public static List<String> splitToken(String token, Multiset<String> prefixesToMatch, Multiset<String> suffixesToMatch)
@@ -435,6 +464,14 @@ public class Main {
         return result;
     }
 
+    private static Collection<Row> selectNot (Collection<Row> rows, String field, String value) {
+        List<Row> result = new ArrayList<Row>();
+        for (Row r: rows)
+            if (!value.equals(r.get(field)))
+                result.add(r);
+        return result;
+    }
+
     private static void checkSame(Collection<Row> allRows, String field1, String field2) {
         out.println (SEPARATOR + "Checking if fields identical: " + field1 + " and " + field2);
         for (Row r: allRows)
@@ -448,7 +485,7 @@ public class Main {
         String joiner = "-";
         StringBuilder sb = new StringBuilder();
         sb.append("Checking for uniqueness of ");
-        out.println (SEPARATOR + "Checking for uniqueness of " + Joiner.on("-").join(fields));
+        out.println (SEPARATOR + "Checking for unique occurrences of the combination of " + Joiner.on("-").join(fields));
 
         Multimap<String, Row> map = HashMultimap.create();
         for (Row r: rows) {
@@ -463,8 +500,37 @@ public class Main {
         int num = 0;
         for (String key: map.keySet()) {
             if (map.get(key).size() > 1) {
-                out.println(++num + ". Warning: key " + key + " is not unique:");
+                out.println(++num + ". Warning: field-key " + key + " is not unique:");
                 for (Row r: map.get(key))
+                    out.println ("    " + r);
+            }
+        }
+        return num;
+    }
+
+    /** checks if the combination of given fields occurs no more than once. Returns the # of violations */
+    private static int checkMinRows(Collection<Row> rows, int minRows, String... fields) {
+        String joiner = "-";
+        out.println (SEPARATOR + "Checking for min count of " +  minRows + " row(s) for every unique combination of " + Joiner.on("-").join(fields));
+
+        // set up a map of all the fields joined together with "-"
+        Multimap<String, Row> map = HashMultimap.create();
+        for (Row r: rows) {
+            StringBuilder sb = new StringBuilder();
+            for (String f : fields) {
+                sb.append(r.get(f) + joiner);
+            }
+            String key = sb.toString();
+            map.put(key, r);
+        }
+
+        // check if each key has at least minRows Rows assigned to it
+        int num = 0;
+        for (String key: map.keySet()) {
+            Collection<Row> keyrows = map.get(key);
+            if (keyrows.size() < minRows) {
+                out.println(++num + ". Warning: field-key " + key + " has only " + keyrows.size() + " row(s)");
+                for (Row r: keyrows)
                     out.println ("    " + r);
             }
         }

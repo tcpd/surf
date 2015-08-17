@@ -13,17 +13,23 @@ import java.util.*;
 
 class Row implements Comparable<Row> {
     private static PrintStream out = System.out;
-    private static String SEPARATOR = "========================================\n";
+    private static String FIELDSPEC_SEPARATOR = "-";
 
     String name, cname, tname, stname, sex, state, pc, party;
     int year = -1, position = -1, votes = -1, rowNum = -1;
     Map<String, String> fields;
+    static String[] toStringFields = new String[0];
+
     public Row(Map<String, String> record, int rowNum) {
         this.fields = record;
         this.rowNum = rowNum;
         String pc = record.get("PC_name");
         String state = record.get("State_name");
         setup(record.get("Name"), record.get("Sex"), record.get("Year"), state, pc, record.get("Party"), record.get("Position"), record.get("Votes"));
+    }
+
+    public static void setToStringFields(String fieldSpec) {
+        toStringFields = fieldSpec.split("-");
     }
 
     public void setup(String name, String sex, String year, String state, String pc, String party, String position, String votes) {
@@ -38,7 +44,8 @@ class Row implements Comparable<Row> {
     void setSTname(String stname) { this.stname = stname;}
 
     public String toString() {
-        return name + " " + sex + "-" + year + "-" + state + "-" + pc + "-" + party + "-" + position + "-" + votes;
+        return getFields(toStringFields, FIELDSPEC_SEPARATOR) +  " (row# " + rowNum + ")";
+//        return name + " " + sex + "-" + year + "-" + state + "-" + pc + "-" + party + "-" + position + "-" + votes;
     }
 
     static int nameSimilarity (Row row1, Row row2) {
@@ -52,6 +59,10 @@ class Row implements Comparable<Row> {
             return 7;
         // else something based on edit distance
         return 0;
+    }
+
+    boolean equal (String field, String value) {
+        return this.get(field).equals(value); // ignore case?
     }
 
     static int similarity (Row row1, Row row2) {
@@ -86,6 +97,18 @@ class Row implements Comparable<Row> {
         String x = fields.get(s);
         return (x != null) ? x : "";
     }
+
+    public String get (String fields[]) { return getFields(fields, FIELDSPEC_SEPARATOR); }
+
+    public String getFields (String fields[], String separator) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fields.length; i++) {
+            sb.append (this.get(fields[i]));
+            if (i < fields.length-1)
+                sb.append(FIELDSPEC_SEPARATOR);
+        }
+        return sb.toString();
+    }
 }
 
 public class Main {
@@ -93,6 +116,7 @@ public class Main {
     private static String DELIMITERS = " -.,;:/'\\t<>\"`()@1234567890";
     private static PrintStream out = System.out;
     private static String SEPARATOR = "========================================\n";
+    private static String FIELDSPEC_SEPARATOR = "-";
 
     private static Multiset<String> generateTokens(Collection<String> cnames) {
         // tokenize the names
@@ -153,6 +177,8 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
+        Row.setToStringFields("Name-Sex-Year-State_name-PC_name-Party-Position-Votes");
+        
         // terminology: name, cname (canonical name), tname (name after tokenization), stname (name after tokenization, with sorted tokens)
         Multiset<String> cnames = HashMultiset.create();
         Multimap<String, Row> nameToRows = HashMultimap.create(), cnameToRows = HashMultimap.create();
@@ -190,24 +216,26 @@ public class Main {
 
             // check: {Name, year, PC} unique?
             // if not, it means multiple people with the same name are contesting in the same PC in the same year -- not impossible.
-            checkUnique(allRows, "Name", "Year", "PC_name");
+            Multimap<String, Row> map = split(allRows, "Name-Year-PC_name");
+            display(filter(map, "notequals", 1));
 
             // for every year and PC_name combo, there must be exactly one winner (POS=1)
-            Collection<Row> winners = select(allRows, "Position", "1");
-            checkUnique(winners, "Year", "PC_name");
-            // should also check that every occurrence of Year-PCname has at least one winner
 
-            Collection<Row> nonIndependents = selectNot(allRows, "Party", "IND");
+            Collection<Row> winners = select(allRows, "Position", "1");
+            map = split(winners, "Year-PC_name");
+            display(filter(map, "notequals", 1));
+            // should also check that every occurrence of Year-PCname has at least one winner
 
             // check: among the non-independents, is {year, PC, Party} unique?
             // if not, it means same party has multiple candidates in the same year in the same PC!!
-            checkUnique(nonIndependents, "Year", "PC_name", "Party");
+            Collection<Row> nonIndependents = selectNot(allRows, "Party", "IND");
+            display(filter(split(nonIndependents, "Year-PC_name-Party"), "notequals", 1));
 
             // Check if every <year, PC> has at least 2 unique rows (otherwise its a walkover!)
-            checkMinRows(nonIndependents, 2, "Year", "PC_name");
+            display(filter(split(allRows, "Year-PC_name"), "max", 1));
 
             // given a PC_name, does it uniquely determine the state?
-            checkConsistentField(allRows, "PC_name", "State_name");
+            display2Level(filter(split(split(allRows, "PC_name"), "State_name"), "min", 2), 3 /* max rows */);
 
             // Look for misspelt PC names? (Also provide state_name in the output for debugging)
             printCloseValuesForField(allRows, "PC_name", "State_name");
@@ -373,8 +401,7 @@ public class Main {
     }
     // check the best way to break up this token, if any, based on the prefix/suffix with the highest count
     // returns an array with 1 token (unchanged, original) or 2 tokens. never more than 2 tokens.
-    public static List<String> splitToken(String token, Multiset<String> prefixesToMatch, Multiset<String> suffixesToMatch)
-    {
+    public static List<String> splitToken(String token, Multiset<String> prefixesToMatch, Multiset<String> suffixesToMatch) {
         List<String> result = new ArrayList<>();
         result.add(token);
 
@@ -415,7 +442,7 @@ public class Main {
         // remove successive, duplicate chars, e.g.
         //  LOOK MAN SINGH RAI
         // LOKMAN SINGH RAI
-        s = s.replaceAll("TH", "T").replaceAll("V", "W").replaceAll("GH", "G").replaceAll("BH", "B").replaceAll("DH", "D").replaceAll("JH", "J").replaceAll("KH", "K").replaceAll("MH", "M").replaceAll("PH", "P").replaceAll("SH", "S").replaceAll("ZH", "Z");
+        s = s.replaceAll("TH", "T").replaceAll("V", "W").replaceAll("GH", "G").replaceAll("BH", "B").replaceAll("DH", "D").replaceAll("JH", "J").replaceAll("KH", "K").replaceAll("MH", "M").replaceAll("PH", "P").replaceAll("SH", "S").replaceAll("ZH", "Z").replaceAll("Y", "I");
         s = s.replaceAll("AU", "OU").replaceAll("OO", "U").replaceAll("EE", "I").replace("KSH", "X"); // .replaceAll("YU", "U");
         char prev = ' ';
         StringBuilder result = new StringBuilder();
@@ -448,105 +475,153 @@ public class Main {
     }
 
     private static void checkSame(Collection<Row> allRows, String field1, String field2) {
-        out.println (SEPARATOR + "Checking if fields identical: " + field1 + " and " + field2);
+        out.println(SEPARATOR + "Checking if fields identical: " + field1 + " and " + field2);
         for (Row r: allRows)
             if (!r.get(field1).equals(r.get(field2))) {
                 out.println("Warning: " + field1 + " and " + field2 + " not the same! row=" + r + " " + field1 + "=" + r.get(field1) + " " + field2 + " = " + r.get(field2) + " row#: " + r.rowNum);
             }
     }
 
-    /** checks if the combination of given fields occurs no more than once. Returns the # of violations */
-    private static int checkUnique(Collection<Row> rows, String... fields) {
-        String joiner = "-";
-        StringBuilder sb = new StringBuilder();
-        sb.append("Checking for uniqueness of ");
-        out.println (SEPARATOR + "Checking for unique occurrences of the combination of " + Joiner.on("-").join(fields));
-
-        Multimap<String, Row> map = HashMultimap.create();
-        for (Row r: rows) {
-            sb = new StringBuilder();
-            for (String f : fields) {
-                sb.append(r.get(f) + joiner);
-            }
-            String key = sb.toString();
-            map.put(key, r);
+    /** converts a collection of rows to a map in which each unique value for the given fieldspec is the key and the value for that key is the rows with that value for the fieldspec */
+    private static Multimap <String, Row> split(Collection<Row> rows, String fieldSpec) {
+        Multimap<String, Row> result = HashMultimap.create();
+        String[] fields = fieldSpec.split(FIELDSPEC_SEPARATOR);
+        for (Row r : rows) {
+            String key = r.getFields(fields, FIELDSPEC_SEPARATOR);
+            result.put(key, r);
         }
-
-        int num = 0;
-        for (String key: map.keySet()) {
-            if (map.get(key).size() > 1) {
-                out.println(++num + ". Warning: field-key " + key + " is not unique:");
-                for (Row r: map.get(key))
-                    out.println ("    " + r);
-            }
-        }
-        return num;
+        return result;
     }
 
-    /** checks if the combination of given fields occurs no more than once. Returns the # of violations */
-    private static int checkMinRows(Collection<Row> rows, int minRows, String... fields) {
-        String joiner = "-";
-        out.println (SEPARATOR + "Checking for min count of " +  minRows + " row(s) for every unique combination of " + Joiner.on("-").join(fields));
-
-        // set up a map of all the fields joined together with "-"
-        Multimap<String, Row> map = HashMultimap.create();
-        for (Row r: rows) {
-            StringBuilder sb = new StringBuilder();
-            for (String f : fields) {
-                sb.append(r.get(f) + joiner);
+    /** 2nd level split, takes A -> rows multimap, and further breaks up each collection of rows for each value of A into a multimap based on the values of B
+     * so field1val -> rows becomes field1val -> fieldval2 -> rows
+     */
+    private static Multimap <String, Multimap <String, Row>> split(Multimap <String, Row> map, String fieldSpec) {
+        Multimap<String, Multimap <String, Row>> result = HashMultimap.create();
+        for (String a: map.keySet()) {
+            Collection<Row> rows = map.get(a);
+            Multimap<String, Row> arowsSplit = split(rows, fieldSpec);
+            for (String b: arowsSplit.keySet()) {
+                Multimap<String, Row> bmap = HashMultimap.create();
+                // bmap will be a map with only 1 key. (but multiple rows associated with that key)
+                bmap.putAll(b, arowsSplit.get(b));
+                result.put(a, bmap); // there could be multiple b's for a single value of a
             }
-            String key = sb.toString();
-            map.put(key, r);
         }
+        return result;
+    }
 
-        // check if each key has at least minRows Rows assigned to it
-        int num = 0;
+    private static Multimap <String, Row> filter(Multimap<String, Row> map, String fieldSpec, String valueSpec) {
+        Multimap<String, Row> filteredMap = HashMultimap.create(); // required extra memory instead of clearing map in place... can do away with it depending on how map.keySet() iteration works
         for (String key: map.keySet()) {
-            Collection<Row> keyrows = map.get(key);
-            if (keyrows.size() < minRows) {
-                out.println(++num + ". Warning: field-key " + key + " has only " + keyrows.size() + " row(s)");
-                for (Row r: keyrows)
-                    out.println ("    " + r);
+            Collection<Row> rows = map.get(key);
+            Collection<Row> filteredRows = filter(rows, fieldSpec, valueSpec);
+            filteredMap.putAll(key, filteredRows);
+        }
+        return filteredMap;
+    }
+
+    private static Collection<Row> filter (Collection<Row> rows, String fieldSpec, String valueSpec) {
+        List<Row> result = new ArrayList<>();
+        String[] fields = fieldSpec.split(FIELDSPEC_SEPARATOR);
+        String[] values = valueSpec.split(FIELDSPEC_SEPARATOR);
+
+        // sanity check
+        if (fields.length != values.length)
+            return result;
+
+        for (Row r: rows)
+            for (int i = 0; i < fields.length; i++)
+                if (r.equal (fields[i], values[i]))
+                    result.add(r);
+
+        return result;
+    }
+
+    /** filters given map to retain only those keys whose rows.size() <op> count */
+    private static<T> Multimap<String, T> filter (Multimap<String, T> map, String op, int count) {
+        Multimap<String, T> filteredMap = HashMultimap.create(); // required extra memory instead of clearing map in place... can do away with it depending on how map.keySet() iteration works
+        for (String key : map.keySet()) {
+            Collection<T> vals = map.get(key);
+                if (checkCount(vals, op, count))
+                    filteredMap.putAll(key, vals);
+        }
+        return filteredMap;
+    }
+
+    /** returns if rows.size() <op> count */
+    private static boolean checkCount(Collection<?> coll, String op, int count) {
+        if ("equals".equals(op)) {
+            return coll.size() == count;
+        } else if ("notequals".equals(op)) {
+            return coll.size() != count;
+        } else if ("min".equals(op)) {
+            return coll.size() >= count;
+        } else if ("max".equals(op)) {
+            return coll.size() <= count;
+        }
+        return false;
+    }
+    
+    private static void display2Level (Multimap<String, Multimap<String, Row>> map, int maxRows) {
+        out.println(SEPARATOR);
+        int count = 0;
+        for (String a: map.keySet()) {
+            Collection<Multimap<String, Row>> bmapsfora = map.get(a);
+            out.println(++count + ") " + a + " (" + pluralize(bmapsfora.size(), "value") + ")");
+            for (Multimap<String, Row> bmap: bmapsfora)
+                display(("    " + count + "."), bmap, maxRows);
+        }
+    }
+
+    private static void display (Multimap<String, Row> map) { display("", map, Integer.MAX_VALUE);}
+
+    private static void display (String prefix, Multimap<String, Row> map, int maxRows) {
+        int count = 0;
+        for (String s: map.keySet()) {
+            Collection<Row> rows = map.get(s);
+            out.println(prefix + (++count) + ") " + s + (rows.size() > maxRows ? " (" + pluralize(rows.size(), "row") + ")" : "")); // print row count only if we're not going to print all the rows below
+            display(("    " + prefix + count + "."), rows, maxRows);
+        }
+    }
+
+    private static void display (String prefix, Collection<Row> rows, int maxRows) {
+        int count = 0;
+        for (Row r: rows) {
+            out.println (prefix + (++count) + ") " + r);
+            if (count >= maxRows) {
+                out.println(prefix.replaceAll("[^ ]", "") + " (and " + pluralize((rows.size() - count), "more row") + ")");
+                break;
             }
         }
-        return num;
     }
 
     private static int printCloseValuesForField(Collection<Row> allRows, String field, String fieldToPrint) {
         Multimap<String, String> map = HashMultimap.create();
-        for (Row r: allRows)
+        Multiset<String> set = HashMultiset.create();
+
+        for (Row r: allRows) {
             map.put(r.get(field), r.get(fieldToPrint));
+            set.add(r.get(field));
+        }
 
         int num = 0;
         out.println (SEPARATOR + "Printing similar values for field " + field);
-        List<String> list = new ArrayList<>(map.keySet());
+        // the first element to be printed in the pair of close names should be the one with the higher count
+        List<String> list = new ArrayList<>(Multisets.copyHighestCountFirst(set).elementSet());
         for (int i = 0; i < list.size(); i++) {
             String f_i = list.get(i);
             for (int j = i + 1; j < list.size(); j++) {
                 String f_j = list.get(j);
                 if (editDistance(f_i, f_j) < 2) {
                     if (fieldToPrint != null)
-                        out.println(++num + ". " + f_i + " (" + Joiner.on(",").join(map.get(f_i)) + ") and " + f_j + " (" + Joiner.on(",").join(map.get(f_j)) + ")");
+                        out.println(++num + ". " + f_i + " (x" + set.count(f_i) + ", " + fieldToPrint + ": " + Joiner.on(",").join(map.get(f_i)) + ") and " + f_j + " (x" + set.count(f_j) + ", " + fieldToPrint + ": " + Joiner.on(",").join(map.get(f_j)) + ")");
                     else
                         out.println(++num + ". " + f_i + " and " + f_j);
                 }
             }
         }
         return num;
-    }
-
-    /** checks that all instances of field1 have a consistent value for field2 */
-    public static void checkConsistentField(Collection<Row> allRows, String field1, String field2) {
-        out.println (SEPARATOR + "Checking if field " + field1 + " always has a consistent value for " + field2);
-        Multimap<String, String> map = HashMultimap.create();
-        for (Row r: allRows)
-            map.put(r.get(field1), r.get(field2));
-
-        int num = 0;
-
-        for (String f1: map.keySet())
-            if (map.get(f1).size() > 1)
-                out.println(++num + ". " + field1 + "=" + f1 + " has multiple values for " + field2 + " (" + Joiner.on(",").join(map.get(f1)) + ")");
     }
 
     static int editDistance(String word1, String word2) {
@@ -587,5 +662,30 @@ public class Main {
         }
 
         return dp[len1][len2];
+    }
+
+    /** if num > 1, pluralizes the desc. will also commatize the num if needed. */
+    public static String pluralize(int x, String desc)
+    {
+        return commatize(x) + " " + desc + ((x > 1) ? "s" : "");
+    }
+
+    public static String commatize(long n)
+    {
+        String result = "";
+        do
+        {
+            if (result.length() > 0)
+                result = "," + result;
+            long trio = n % 1000; // 3 digit number to be printed
+            if (trio == n) // if this is the last trio, no lead of leading 0's,
+                // otherwise make sure to printf %03f
+                result = String.format("%d", n % 1000) + result;
+            else
+                result = String.format("%03d", n % 1000) + result;
+
+            n = n / 1000;
+        } while (n > 0);
+        return result;
     }
 }

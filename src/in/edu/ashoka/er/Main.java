@@ -208,42 +208,6 @@ public class Main {
             pcs.add(state + "-" + pc);
         }
 
-        // perform some consistency checks
-        {
-            // these rows are supposed to be exact duplicates
-            checkSame(allRows, "Party", "Party_dup");
-            checkSame(allRows, "Year", "Year_dup");
-
-            // check: {Name, year, PC} unique?
-            // if not, it means multiple people with the same name are contesting in the same PC in the same year -- not impossible.
-            Multimap<String, Row> map = split(allRows, "Name-Year-PC_name");
-            display(filter(map, "notequals", 1));
-
-            // for every year and PC_name combo, there must be exactly one winner (POS=1)
-
-            Collection<Row> winners = select(allRows, "Position", "1");
-            map = split(winners, "Year-PC_name");
-            display(filter(map, "notequals", 1));
-            // should also check that every occurrence of Year-PCname has at least one winner
-
-            // check: among the non-independents, is {year, PC, Party} unique?
-            // if not, it means same party has multiple candidates in the same year in the same PC!!
-            Collection<Row> nonIndependents = selectNot(allRows, "Party", "IND");
-            display(filter(split(nonIndependents, "Year-PC_name-Party"), "notequals", 1));
-
-            // Check if every <year, PC> has at least 2 unique rows (otherwise its a walkover!)
-            display(filter(split(allRows, "Year-PC_name"), "max", 1));
-
-            // given a PC_name, does it uniquely determine the state?
-            display2Level(filter(split(split(allRows, "PC_name"), "State_name"), "min", 2), 3 /* max rows */);
-
-            // Look for misspelt PC names? (Also provide state_name in the output for debugging)
-            printCloseValuesForField(allRows, "PC_name", "State_name");
-
-            // Look for misspelt Party names
-            printCloseValuesForField(allRows, "Party", null);
-        }
-
         int count = 0;
         List<String> list = new ArrayList(pcs.elementSet());
         Collections.sort(list);
@@ -267,6 +231,55 @@ public class Main {
         }
         */
 
+        // perform some consistency checks
+        {
+            // these rows are supposed to be exact duplicates
+            checkSame(allRows, "Party", "Party_dup");
+            checkSame(allRows, "Year", "Year_dup");
+
+            // check: {Name, year, PC} unique?
+            // if not, it means multiple people with the same name are contesting in the same PC in the same year -- not impossible.
+            out.println (SEPARATOR + " Checking if people with the same name contested the same seat in the same year");
+            Multimap<String, Row> map = split(allRows, "Name-Year-PC_name-State_name");
+            display(filter(map, "notequals", 1));
+
+            out.println (SEPARATOR + " Checking that there is at most 1 winner per seat");
+            Collection<Row> winners = select(allRows, "Position", "1");
+            Multimap<String, Row> winnersMap = split(winners, "Year-PC_name-State_name");
+            display(filter(winnersMap, "notequals", 1));
+
+            out.println(SEPARATOR + " Checking that there is at least 1 winner per seat");
+            Set<String> winnerKeys = winnersMap.keySet();
+            map = split(allRows, "Year-PC_name-State_name");
+            map = minus(map, winnerKeys);
+            if (map.size() > 0) {
+                out.println(" The following elections do not have a winner!?!");
+                display(map);
+            }
+
+            // check: among the non-independents, is {year, PC, Party} unique?
+            // if not, it means same party has multiple candidates in the same year in the same PC!!
+            out.println (SEPARATOR + " Checking uniqueness of Year-PC-State-Party (non-independents)");
+            Collection<Row> nonIndependents = selectNot(allRows, "Party", "IND");
+            display(filter(split(nonIndependents, "Year-PC_name-State_name-Party"), "notequals", 1));
+
+            // Check if every <year, PC> has at least 2 unique rows (otherwise its a walkover!)
+            out.println (SEPARATOR + " Checking if there at least 2 candidates for every Year-PC");
+            display(filter(split(allRows, "Year-PC_name"), "max", 1));
+
+            // given a PC_name, does it uniquely determine the state?
+            out.println(SEPARATOR + " Checking if each PC name belongs to exactly one state");
+            display2Level(filter(split(split(allRows, "PC_name"), "State_name"), "min", 2), 3 /* max rows */);
+
+            out.println (SEPARATOR + " Looking for possible misspellings in PC_name");
+            displayPairs(allRows, valuesUnderEditDistance(allRows, "PC_name", 1), "PC_name", 3 /* max rows */);
+            // printCloseValuesForField(allRows, "PC_name");
+
+            out.println (SEPARATOR + " Looking for possible misspellings in Party");
+            displayPairs(nonIndependents, valuesUnderEditDistance(allRows, "Party", 1), "Party", 3 /* max rows */);
+            // printCloseValuesForField(allRows, "Party");
+        }
+
         // set up tname and stname fields (tokenized and sorted-tokenized)
         // out.println(SEPARATOR + " newly tokenized names\n\n");
         Multimap<String, String> tnameToCname = HashMultimap.create(), stnameToCname = HashMultimap.create();
@@ -287,26 +300,6 @@ public class Main {
 
            // out.println (cname + " -> " + " (" + cnames.count(cname) + " row(s))");
         }
-
-        /*
-        // print out newly tokenized names
-        out.println(SEPARATOR + " newly tokenized names (same token order)\n\n");
-        count = 0;
-        for (String newName: tnameToCname.keySet())
-            if (tnameToCname.get(newName).size() > 1)
-            {
-                Collection<String> originals = tnameToCname.get(newName);
-                out.println (++count + ". tokenized: " + newName);
-
-                for (String original: originals) {
-                    int rowCount = cnames.count(original);
-                    String rowCountStr = "";
-                    if (rowCount > 1)
-                        rowCountStr = " #nrows: " + rowCount;
-                    out.println (original + rowCountStr);
-                }
-            }
-        */
 
         // sort stnames list, so longer stnames appear first (we probably have higher confidence in them)
         List<String> stnames = new ArrayList<>(stnameToCname.keySet());
@@ -549,6 +542,17 @@ public class Main {
         return filteredMap;
     }
 
+    /** removes keysToRemove from map. warning: modifies map */
+    private static<T> Multimap<String, T> minus(Multimap<String, T> map, Collection<String> keysToRemove) {
+        Multimap<String, T> result = HashMultimap.create();
+        Set<String> keysToRemoveSet = new LinkedHashSet<>(keysToRemove);
+
+        for (String key: map.keySet())
+            if (!keysToRemoveSet.contains(key))
+                result.putAll (key, map.get(key));
+        return result;
+    }
+
     /** returns if rows.size() <op> count */
     private static boolean checkCount(Collection<?> coll, String op, int count) {
         if ("equals".equals(op)) {
@@ -562,7 +566,7 @@ public class Main {
         }
         return false;
     }
-    
+
     private static void display2Level (Multimap<String, Multimap<String, Row>> map, int maxRows) {
         out.println(SEPARATOR);
         int count = 0;
@@ -588,40 +592,50 @@ public class Main {
     private static void display (String prefix, Collection<Row> rows, int maxRows) {
         int count = 0;
         for (Row r: rows) {
-            out.println (prefix + (++count) + ") " + r);
-            if (count >= maxRows) {
-                out.println(prefix.replaceAll("[^ ]", "") + " (and " + pluralize((rows.size() - count), "more row") + ")");
+            out.println(prefix + (++count) + ") " + r);
+            if (count >= maxRows && rows.size() > count) {
+                out.println(prefix.replaceAll("[^ ]", "") + "and " + pluralize((rows.size() - count), "more row") + "...");
                 break;
             }
         }
     }
 
-    private static int printCloseValuesForField(Collection<Row> allRows, String field, String fieldToPrint) {
-        Multimap<String, String> map = HashMultimap.create();
-        Multiset<String> set = HashMultiset.create();
+    private static void displayPairs (Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows) {
+        Multimap<String, Row> map = split(rows, field);
+        int count = 0;
+        for (Pair<String, String> pair: pairs) {
+            String v1 = pair.getFirst();
+            String v2 = pair.getSecond();
+            ++count;
+            out.println (count + ".1) " + v1);
+            display ("    " + count + ".1", map.get(v1), maxRows);
+            out.println (count + ".2) " + v2);
+            display ("    " + count + ".2", map.get(v2), maxRows);
+        }
+    }
 
-        for (Row r: allRows) {
-            map.put(r.get(field), r.get(fieldToPrint));
-            set.add(r.get(field));
+    /** returns pairs of strings in the given field that are close in edit distance (< given maxEditDistance), sorted by frequency of occurrence of the first element of the pair */
+    private static List<Pair<String, String>> valuesUnderEditDistance(Collection<Row> rows, String field, int maxEditDistance) {
+        Multiset<String> set = HashMultiset.create();
+        List<Pair<String, String>> result = new ArrayList<>();
+
+        for (Row r: rows) {
+            String val = r.get(field);
+            set.add(val);
         }
 
-        int num = 0;
-        out.println (SEPARATOR + "Printing similar values for field " + field);
         // the first element to be printed in the pair of close names should be the one with the higher count
         List<String> list = new ArrayList<>(Multisets.copyHighestCountFirst(set).elementSet());
         for (int i = 0; i < list.size(); i++) {
             String f_i = list.get(i);
             for (int j = i + 1; j < list.size(); j++) {
                 String f_j = list.get(j);
-                if (editDistance(f_i, f_j) < 2) {
-                    if (fieldToPrint != null)
-                        out.println(++num + ". " + f_i + " (x" + set.count(f_i) + ", " + fieldToPrint + ": " + Joiner.on(",").join(map.get(f_i)) + ") and " + f_j + " (x" + set.count(f_j) + ", " + fieldToPrint + ": " + Joiner.on(",").join(map.get(f_j)) + ")");
-                    else
-                        out.println(++num + ". " + f_i + " and " + f_j);
+                if (editDistance(f_i, f_j) <= maxEditDistance) {
+                    result.add(new Pair<>(f_i, f_j));
                 }
             }
         }
-        return num;
+        return result;
     }
 
     static int editDistance(String word1, String word2) {

@@ -253,7 +253,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         Row.setToStringFields("Name-Sex-Year-State_name-PC_name-Party-Position-Votes");
-        
+
         // terminology: name, cname (canonical name), tname (name after tokenization), stname (name after tokenization, with sorted tokens)
         Multimap<String, Row> nameToRows = HashMultimap.create(), cnameToRows = HashMultimap.create();
         Set<Row> allRows = new LinkedHashSet<>();
@@ -279,11 +279,11 @@ public class Main {
 
             // check: {Name, year, PC} unique?
             // if not, it means multiple people with the same name are contesting in the same PC in the same year -- not impossible.
-            out.println (SEPARATOR + " Checking if people with the same name contested the same seat in the same year");
+            out.println(SEPARATOR + " Checking if people with the same name contested the same seat in the same year");
             Multimap<String, Row> map = split(allRows, "Name-Year-PC_name-State_name");
             Display.display(filter(map, "notequals", 1));
 
-            out.println (SEPARATOR + " Checking that there is at most 1 winner per seat");
+            out.println(SEPARATOR + " Checking that there is at most 1 winner per seat");
             Collection<Row> winners = select(allRows, "Position", "1");
             Multimap<String, Row> winnersMap = split(winners, "Year-PC_name-State_name");
             Display.display(filter(winnersMap, "notequals", 1));
@@ -310,121 +310,123 @@ public class Main {
             Display.display(filter(split(nonIndependents, "Year-PC_name-State_name-Party"), "notequals", 1));
 
             // Check if every <year, PC> has at least 2 unique rows (otherwise its a walkover!)
-            out.println (SEPARATOR + " Checking if there at least 2 candidates for every Year-PC");
+            out.println(SEPARATOR + " Checking if there at least 2 candidates for every Year-PC");
             Display.display(filter(split(allRows, "Year-PC_name"), "max", 1));
 
             // given a PC_name, does it uniquely determine the state?
             out.println(SEPARATOR + " Checking if each PC name belongs to exactly one state");
             Display.display2Level(filter(split(split(allRows, "PC_name"), "State_name"), "min", 2), 3 /* max rows */);
 
-            out.println (SEPARATOR + " Looking for possible misspellings in PC_name");
+            out.println(SEPARATOR + " Looking for possible misspellings in PC_name");
             Display.displayPairs(allRows, valuesUnderEditDistance(allRows, "PC_name", 1), "PC_name", 3 /* max rows */);
 
-            out.println (SEPARATOR + " Looking for possible misspellings in Party");
+            out.println(SEPARATOR + " Looking for possible misspellings in Party");
             Display.displayPairs(nonIndependents, valuesUnderEditDistance(allRows, "Party", 1), "Party", 3 /* max rows */);
 
-            out.println(SEPARATOR + " Looking for similar names");
-            reportSimilarValuesForField(allRows, "Name");
+            Tokenizer.setupVersions(allRows, "Name");
 
             // given a st_name, does it uniquely determine the sex?
             out.println(SEPARATOR + " Checking if each (C-R-S) name belongs to exactly one sex");
             Display.display2Level(filter(split(split(allRows, "_st_Name"), "Sex"), "min", 2), 3 /* max rows */, false);
 
-            out.println (SEPARATOR + " Looking for similar PCs");
-            reportSimilarValuesForField(allRows, "Name");
+            Tokenizer.setupVersions(allRows, "PC_name");
+            out.println(SEPARATOR + " Looking for similar PCs");
+            Display.display2Level(reportSimilarValuesForField(allRows, "PC_name"), 3, false);
+
+            out.println(SEPARATOR + " Looking for similar names");
+            Display.display2Level(reportSimilarValuesForField(allRows, "Name"), 3, false);
+
+            out.println(SEPARATOR + "Similar names (ST edit distance = 1)");
+            Display.displayPairs(allRows, similarPairsForField(allRows, "Name", 1), "_st_Name", 3, false);
         }
+    }
 
 
-        /*
-        // note: no reset of count.
-        out.println(SEPARATOR + "similar related (st) names (edit distance = 1)\n\n");
+    public static List<Pair<String, String>> similarPairsForField(Collection<Row> rows, String field, int ed)
+    {
+        List<Pair<String, String>> result = new ArrayList<>();
 
-        // setup tokenToStIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
-        Multimap<String, Integer> tokenToStIdx = HashMultimap.create();
-        {
-            for (int i = 0; i < stnames.size(); i++) {
-                String stname = stnames.get(i);
-                StringTokenizer st = new StringTokenizer(stname, Tokenizer.DELIMITERS);
-                while (st.hasMoreTokens()) {
-                    String tok = st.nextToken();
-                    if (tok.length() < 3)
-                        continue;
-                    tokenToStIdx.put(tok, i);
-                }
+        Multimap<String, Row> fieldToRows = split (rows, "_st_" + field);
+        List<String> listStField = new ArrayList<>(fieldToRows.keySet());
+        Collections.sort(listStField, stringLengthComparator);
+
+        // setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
+        // since editDistance computation is expensive, we'll only compute it for pairs that have at least 1 token in common
+        Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
+        for (int i = 0; i < listStField.size(); i++) {
+            String fieldVal = listStField.get(i);
+            StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
+            while (st.hasMoreTokens()) {
+                String tok = st.nextToken();
+                if (tok.length() < 3)
+                    continue;
+                tokenToFieldIdx.put(tok, i);
             }
         }
 
-        // set up nonSpaceStnames, computed only once for efficiency. its expensive to do this in the inner loop
-        List<String> nonSpaceStnames = new ArrayList<>();
-        for (int i = 0; i < stnames.size(); i++)
-            nonSpaceStnames.add(stnames.get(i).replaceAll(" ", ""));
+        // these non-space versions will be used for edit distance comparison.
+        // order in nonSpaceStFields is the same as in listStField
+        List<String> nonSpaceStFields = new ArrayList<>();
+        for (String fieldVal: listStField)
+            nonSpaceStFields.add(fieldVal.replaceAll(" ", ""));
 
-            // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < 1, ignoring spaces.
+        int count = 0;
+        int totalComparisons = 0;
+        // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < 1, ignoring spaces.
         // only check with stnames after it, because we want to report a pair of stnames A and B only once (A-B, not B-A)
-        for (int i = 0; i < stnames.size(); i++) {
-            String stname = stnames.get(i);
+        for (int i = 0; i < listStField.size(); i++) {
+            String stField = listStField.get(i);
 
-            // compute the indexes of the stnames that we should compare this stname with, based on common tokens
-            Set<Integer> stNameIdxsToCompareWith = new LinkedHashSet<>();
+            // collect the indexes of the values that we should compare stField with, based on common tokens
+            Set<Integer> idxsToCompareWith = new LinkedHashSet<>();
             {
-                StringTokenizer st = new StringTokenizer(stname, Tokenizer.DELIMITERS);
+                StringTokenizer st = new StringTokenizer(stField, Tokenizer.DELIMITERS);
                 while (st.hasMoreTokens()) {
                     String tok = st.nextToken();
                     if (tok.length() < 3)
                         continue;
-                    Collection<Integer> c = tokenToStIdx.get(tok);
+                    Collection<Integer> c = tokenToFieldIdx.get(tok);
                     for (Integer j: c)
                         if (j > i)
-                            stNameIdxsToCompareWith.add(j);
+                            idxsToCompareWith.add(j);
                 }
             }
 
-            String nonSpaceStname = nonSpaceStnames.get(i);
+            // now check stField against all idxs
+            totalComparisons += idxsToCompareWith.size();
+
+            String nonSpaceStField = nonSpaceStFields.get(i);
             // check each one of stNameIdxsToCompareWith for edit distance = 1
-            for (Integer j : stNameIdxsToCompareWith) {
-                String stname1 = stnames.get(j);
-                String nonSpaceStname1 = nonSpaceStnames.get(j);
+            for (Integer j : idxsToCompareWith) {
+                String stField1 = listStField.get(j);
+                String nonSpaceStField1 = nonSpaceStFields.get(j);
 
                 // now compare stname with stname1
                 {
-                    if (Math.abs(nonSpaceStname.length() - nonSpaceStname1.length()) > 1)
+                    if (Math.abs(nonSpaceStField.length() - nonSpaceStField1.length()) > 1)
                         continue; // optimization: don't bother to compute edit distance if the lengths differ by more than 1
 
-                    if (editDistance(nonSpaceStname, nonSpaceStname1) == 1) { // remember to remove spaces before comparing edit distance of stname stname1
+                    if (Util.editDistance(nonSpaceStField, nonSpaceStField1) == ed) { // make sure to use the space-removed versions to compute edit distance
                         // ok, we found something that looks close enough
-                        out.println(++count + ". similar but not exactly same (st)names: \n");
                         // out.println("  canonical: " + stname);
-                        printRowsWithStName(stnameToCname, cnameToRows, stname);
-                        printRowsWithStName(stnameToCname, cnameToRows, stname1);
+                        result.add(new Pair<String, String>(stField, stField1));
                     }
                 }
             }
         }
-        */
+
+        out.println ("Similar pairs found: " + result.size());
+        out.println ("list size: " + listStField.size() + ", total comparisons: " + totalComparisons + " average: " + ((float) totalComparisons)/listStField.size());
+        return result;
     }
 
-    static void reportSimilarValuesForField(Collection<Row> rows, String field) {
-        Tokenizer.setupVersions(rows, field);
-        Multimap<String, Row> stNameSplit = split(rows, "_st_" + field);
-        Multimap<String, Multimap<String, Row>> stNameToNameToRows = split(stNameSplit, field);
-        Multimap<String, Multimap<String, Row>> stNameToMultipleNameToRows = sort(filter(stNameToNameToRows, "min", 2), stringLengthComparator);
-        Display.display2Level(stNameToMultipleNameToRows, 3, false);
-    }
+    /** Prints similar (canonicalized, retokenized, sorted) names. Tokenizer.setupVersions(allRows, "Name"); should already been called on this field */
+    static Multimap<String, Multimap<String, Row>> reportSimilarValuesForField(Collection<Row> rows, String field) {
 
-    private static void printRowsWithStName(Multimap<String, String> stnameToCname, Multimap<String, Row> cnameToRows, String stname)
-    {
-        Collection<String> cnamesSet = stnameToCname.get(stname);
-        for (String cname : cnamesSet) {
-            printNameDetail(cnameToRows, cname);
-            out.println();
-        }
-    }
-
-    private static void printNameDetail(Multimap<String, Row> namesToInfo, String n) {
-        List<Row> rows = new ArrayList<>(namesToInfo.get(n));
-        Collections.sort(rows);
-        for (Row row: rows)
-            out.println ("   " + row);
+        Multimap<String, Row> stFieldSplit = split(rows, "_st_" + field);
+        Multimap<String, Multimap<String, Row>> stFieldToFieldToRows = split(stFieldSplit, field);
+        Multimap<String, Multimap<String, Row>> stFieldToMultipleFieldToRows = sort(filter(stFieldToFieldToRows, "min", 2), stringLengthComparator);
+        return stFieldToMultipleFieldToRows;
     }
 
     private static Collection<Row> select (Collection<Row> rows, String field, String value) {
@@ -706,16 +708,19 @@ class Display {
         }
     }
 
-    static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows) {
+
+    static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows) { displayPairs(rows, pairs, field, maxRows, true); }
+
+    static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows, boolean showKey) {
         Multimap<String, Row> map = Main.split(rows, field);
         int count = 0;
         for (Pair<String, String> pair : pairs) {
             String v1 = pair.getFirst();
             String v2 = pair.getSecond();
             ++count;
-            out.println(count + ".1) " + v1);
+            out.println(count + ".1) " + (showKey ? v1 : ""));
             display("    " + count + ".1.", map.get(v1), maxRows);
-            out.println(count + ".2) " + v2);
+            out.println(count + ".2) " + (showKey ? v2 : ""));
             display("    " + count + ".2.", map.get(v2), maxRows);
         }
     }

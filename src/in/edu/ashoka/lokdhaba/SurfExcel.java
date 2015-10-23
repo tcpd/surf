@@ -1,8 +1,10 @@
 
-package in.edu.ashoka.er;
+package in.edu.ashoka.lokdhaba;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
+import edu.stanford.muse.util.UnionFindBox;
+import edu.stanford.muse.util.Util;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -14,6 +16,7 @@ import java.util.*;
 class Row implements Comparable<Row> {
     private static PrintStream out = System.out;
     private static String FIELDSPEC_SEPARATOR = "-";
+    private static Comparator currentComparator = null;
 
     int year = -1, position = -1, votes = -1, rowNum = -1;
     Map<String, Object> fields;
@@ -23,6 +26,12 @@ class Row implements Comparable<Row> {
         public int compare(Row r1, Row r2) {
             return r1.getInt("Position") - r2.getInt("Position");
         }};
+
+    static Comparator<Row> rowNumComparator = new Comparator<Row>() {
+        public int compare(Row r1, Row r2) {
+            return r1.rowNum - r2.rowNum;
+        }};
+
 
     static Comparator<Row> yearComparator = new Comparator<Row>() {
         public int compare(Row r1, Row r2) {
@@ -42,6 +51,9 @@ class Row implements Comparable<Row> {
         toStringFields = fieldSpec.split("-");
     }
 
+    public static void setComparator(Comparator c) {
+        currentComparator = c;
+    }
     public void setup(String year, String position, String votes) {
         try { this.year = Integer.parseInt(year); } catch (NumberFormatException nfe ) { }
         try { this.position = Integer.parseInt(position); } catch (NumberFormatException nfe ) { }
@@ -58,6 +70,9 @@ class Row implements Comparable<Row> {
 
     public int compareTo(Row other)
     {
+        if (currentComparator != null)
+            return currentComparator.compare(this, other);
+
         // lower positions first
         if (position != other.position)
             return (position < other.position) ? -1 : 1;
@@ -114,7 +129,6 @@ class Row implements Comparable<Row> {
 
 class Tokenizer {
     static String DELIMITERS = " -.,;:/'\\t<>\"`()@1234567890";
-    private static PrintStream out = System.out;
 
     /** generates weighted token counts for tokens in each key. the count of a key (token) in the multiset is its weight. */
     private static Multiset<String> generateTokens(Multimap<String, Row> map) {
@@ -134,7 +148,7 @@ class Tokenizer {
                         tokens.add(token);
             }
         }
-        out.println("single word keys: " + nSingleWordKeys + " total tokens: " + tokens.size() + " unique: " + tokens.elementSet().size());
+       // out.println("single word keys: " + nSingleWordKeys + " total tokens: " + tokens.size() + " unique: " + tokens.elementSet().size());
         return tokens;
     }
 
@@ -193,7 +207,7 @@ class Tokenizer {
         }
 
         // split on cfield and get token frequencies
-        Multimap<String, Row> cfieldValToRows = Main.split(allRows, cfield);
+        Multimap<String, Row> cfieldValToRows = SurfExcel.split(allRows, cfield);
         Multiset<String> tokens = generateTokens(cfieldValToRows);
 
         for (String val : cfieldValToRows.keySet()) {
@@ -212,6 +226,7 @@ class Tokenizer {
             }
         }
     }
+
 
     /** canonicalizes Indian variations of spellings and replaces a run of repeated letters by a single letter */
     static String canonicalize(String s)
@@ -236,9 +251,20 @@ class Tokenizer {
 
         return result.toString();
     }
+
+    public static Map<String, String> canonicalize (Collection<String> list) {
+        if (list == null)
+            return null;
+
+        Map<String, String> result = new LinkedHashMap<>();
+        for (String s: list)
+            result.put(s, canonicalize(s));
+
+        return result;
+    }
 }
 
-public class Main {
+public class SurfExcel {
 
     private static PrintStream out = System.out;
     private static String SEPARATOR = "========================================\n";
@@ -251,99 +277,68 @@ public class Main {
         }
     };
 
-    public static void main(String[] args) throws IOException {
-        Row.setToStringFields("Name-Sex-Year-State_name-PC_name-Party-Position-Votes");
-
-        // terminology: name, cname (canonical name), tname (name after tokenization), stname (name after tokenization, with sorted tokens)
-        Multimap<String, Row> nameToRows = HashMultimap.create(), cnameToRows = HashMultimap.create();
+    static Set<Row> readRows(String filename) throws IOException {
         Set<Row> allRows = new LinkedHashSet<>();
         int nRows = 0;
 //        Reader in = new FileReader("GE.csv");
         // read the names from CSV
-        Iterable<CSVRecord> records = CSVParser.parse(new File("GE.csv"), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
+        Iterable<CSVRecord> records = CSVParser.parse(new File(filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
         for (CSVRecord record : records) {
-            String name = record.get("Name");
-            if (name == null)
-                continue;
-
             nRows++;
             Row r = new Row(record.toMap(), nRows);
             allRows.add(r);
         }
+        return allRows;
+    }
 
-        // perform some consistency checks
-        {
-            // these rows are supposed to be exact duplicates
-            checkSame(allRows, "Party", "Party_dup");
-            checkSame(allRows, "Year", "Year_dup");
-
-            // check: {Name, year, PC} unique?
-            // if not, it means multiple people with the same name are contesting in the same PC in the same year -- not impossible.
-            out.println(SEPARATOR + " Checking if people with the same name contested the same seat in the same year");
-            Multimap<String, Row> map = split(allRows, "Name-Year-PC_name-State_name");
-            Display.display(filter(map, "notequals", 1));
-
-            out.println(SEPARATOR + " Checking that there is at most 1 winner per seat");
-            Collection<Row> winners = select(allRows, "Position", "1");
-            Multimap<String, Row> winnersMap = split(winners, "Year-PC_name-State_name");
-            Display.display(filter(winnersMap, "notequals", 1));
-
-            out.println(SEPARATOR + " Checking that there is at least 1 winner per seat");
-            Set<String> winnerKeys = winnersMap.keySet();
-            map = split(allRows, "Year-PC_name-State_name");
-            map = minus(map, winnerKeys);
-            if (map.size() > 0) {
-                out.println(" The following elections do not have a winner!?!");
-                Display.display(map);
-            }
-
-            Collection<Row> selectedRows = selectNot(allRows, "Name", "NONE OF THE ABOVE");
-            selectedRows = selectNot(selectedRows, "Sex", "F");
-            selectedRows = selectNot(selectedRows, "Sex", "M");
-            out.println(SEPARATOR + " Checking values in \"Sex\" fields other than M and F");
-            Display.display("", selectedRows, Integer.MAX_VALUE);
-
-            // check: among the non-independents, is {year, PC, Party} unique?
-            // if not, it means same party has multiple candidates in the same year in the same PC!!
-            out.println(SEPARATOR + " Checking uniqueness of Year-PC-State-Party (non-independents)");
-            Collection<Row> nonIndependents = selectNot(allRows, "Party", "IND");
-            Display.display(filter(split(nonIndependents, "Year-PC_name-State_name-Party"), "notequals", 1));
-
-            // Check if every <year, PC> has at least 2 unique rows (otherwise its a walkover!)
-            out.println(SEPARATOR + " Checking if there at least 2 candidates for every Year-PC");
-            Display.display(filter(split(allRows, "Year-PC_name"), "max", 1));
-
-            // given a PC_name, does it uniquely determine the state?
-            out.println(SEPARATOR + " Checking if each PC name belongs to exactly one state");
-            Display.display2Level(filter(split(split(allRows, "PC_name"), "State_name"), "min", 2), 3 /* max rows */);
-
-            out.println(SEPARATOR + " Looking for possible misspellings in PC_name");
-            Display.displayPairs(allRows, valuesUnderEditDistance(allRows, "PC_name", 1), "PC_name", 3 /* max rows */);
-
-            out.println(SEPARATOR + " Looking for possible misspellings in Party");
-            Display.displayPairs(nonIndependents, valuesUnderEditDistance(allRows, "Party", 1), "Party", 3 /* max rows */);
-
-            Tokenizer.setupVersions(allRows, "Name");
-
-            // given a st_name, does it uniquely determine the sex?
-            out.println(SEPARATOR + " Checking if each (C-R-S) name belongs to exactly one sex");
-            Display.display2Level(filter(split(split(allRows, "_st_Name"), "Sex"), "min", 2), 3 /* max rows */, false);
-
-            Tokenizer.setupVersions(allRows, "PC_name");
-            out.println(SEPARATOR + " Looking for similar PCs");
-            Display.display2Level(reportSimilarValuesForField(allRows, "PC_name"), 3, false);
-
-            out.println(SEPARATOR + " Looking for similar names");
-            Display.display2Level(reportSimilarValuesForField(allRows, "Name"), 3, false);
-
-            /*
-            out.println(SEPARATOR + "Similar names (ST edit distance = 1)");
-            Display.displayPairs(allRows, similarPairsForField(allRows, "Name", 2), "_st_Name", 3, false);
-            */
-            out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = 1)");
-            similarPairsForField (allRows, "Name", 1);
-            Display.display2Level (sort (filter(split(split(allRows, "_est_Name"), "Name"), "min", 2), stringLengthComparator), 3);
+    static Set<Row> writeRows(String filename) throws IOException {
+        Set<Row> allRows = new LinkedHashSet<>();
+        int nRows = 0;
+//        Reader in = new FileReader("GE.csv");
+        // read the names from CSV
+        Iterable<CSVRecord> records = CSVParser.parse(new File(filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
+        for (CSVRecord record : records) {
+            nRows++;
+            Row r = new Row(record.toMap(), nRows);
+            allRows.add(r);
         }
+        return allRows;
+    }
+
+    static void setColumnAlias(Collection<Row> rows, String oldColName, String newColName) {
+        for (Row r: rows) {
+            r.set(newColName, r.get(oldColName));
+        }
+    }
+
+
+    static Collection<Row> readLinesFromFile(String filename) throws IOException {
+        Collection<String> lines = Util.getLinesFromFile(filename, false);
+        Multimap map = HashMultimap.create();
+        List<Row> rows = new ArrayList<Row>();
+        int num = 0;
+        for (String line : lines) {
+            Map<String, String> m = new LinkedHashMap();
+            if (Util.nullOrEmpty(line))
+                continue;
+            m.put("Line", line);
+            Row r = new Row(m, ++num);
+            rows.add(r);
+
+        }
+        return rows;
+    }
+
+    public static void assignIDs(Collection<Row> allRows, String field, String filename) {
+        EquivalenceHandler eh = new EquivalenceHandler(filename);
+        String newField = "_id_" + field;
+        for (Row r: allRows) {
+            r.set (newField, eh.getClassNum(r.get(field)));
+        }
+    }
+
+    public static void warn (String s) {
+        out.println("WARNING " + s);
     }
 
 
@@ -411,7 +406,7 @@ public class Main {
                     if (Math.abs(nonSpaceStField.length() - nonSpaceStField1.length()) > 1)
                         continue; // optimization: don't bother to compute edit distance if the lengths differ by more than 1
 
-                    if (Util.editDistance(nonSpaceStField, nonSpaceStField1) <= ed) { // make sure to use the space-removed versions to compute edit distance
+                    if (Util1.editDistance(nonSpaceStField, nonSpaceStField1) <= ed) { // make sure to use the space-removed versions to compute edit distance
                         // ok, we found something that looks close enough
                         // out.println("  canonical: " + stname);
                         result.add(new Pair<String, String>(stField, stField1));
@@ -450,7 +445,7 @@ public class Main {
         return stFieldToMultipleFieldToRows;
     }
 
-    private static Collection<Row> select (Collection<Row> rows, String field, String value) {
+    static Collection<Row> select(Collection<Row> rows, String field, String value) {
         List<Row> result = new ArrayList<Row>();
         for (Row r: rows)
             if (value.equals(r.get(field)))
@@ -458,7 +453,7 @@ public class Main {
         return result;
     }
 
-    private static Collection<Row> selectNot (Collection<Row> rows, String field, String value) {
+    static Collection<Row> selectNot(Collection<Row> rows, String field, String value) {
         List<Row> result = new ArrayList<Row>();
         for (Row r: rows)
             if (!value.equals(r.get(field)))
@@ -466,12 +461,56 @@ public class Main {
         return result;
     }
 
-    private static void checkSame(Collection<Row> allRows, String field1, String field2) {
+    static void checkSame(Collection<Row> allRows, String field1, String field2) {
         out.println(SEPARATOR + "Checking if fields identical: " + field1 + " and " + field2);
         for (Row r: allRows)
             if (!r.get(field1).equals(r.get(field2))) {
                 out.println("Warning: " + field1 + " and " + field2 + " not the same! row=" + r + " " + field1 + "=" + r.get(field1) + " " + field2 + " = " + r.get(field2) + " row#: " + r.rowNum);
             }
+    }
+
+    static void assign_unassignedIds(Collection<Row> allRows, String field) {
+        String idField = "_id_" + field;
+        Map<String, String> map = new LinkedHashMap<>();
+        int unassigned_id_val = 0;
+        for (Row r: allRows) {
+            String idVal = r.get(idField);
+            if (Util.nullOrEmpty(idVal)) {
+                String fieldVal = r.get(field);
+                idVal = map.get(fieldVal);
+                if (Util.nullOrEmpty(idVal)) {
+                    idVal = " U-" + (++unassigned_id_val);
+                    map.put(fieldVal, idVal);
+                }
+                r.set(idField, idVal);
+            }
+        }
+        out.println ("Number of unassigned ids that were now assigned: " + unassigned_id_val);
+    }
+
+    static void profile(Collection<Row> allRows, String field) {
+        String idField = "_id_" + field;
+        Multimap<String, String> map = LinkedHashMultimap.create();
+        Set<String> seen = new LinkedHashSet<>(); // field vals that we have already seen
+
+        for (Row r: allRows) {
+            String fieldVal = r.get(field);
+            String idVal = r.get(idField);
+            if (!seen.contains(fieldVal)) {
+                map.put(idVal, r.get(field));
+                seen.add(r.get(field));
+            }
+        }
+
+        List<String> list = new ArrayList<>();
+
+        for (String s: map.keySet()) {
+//            out.println (s + " -- " + Util.join(map.get(s), " | "));
+            list.add(Util.join(map.get(s), " | "));
+        }
+        Collections.sort(list);
+        for (String s: list)
+            out.println (s);
     }
 
     /** converts a collection of rows to a map in which each unique value for the given fieldspec is the key and the value for that key is the rows with that value for the fieldspec */
@@ -534,7 +573,7 @@ public class Main {
     /** filters given map to retain only those keys whose rows.size() <op> count */
     static<T> Multimap<String, T> sort (Multimap<String, T> map, Comparator<String> comparator) {
         List<String> keyList = new ArrayList<>(map.keySet());
-        Collections.sort (keyList, comparator);
+        Collections.sort(keyList, comparator);
 
         Multimap<String, T> sortedMap = LinkedHashMultimap.create(); // required extra memory instead of clearing map in place... can do away with it depending on how map.keySet() iteration works
 
@@ -572,22 +611,37 @@ public class Main {
 
 
     /** returns pairs of strings in the given field that are close in edit distance (< given maxEditDistance), sorted by frequency of occurrence of the first element of the pair */
-    private static List<Pair<String, String>> valuesUnderEditDistance(Collection<Row> rows, String field, int maxEditDistance) {
+    static List<Pair<String, String>> valuesUnderEditDistance(Collection<Row> rows, String field, int maxEditDistance) {
         Multiset<String> set = HashMultiset.create();
         List<Pair<String, String>> result = new ArrayList<>();
+        Map<String, String> idMap = new LinkedHashMap<>();
 
         for (Row r: rows) {
             String val = r.get(field);
             set.add(val);
+            String idField = "_id_" + field;
+            String idVal = r.get(idField);
+            if (!Util.nullOrEmpty(idField))
+                idMap.put(val, idVal);
         }
 
         // the first element to be printed in the pair of close names should be the one with the higher count
         List<String> list = new ArrayList<>(Multisets.copyHighestCountFirst(set).elementSet());
+        outer:
         for (int i = 0; i < list.size(); i++) {
             String f_i = list.get(i);
+            String id_i = idMap.get(f_i);
+
             for (int j = i + 1; j < list.size(); j++) {
                 String f_j = list.get(j);
-                if (Util.editDistance(f_i, f_j) <= maxEditDistance) {
+                String id_j = idMap.get(f_j);
+                if (Math.abs(f_j.length() - f_i.length()) > maxEditDistance)
+                    continue outer;
+                if (!Util.nullOrEmpty(id_i) && id_i.equals(id_j)) {
+                    out.println ("same id for " + f_i + " and " + f_j);
+                    continue; // at least their ids are the same, skip
+                }
+                if (Util1.editDistance(f_i, f_j) <= maxEditDistance) {
                     result.add(new Pair<>(f_i, f_j));
                 }
             }
@@ -598,30 +652,7 @@ public class Main {
 
 }
 
-class Util {
-    /**
-     * if num > 1, pluralizes the desc. will also commatize the num if needed.
-     */
-    public static String pluralize(int x, String desc) {
-        return commatize(x) + " " + desc + ((x > 1) ? "s" : "");
-    }
-
-    public static String commatize(long n) {
-        String result = "";
-        do {
-            if (result.length() > 0)
-                result = "," + result;
-            long trio = n % 1000; // 3 digit number to be printed
-            if (trio == n) // if this is the last trio, no lead of leading 0's,
-                // otherwise make sure to printf %03f
-                result = String.format("%d", n % 1000) + result;
-            else
-                result = String.format("%03d", n % 1000) + result;
-
-            n = n / 1000;
-        } while (n > 0);
-        return result;
-    }
+class Util1 {
 
     static int editDistance(String word1, String word2) {
         int len1 = word1.length();
@@ -667,6 +698,24 @@ class Util {
 class Display {
     private static PrintStream out = System.out;
 
+    static void displayCollection(Collection<String> c, Collection<String> reference) {
+        int i = 1;
+        Map<String, String> cStrings = Tokenizer.canonicalize(c);
+        Map<String, String> cReference = Tokenizer.canonicalize(reference);
+
+        for (String s: c) {
+            String probablyString = "";
+            if (reference != null)
+                for (String s1: reference) {
+                    if (Util1.editDistance(cStrings.get(s), cReference.get(s1)) < 2) {
+                        probablyString = " (could be " + s1 + ")";
+                        break;
+                    }
+                }
+            out.println(i++ + ". " + s + probablyString);
+        }
+    }
+
     static void display2Level(Multimap<String, Multimap<String, Row>> map, int maxRows) {
         display2Level(map, maxRows, true);
     }
@@ -687,11 +736,11 @@ class Display {
         display("", map, Integer.MAX_VALUE);
     }
 
-    static void display(String prefix, Multimap<String, Row> map, int maxRows) {
+    private static void display(String prefix, Multimap<String, Row> map, int maxRows) {
         display(prefix, map, maxRows, false);
     }
 
-    static void display(String prefix, Multimap<String, Row> map, int maxRows, boolean suppressCounting) {
+    private static void display(String prefix, Multimap<String, Row> map, int maxRows, boolean suppressCounting) {
         int count = 0;
         for (String s : map.keySet()) {
             Collection<Row> rows = map.get(s);
@@ -701,11 +750,35 @@ class Display {
         }
     }
 
+    /** given set1/2 with descriptor desc1/2, prints the list of things in set1 but not set2 and vice versa.
+     * for these items, also prints suggested matches (<= edit distance 1) in the other set.
+     */
+    static void displayDiffs(String desc1, Set<String> set1, String desc2, Set<String> set2)
+    {
+        Set<String> tmp = new LinkedHashSet<>(set1);
+        tmp.removeAll(set2);
+        if (tmp.size() > 0) {
+            out.println("Only in " + desc1 + " and not " + desc2);
+            List<String> tmpList = new ArrayList<>(tmp);
+            Collections.sort(tmpList);
+            Display.displayCollection (tmpList, set2);
+        }
+
+        tmp = new LinkedHashSet<>(set2);
+        tmp.removeAll(set1);
+        List<String> tmpList = new ArrayList<>(tmp);
+        Collections.sort(tmpList);
+        if (tmp.size() > 0) {
+            out.println("Only in " + desc2 + " and not " + desc1);
+            Display.displayCollection (tmpList, set1);
+        }
+    }
+
     static void display(String prefix, Collection<Row> rows, int maxRows) {
         int count = 0;
         /** sort the rows by position -- we prefer to show more significant candidates first. Could also do this by year or some other criterion for the row */
         List<Row> rowList = new ArrayList<>(rows);
-        Collections.sort (rowList, Row.positionComparator);
+        Collections.sort (rowList);
 
         for (Row r : rowList) {
             out.println(prefix + (++count) + ") " + r);
@@ -719,11 +792,10 @@ class Display {
         }
     }
 
-
     static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows) { displayPairs(rows, pairs, field, maxRows, true); }
 
-    static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows, boolean showKey) {
-        Multimap<String, Row> map = Main.split(rows, field);
+    private static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows, boolean showKey) {
+        Multimap<String, Row> map = SurfExcel.split(rows, field);
         int count = 0;
         for (Pair<String, String> pair : pairs) {
             String v1 = pair.getFirst();
@@ -734,6 +806,49 @@ class Display {
             out.println(count + ".2) " + (showKey ? v2 : ""));
             display("    " + count + ".2.", map.get(v2), maxRows);
         }
+    }
+}
+
+class EquivalenceHandler {
+    Map<String, UnionFindBox<String>> stringToBox = new LinkedHashMap<>();
+
+    public EquivalenceHandler(String equivalenceFile) {
+        List<String> lines = new ArrayList<>();
+        try { lines = Util.getLinesFromFile(equivalenceFile, true); }
+        catch (Exception e) { Util.print_exception(e); }
+
+        int lineNum = 0;
+        for (String line: lines) {
+            lineNum++;
+            String[] equivs = line.split("=");
+            Arrays.sort(equivs); // sort alphabetically
+            if (equivs.length != 2) {
+                SurfExcel.warn("Bad input at line# " + lineNum + " in " + equivalenceFile + ": " + line);
+                continue;
+            }
+
+            String left = equivs[0], right = equivs[1];
+            UnionFindBox<String> leftBox = stringToBox.get(left);
+            if (leftBox == null) {
+                leftBox = new UnionFindBox<String>(left);
+                stringToBox.put(left, leftBox);
+            }
+            UnionFindBox<String> rightBox = stringToBox.get(right);
+            if (rightBox == null) {
+                rightBox = new UnionFindBox<String>(right);
+                stringToBox.put(right, rightBox);
+            }
+            leftBox.unify(rightBox);
+        }
+
+        UnionFindBox.assignClassNumbers(stringToBox.values());
+    }
+
+    public String getClassNum(String s) {
+        UnionFindBox<String> ufo = stringToBox.get(s);
+        if (ufo == null)
+            return "";
+        return Integer.toString(ufo.classNum);
     }
 }
 

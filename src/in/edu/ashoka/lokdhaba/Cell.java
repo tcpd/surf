@@ -17,7 +17,7 @@ public class Cell {
     public static void main(String[] args) throws IOException {
         Row.setToStringFields("Line");
         Row.setComparator(Row.rowNumComparator);
-        Collection<Row> allRows = SurfExcel.readLinesFromFile(args[0]);
+        Collection<Row> allRows = new Dataset(args[0]).rows;
 
         out.println(SEPARATOR + " Identical sentences");
         Multimap<String, Row> map1 = SurfExcel.split(allRows, "Line");

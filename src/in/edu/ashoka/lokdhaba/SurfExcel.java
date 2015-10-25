@@ -13,6 +13,103 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
+class Dataset {
+    Collection<Row> rows;
+    String name, description;
+    Set<String> cColumns = new LinkedHashSet<>(); // this is the real list of col names (canonical) available (no aliases) for each row in this dataset.
+    Multimap<String, String> cColumnToDisplayName = LinkedHashMultimap.create(); // display col names (both real and aliases)
+    Map<String, String> cColumnAliases = new LinkedHashMap<>(); // cCol -> cCol as aliases.
+
+    static String removePlural(String s)
+    {
+        /* S stemmer: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.104.9828
+        IF a word ends in “ies,” but not “eies” or “aies”
+        THEN “ies” - “y”
+        IF a word ends in “es,” but not “aes,” “ees,” or “oes”
+        THEN “es” -> “e”
+        IF a word ends in "s,” but not “us” or ‘ss”
+           THEN "s" -> NULL
+        */
+
+        if (s.endsWith("ies") && !(s.endsWith("eies") || s.endsWith("aies")))
+            return s.replaceAll("ies$", "y"); // this gets movies wrong!
+        if (s.endsWith("es") && !(s.endsWith("aes") || s.endsWith("ees") || s.endsWith("oes")))
+            return s.replaceAll("es$", "e");
+        if (s.endsWith("es") && !(s.endsWith("aes") || s.endsWith("ees") || s.endsWith("oes")))
+            return s.replaceAll("es$", "e");
+        if (s.endsWith("s") && !(s.endsWith("us") || s.endsWith("ss")))
+            return s.replaceAll("s$", "");
+        return s;
+    }
+
+    // maintain a map for canonicalization, otherwise computing lower case, remove plurals etc takes a lot of time when reading a large dataset
+    Map<String, String> cCache = new LinkedHashMap<>();
+    String canonicalizeCol(String col) {
+        String s = cCache.get(col);
+        if (s != null)
+            return s;
+
+        String ccol = col.toLowerCase();
+        ccol = ccol.replaceAll("_", "");
+        ccol = ccol.replaceAll("-", "");
+        ccol = removePlural(ccol).intern();
+        cCache.put(col, ccol);
+        return ccol;
+    }
+
+    void warnIfColumnExists(String col) {
+        if (hasColumnName(col))
+            System.err.println("Error: duplicate columns for repeated: " + col);
+    }
+
+    void registerColumn(String col) {
+        warnIfColumnExists(col);
+        String cCol = canonicalizeCol(col);
+        cColumns.add(cCol);
+        cColumnToDisplayName.put(cCol, col);
+    }
+
+    void registerColumnAlias(String oldCol, String newCol) {
+        warnIfColumnExists(newCol);
+        if (!hasColumnName(oldCol)) {
+            System.err.println("Warning: no column called " + oldCol);
+            return;
+        }
+
+        registerColumn(newCol);
+        cColumnAliases.put(canonicalizeCol(newCol), canonicalizeCol(oldCol));
+    }
+
+    public Dataset (String filename) throws IOException {
+        this.name = filename;
+
+        Set<Row> allRows = new LinkedHashSet<>();
+        int nRows = 0;
+//        Reader in = new FileReader("GE.csv");
+        // read the names from CSV
+        Iterable<CSVRecord> records = CSVParser.parse(new File(filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
+        for (CSVRecord record : records) {
+            nRows++;
+            Map<String, String> map = record.toMap();
+
+            if (nRows == 1) {
+                for (String col : map.keySet()) {
+                    registerColumn(col);
+                }
+            }
+
+            Row r = new Row(map, nRows, this);
+            allRows.add(r);
+        }
+        this.rows = allRows;
+    }
+
+    boolean hasColumnName(String col) {
+        String ccol = canonicalizeCol(col);
+        return cColumnAliases.keySet().contains(ccol) || cColumns.contains(ccol);
+    }
+}
+
 class Row implements Comparable<Row> {
     private static PrintStream out = System.out;
     private static String FIELDSPEC_SEPARATOR = "-";
@@ -21,6 +118,7 @@ class Row implements Comparable<Row> {
     int year = -1, position = -1, votes = -1, rowNum = -1;
     Map<String, Object> fields;
     static String[] toStringFields = new String[0];
+    private Dataset d;
 
     static Comparator<Row> positionComparator = new Comparator<Row>() {
         public int compare(Row r1, Row r2) {
@@ -38,13 +136,15 @@ class Row implements Comparable<Row> {
             return r1.getInt("Year") - r2.getInt("Year");
         }};
 
-    public Row(Map<String, String> record, int rowNum) {
+    public Row(Map<String, String> map, int rowNum, Dataset d) {
         this.fields = new LinkedHashMap<>();
-        for (String key: record.keySet())
-            this.fields.put(key.intern(), record.get(key)); // intern the key to save memory
+        this.d = d;
+
+        for (String key: map.keySet())
+            this.fields.put(d.canonicalizeCol(key), map.get(key)); // intern the key to save memory
 
         this.rowNum = rowNum;
-        setup(record.get("Year"), record.get("Position"), record.get("Votes"));
+        setup(map.get("Year"), map.get("Position"), map.get("Votes"));
     }
 
     public static void setToStringFields(String fieldSpec) {
@@ -84,15 +184,31 @@ class Row implements Comparable<Row> {
         return toString().compareTo(other.toString());
     }
 
-    public String get(String s) {
-        if (s == null)
+    public String get(String col) {
+        if (col == null)
             return "";
-        String x = (String) fields.get(s);
+        col = d.canonicalizeCol(col);
+        while (true) {
+            String alias = d.cColumnAliases.get(col);
+            if (alias == null)
+                break;
+            col = alias;
+        }
+
+        String x = (String) fields.get(col);
         return (x != null) ? x : "";
     }
 
-    public void set(String key, String val) {
-        fields.put(key, val);
+    public void set(String col, String val) {
+        col = d.canonicalizeCol(col);
+        while (true) {
+            String alias = d.cColumnAliases.get(col);
+            if (alias == null)
+                break;
+            col = alias;
+        }
+
+        fields.put(col, val);
     }
 
     public String getFields (String fields[], String separator) {
@@ -100,12 +216,13 @@ class Row implements Comparable<Row> {
         for (int i = 0; i < fields.length; i++) {
             sb.append (this.get(fields[i]));
             if (i < fields.length-1)
-                sb.append(FIELDSPEC_SEPARATOR);
+                sb.append(separator);
         }
         return sb.toString();
     }
 
     public int setAsInt(String field) {
+        field = d.canonicalizeCol(field);
         int x = Integer.MIN_VALUE;
         if (field == null || "".equals(field)){
             x = 0;
@@ -193,7 +310,7 @@ class Tokenizer {
 
     /** sets up canonicalized, retokenized and sorted-retokenized versions of the given field.
      * e.g if field is Name, fields called _c_Name, _t_Name and _st_Name are added to all rows */
-    static void setupVersions(Collection<Row> allRows, String field)
+    static void setupDesiVersions(Collection<Row> allRows, String field)
     {
         String cfield = "_c_" + field;
         String tfield = "_t_" + field;
@@ -202,7 +319,7 @@ class Tokenizer {
         // compute and set cfield for all rows
         for (Row r: allRows) {
             String val = r.get(field);
-            String cval = canonicalize(val);
+            String cval = canonicalizeDesi(val);
             r.set(cfield, cval);
         }
 
@@ -229,7 +346,7 @@ class Tokenizer {
 
 
     /** canonicalizes Indian variations of spellings and replaces a run of repeated letters by a single letter */
-    static String canonicalize(String s)
+    static String canonicalizeDesi(String s)
     {
         // canonicalize standard Indian variations of spellings
         s = s.replaceAll("TH", "T").replaceAll("V", "W").replaceAll("GH", "G").replaceAll("BH", "B").replaceAll("DH", "D").replaceAll("JH", "J").replaceAll("KH", "K").replaceAll("MH", "M").replaceAll("PH", "P").replaceAll("SH", "S").replaceAll("ZH", "Z").replaceAll("Y", "I");
@@ -252,13 +369,13 @@ class Tokenizer {
         return result.toString();
     }
 
-    public static Map<String, String> canonicalize (Collection<String> list) {
+    public static Map<String, String> canonicalizeDesi (Collection<String> list) {
         if (list == null)
             return null;
 
         Map<String, String> result = new LinkedHashMap<>();
         for (String s: list)
-            result.put(s, canonicalize(s));
+            result.put(s, canonicalizeDesi(s));
 
         return result;
     }
@@ -268,7 +385,7 @@ public class SurfExcel {
 
     private static PrintStream out = System.out;
     private static String SEPARATOR = "========================================\n";
-    private static String FIELDSPEC_SEPARATOR = "-";
+    static String FIELDSPEC_SEPARATOR = "-";
 
     static Comparator<String> stringLengthComparator = new Comparator<String>() {
         @Override
@@ -276,58 +393,6 @@ public class SurfExcel {
             return o2.length() - o1.length();
         }
     };
-
-    static Set<Row> readRows(String filename) throws IOException {
-        Set<Row> allRows = new LinkedHashSet<>();
-        int nRows = 0;
-//        Reader in = new FileReader("GE.csv");
-        // read the names from CSV
-        Iterable<CSVRecord> records = CSVParser.parse(new File(filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
-        for (CSVRecord record : records) {
-            nRows++;
-            Row r = new Row(record.toMap(), nRows);
-            allRows.add(r);
-        }
-        return allRows;
-    }
-
-    static Set<Row> writeRows(String filename) throws IOException {
-        Set<Row> allRows = new LinkedHashSet<>();
-        int nRows = 0;
-//        Reader in = new FileReader("GE.csv");
-        // read the names from CSV
-        Iterable<CSVRecord> records = CSVParser.parse(new File(filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
-        for (CSVRecord record : records) {
-            nRows++;
-            Row r = new Row(record.toMap(), nRows);
-            allRows.add(r);
-        }
-        return allRows;
-    }
-
-    static void setColumnAlias(Collection<Row> rows, String oldColName, String newColName) {
-        for (Row r: rows) {
-            r.set(newColName, r.get(oldColName));
-        }
-    }
-
-
-    static Collection<Row> readLinesFromFile(String filename) throws IOException {
-        Collection<String> lines = Util.getLinesFromFile(filename, false);
-        Multimap map = HashMultimap.create();
-        List<Row> rows = new ArrayList<Row>();
-        int num = 0;
-        for (String line : lines) {
-            Map<String, String> m = new LinkedHashMap();
-            if (Util.nullOrEmpty(line))
-                continue;
-            m.put("Line", line);
-            Row r = new Row(m, ++num);
-            rows.add(r);
-
-        }
-        return rows;
-    }
 
     public static void assignIDs(Collection<Row> allRows, String field, String filename) {
         EquivalenceHandler eh = new EquivalenceHandler(filename);
@@ -341,7 +406,6 @@ public class SurfExcel {
         out.println("WARNING " + s);
     }
 
-
     public static List<Pair<String, String>> similarPairsForField(Collection<Row> rows, String field, int ed)
     {
         List<Pair<String, String>> result = new ArrayList<>();
@@ -349,6 +413,8 @@ public class SurfExcel {
         Multimap<String, Row> fieldToRows = split (rows, "_st_" + field);
         List<String> listStField = new ArrayList<>(fieldToRows.keySet());
         Collections.sort(listStField, stringLengthComparator);
+        listStField = Collections.unmodifiableList(listStField);
+        // ok, now list of stFields is frozen, we can use indexes into it which will be stable.
 
         // setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
         // since editDistance computation is expensive, we'll only compute it for pairs that have at least 1 token in common
@@ -364,11 +430,12 @@ public class SurfExcel {
             }
         }
 
-        // these non-space versions will be used for edit distance comparison.
-        // order in nonSpaceStFields is the same as in listStField
+        // we need non-space versions for edit distance comparison.
+        // order in nonSpaceStFields is exactly the same as in listStField
         List<String> nonSpaceStFields = new ArrayList<>();
         for (String fieldVal: listStField)
             nonSpaceStFields.add(fieldVal.replaceAll(" ", ""));
+        nonSpaceStFields = Collections.unmodifiableList(nonSpaceStFields);
 
         int totalComparisons = 0;
         // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < 1, ignoring spaces.
@@ -436,11 +503,16 @@ public class SurfExcel {
         return result;
     }
 
-    /** Prints similar (canonicalized, retokenized, sorted) names. Tokenizer.setupVersions(allRows, "Name"); should already been called on this field */
-    static Multimap<String, Multimap<String, Row>> reportSimilarValuesForField(Collection<Row> rows, String field) {
+    /** Prints values of field that are different, but map to the same (canonicalized, retokenized, sorted) value.
+     * Tokenizer.setupDesiVersions(allRows, field); should already been called on this field */
+    static Multimap<String, Multimap<String, Row>> reportSimilarDesiValuesForField(Collection<Row> rows, String field) {
 
+        // stField -> rows with that st field
         Multimap<String, Row> stFieldSplit = split(rows, "_st_" + field);
+        // stField -> { field -> rows, field -> rows, ...}
         Multimap<String, Multimap<String, Row>> stFieldToFieldToRows = split(stFieldSplit, field);
+
+        // filter to only those stField -> { at least 2x field -> rows}
         Multimap<String, Multimap<String, Row>> stFieldToMultipleFieldToRows = sort(filter(stFieldToFieldToRows, "min", 2), stringLengthComparator);
         return stFieldToMultipleFieldToRows;
     }
@@ -488,6 +560,7 @@ public class SurfExcel {
         out.println ("Number of unassigned ids that were now assigned: " + unassigned_id_val);
     }
 
+    /*
     static void profile(Collection<Row> allRows, String field) {
         String idField = "_id_" + field;
         Multimap<String, String> map = LinkedHashMultimap.create();
@@ -497,8 +570,8 @@ public class SurfExcel {
             String fieldVal = r.get(field);
             String idVal = r.get(idField);
             if (!seen.contains(fieldVal)) {
-                map.put(idVal, r.get(field));
-                seen.add(r.get(field));
+                map.put(idVal, fieldVal);
+                seen.add(fieldVal);
             }
         }
 
@@ -511,6 +584,27 @@ public class SurfExcel {
         Collections.sort(list);
         for (String s: list)
             out.println (s);
+    }
+    */
+
+    static void profile(Collection<Row> allRows, String field) {
+        Multiset<String> set = LinkedHashMultiset.create();
+
+        for (Row r: allRows) {
+            String fieldVal = r.get(field);
+            set.add(fieldVal);
+        }
+
+        List<String> list = new ArrayList<>();
+
+        for (String s: Multisets.copyHighestCountFirst(set).elementSet())
+        {
+//            out.println (s + " -- " + Util.join(map.get(s), " | "));
+            list.add((s.length() == 0 ? "<blank>" : s) + " (" + set.count(s) + ") | ");
+        }
+        for (String s: list)
+            out.print(s);
+        out.println();
     }
 
     /** converts a collection of rows to a map in which each unique value for the given fieldspec is the key and the value for that key is the rows with that value for the fieldspec */
@@ -700,8 +794,8 @@ class Display {
 
     static void displayCollection(Collection<String> c, Collection<String> reference) {
         int i = 1;
-        Map<String, String> cStrings = Tokenizer.canonicalize(c);
-        Map<String, String> cReference = Tokenizer.canonicalize(reference);
+        Map<String, String> cStrings = Tokenizer.canonicalizeDesi(c);
+        Map<String, String> cReference = Tokenizer.canonicalizeDesi(reference);
 
         for (String s: c) {
             String probablyString = "";

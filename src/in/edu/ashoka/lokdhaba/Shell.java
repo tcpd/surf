@@ -20,15 +20,15 @@ public class Shell {
             "profile",
             "split", "sort",
             "filter",
+            "clear",
             "select", "selectNot",
-            "show", "print",
+            "show", "print", "about",
             "displayDiffs",
             "display2Level",
             "displayPairs",
             "display",
-            "setupVersions",
-            "similarPairsForField",
-            "misspelling", "similar"
+            "misspelling", "similar",
+            "desisimilar"
     };
 
     private static String[] rewriteTokens = new String[]{
@@ -56,12 +56,12 @@ public class Shell {
     }
 
     private static Map<String, Object> vars = new LinkedHashMap<String, Object>();
-    private Set<String> colNames = new LinkedHashSet<>();
-    Set<Row> allRows;
 
+    // strip out everything before a valid command
     private static List<String> relayout_cmdline(List<String> args) {
         for (int i = 0; i < args.size(); i++) {
-            if (commands.contains(args.get(i)))
+            String arg = args.get(i).toLowerCase();
+            if (commands.contains(arg))
             {
                 List<String> result = new ArrayList<String>();
                 for (int j = i; j < args.size(); j++)
@@ -72,33 +72,11 @@ public class Shell {
         return null;
     }
 
-    private static String removePlural(String s)
-    {
-        /* S stemmer: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.104.9828
-        IF a word ends in “ies,” but not “eies” or “aies”
-        THEN “ies” - “y”
-        IF a word ends in “es,” but not “aes,” “ees,” or “oes”
-        THEN “es” -> “e”
-        IF a word ends in "s,” but not “us” or ‘ss”
-           THEN "s" -> NULL
-        */
-
-        if (s.endsWith("ies") && !(s.endsWith("eies") || s.endsWith("aies")))
-            return s.replaceAll("ies$", "y"); // this gets movies wrong!
-        if (s.endsWith("es") && !(s.endsWith("aes") || s.endsWith("ees") || s.endsWith("oes")))
-            return s.replaceAll("es$", "e");
-        if (s.endsWith("es") && !(s.endsWith("aes") || s.endsWith("ees") || s.endsWith("oes")))
-            return s.replaceAll("es$", "e");
-        if (s.endsWith("s") && !(s.endsWith("us") || s.endsWith("ss")))
-            return s.replaceAll("s$", "");
-        return s;
-    }
-
     private static List<String> removePlurals(Collection<String> c)
     {
         List<String> result = new ArrayList<>();
         for (String s: c)
-            result.add(removePlural(s));
+            result.add(Dataset.removePlural(s));
         return result;
     }
 
@@ -120,9 +98,17 @@ public class Shell {
         return rewriteTokens(Util.tokenize(s));
     }
 
-    private static int getTokenIndex(List<String> args, Set<String> colNames) {
+    private static int getIndexOfColumnName(List<String> args, Dataset d) {
         for (int i = 0; i < args.size(); i++) {
-            if (colNames.contains(args.get(i)))
+            if (d.hasColumnName(args.get(i)))
+                return i;
+        }
+        return -1;
+    }
+
+    private static int getIndexOfVarName(List<String> args, Set<String> vars) {
+        for (int i = 0; i < args.size(); i++) {
+            if (vars.contains(args.get(i)))
                 return i;
         }
         return -1;
@@ -146,18 +132,18 @@ public class Shell {
         if (line == null)
             return false;
         line = line.toLowerCase().trim();
-        return ("yes".equals(line));
+        return (line.startsWith("yes") || line.equals("y") || line.startsWith("yeah") || line.equals("ya"));
     }
 
-    private String extractCol(List<String> tokens) { return extractCol(tokens, false); }
+    private String extractCol(List<String> tokens, Dataset d) { return extractCol(tokens, d, false); }
 
-    private String extractCol(List<String> tokens, boolean promptIfNull) {
+    private String extractCol(List<String> tokens, Dataset d, boolean promptIfNull) {
         // consider accommodating plurals: http://www.oxforddictionaries.com/words/plurals-of-nouns
         // consider also http://grammar.about.com/od/words/a/A-List-Of-Irregular-Plural-Nouns-In-English.htm
         // https://lucene.apache.org/core/4_4_0/analyzers-common/org/apache/lucene/analysis/en/EnglishMinimalStemmer.html
         // which refers to a simple S stemmer
         // (http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.104.9828, see rules at the bottom of page 2)
-        int i = getTokenIndex(tokens, colNames);
+        int i = getIndexOfColumnName(tokens, d);
         if (i >= 0)
             return tokens.remove(i);
         else {
@@ -170,10 +156,10 @@ public class Shell {
         }
     }
 
-    private Collection<String> extractCols(List<String> tokens) {
+    private Collection<String> extractCols(List<String> tokens, Dataset d) {
         Collection<String> cols = new ArrayList<>();
         do {
-            String col = extractCol(tokens, true);
+            String col = extractCol(tokens, d, (cols.size() == 0) /* prompt only if cols.size is 0 */);
             if (col == null)
                 break;
             cols.add(col);
@@ -186,20 +172,19 @@ public class Shell {
     }
 
     private Object extractVar(List<String> tokens, boolean promptIfNull) {
-        int i = getTokenIndex(tokens, vars.keySet());
+        int i = getIndexOfVarName(tokens, vars.keySet());
         if (i >= 0) {
             String var = tokens.remove(i);
             return vars.get(var);
         }
-        else {
-            if (promptIfNull) {
-                prompt("on which data?");
-                String var = getLineFromUser();
-                return vars.get(var);
-            }
-            else
-                return vars.get("it");
+        if (vars.get("it") != null)
+            return vars.get("it");
+        if (promptIfNull) {
+            prompt("on which data?");
+            String var = getLineFromUser();
+            return vars.get(var);
         }
+        return null;
     }
 
     private String getALine() {
@@ -219,20 +204,27 @@ public class Shell {
     }
 
     private void start() throws IOException {
+        Dataset d = null;
 
         while (true) {
             if (linesIterator == null)
-                print ("> ");
+                println("What next?");
             try {
                 String line = getALine();
                 if (line == null || "quit".equals(line))
                     break;
 
-                line = line.toLowerCase();
+               // line = line.toLowerCase();
                 List<String> tokens = Util.tokenize(line);
+                if (tokens.size() == 0)
+                    continue;
 
                 tokens = rewrite(tokens); // simple rewrite
                 tokens = relayout_cmdline(tokens);
+                if (Util.nullOrEmpty(tokens)) {
+                    print ("Sorry, I didn't understand that...");
+                    continue;
+                }
                 // look for commands, operators (conditions), variables, columns
                 // variables can be collections of rows, split of col -> rows, pairs of diffs
                 String cmd = tokens.remove(0);
@@ -241,28 +233,27 @@ public class Shell {
                 println("simplified cmd line: " + cmd + " " + Util.join(args, " "));
 
                 if ("showrows".equals(cmd)) {
-                    Collection<String> cols = extractCols(args);
+                    Collection<String> cols = extractCols(args, d);
                     Row.setToStringFields(Util.join(cols, "-"));
                 }
 
                 if ("read".equals(cmd)) {
                     String filename = args.get(0);
-                    allRows = SurfExcel.readRows(filename);
-                    for (String s : allRows.iterator().next().fields.keySet())
-                        colNames.add(s);
+                    d = new Dataset(filename);
+                    Collection<Row> allRows = d.rows;
 
                     vars.put("allrows", allRows);
                     vars.put(filename, allRows); // also put the collection under its filename
                     vars.put("it", allRows); // also put the collection under its filename
-                    println("ok, it has " + Util.pluralize(allRows.size(), " row") + " and " + Util.pluralize(colNames.size(), "column"));
+                    println("ok, it has " + Util.pluralize(allRows.size(), " row") + " and " + Util.pluralize(d.cColumns.size(), "column"));
                     println("would you like to see a profile of the columns?");
                     boolean y = getYesOrNoFromUser();
                     if (!y)
                         println("Ok, no problem.");
                     else {
-                        for (String col : colNames) {
-                            print("Profile for column " + col + ":");
-                            SurfExcel.profile(allRows, col);
+                        for (String cCol : d.cColumns) {
+                            print("Profile for column " + Util.join(d.cColumnToDisplayName.get(cCol), "|") + ":");
+                            SurfExcel.profile(allRows, cCol);
                         }
                     }
                 }
@@ -270,12 +261,12 @@ public class Shell {
                 if ("alias".equals(cmd) || "call".equals(cmd)) {
                     String oldName = args.get(0), newName = args.get(1);
                     if (commands.contains(newName)) {
-                        error("Sorry, " + newName + " can't be used as a name... it gets too confusing. Please pick another name");
+                        error("Sorry, " + newName + " can't be used as a name... it gets too confusing. Please pick another name.");
                         continue;
                     }
 
-                    if (colNames.contains(oldName)) {
-                        SurfExcel.setColumnAlias(allRows, oldName, newName);
+                    if (d.hasColumnName(oldName)) {
+                        d.registerColumnAlias(oldName, newName);
                         // leave it unchanged
                     }
 
@@ -287,7 +278,7 @@ public class Shell {
                 }
 
                 if ("profile".equals(cmd)) {
-                    String col = extractCol(args);
+                    String col = extractCol(args, d, true);
                     if (col == null) {
                         error("sorry, need a column name");
                         continue;
@@ -299,7 +290,7 @@ public class Shell {
                 }
 
                 if ("split".equals(cmd)) {
-                    Collection<String> cols = extractCols(args);
+                    Collection<String> cols = extractCols(args, d);
                     Object o = extractVar(args);
                     if (Util.nullOrEmpty(cols)) {
                         error("sorry, need a column name");
@@ -307,20 +298,41 @@ public class Shell {
                     }
                     Object var = null;
                     if (o instanceof Collection) {
-                        var = SurfExcel.split((Collection<Row>) o, Util.join(cols, "-"));
+                        var = SurfExcel.split((Collection<Row>) o, Util.join(cols, SurfExcel.FIELDSPEC_SEPARATOR));
                     } else if (o instanceof Multimap) {
-                        var = SurfExcel.split((Multimap<String, Row>) o, Util.join(cols, "-"));
+                        var = SurfExcel.split((Multimap<String, Row>) o, Util.join(cols, SurfExcel.FIELDSPEC_SEPARATOR));
                     }
 
                     if (var != null)
-                        vars.put("it", var); // also put the collection under its filename
+                        vars.put("it", var);
+                }
+
+                if ("clear".equals(cmd)) {
+                    vars.put("it", d.rows);
+                }
+
+                if ("filter".equals(cmd)) {
+                    Object o = extractVar(args);
+                    Object var = null;
+                    if (o instanceof Collection) {
+                        // Collection<String> cols = extractCols(args, d);
+                        // need a fieldspec and valuespec
+                        var = SurfExcel.filter((Collection<Row>) o, args.get(0), args.get(1));
+                    } else if (o instanceof Multimap) {
+                        String op = (args.size() < 2) ? "equals" : args.get(0);
+                        int val = Integer.parseInt((args.size() < 2) ? args.get(0) : args.get(1));
+                        var = SurfExcel.filter((Multimap<String, Row>) o, op, val);
+                    }
+
+                    if (var != null)
+                        vars.put("it", var);
                 }
 
                 if ("echo".equals(cmd)) {
                     print(Util.join(args, " "));
                 }
 
-                if ("show".equals(cmd) || "lookfor".equals(cmd) || "print".equals(cmd)) {
+                if ("show".equals(cmd) || "lookfor".equals(cmd) || "print".equals(cmd) || "about".equals(cmd)) {
                     Object o = extractVar(args);
                     if (o == null) {
                         error("sorry, need a column name");
@@ -329,10 +341,14 @@ public class Shell {
                     if (o instanceof Multimap) {
                         Display.display2Level((Multimap) o, 3, true);
                     }
+                    if (o instanceof Collection) {
+                        Display.display ("", (Collection) o, 3);
+                        // can also check if show has a parameter
+                    }
                 }
 
                 if ("misspelling".equals(cmd) || "similar".equals(cmd)) {
-                    String col = extractCol(args);
+                    String col = extractCol(args, d);
                     if (col == null) {
                         error("sorry, need a column name");
                         continue;
@@ -340,6 +356,17 @@ public class Shell {
                     Object o = extractVar(args);
                     Display.displayPairs((Collection) o, SurfExcel.valuesUnderEditDistance((Collection) o, col, 1), col, 3);
                 }
+
+                if ("desisimilar".equals(cmd)) {
+                    String col = extractCol(args, d);
+                    if (col == null) {
+                        error("sorry, need a column name");
+                        continue;
+                    }
+                    Object o = extractVar(args);
+                    Display.display2Level(SurfExcel.reportSimilarDesiValuesForField((Collection<Row>) o, col), 3, false);
+                }
+
             } catch (Exception e) {
                 error("Sorry, met an exception! " + e);
                 e.printStackTrace(System.err);

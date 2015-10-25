@@ -32,15 +32,16 @@ public class Bihar {
         check if each name belongs to exactly one sex
         */
 
-        Collection<Row> allRows = SurfExcel.readRows("Bihar.csv");
+        Dataset d = new Dataset("Bihar.csv");
+        Collection<Row> allRows = d.rows;
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
 
         // terminology: name, cname (canonical name), tname (name after tokenization), stname (name after tokenization, with sorted tokens)
 
 //        SurfExcel.assignIDs(allRows, "PC_name", "/Users/hangal/Downloads/control.pc-names.txt");
-        SurfExcel.setColumnAlias(allRows, "Cand1", "Name");
-        SurfExcel.setColumnAlias(allRows, "Sex1", "Sex");
-        SurfExcel.setColumnAlias(allRows, "Party1", "Party");
+        d.registerColumnAlias("Cand1", "Name");
+        d.registerColumnAlias("Sex1", "Sex");
+        d.registerColumnAlias("Party1", "Party");
 
         Display.displayPairs(allRows, SurfExcel.valuesUnderEditDistance(allRows, "AC_name", 2), "AC_name", 3 /* max rows */);
         SurfExcel.assign_unassignedIds(allRows, "AC_name");
@@ -110,18 +111,17 @@ public class Bihar {
             out.println(SEPARATOR + " Look for possible misspellings in Party");
             Display.displayPairs(nonIndependents, SurfExcel.valuesUnderEditDistance(allRows, "Party", 1), "Party", 3 /* max rows */);
 
-            Tokenizer.setupVersions(allRows, "Name");
+            Tokenizer.setupDesiVersions(allRows, "AC_name");
+            out.println(SEPARATOR + " Look for similar ACs");
+            Display.display2Level(SurfExcel.reportSimilarDesiValuesForField(allRows, "AC_name"), 3, false);
 
-            // given a st_name, does it uniquely determine the sex?
+            Tokenizer.setupDesiVersions(allRows, "Name");
+            out.println(SEPARATOR + " Looking for similar names");
+            Display.display2Level(SurfExcel.reportSimilarDesiValuesForField(allRows, "Name"), 3, false);
+
+            // given a st_name, does it uniquely determine the sex? set up desi versions must have been done before this!
             out.println(SEPARATOR + " Checking if each (C-R-S) name belongs to exactly one sex");
             Display.display2Level(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_st_Name"), "Sex"), "min", 2), 3 /* max rows */, false);
-
-            Tokenizer.setupVersions(allRows, "PC_name");
-            out.println(SEPARATOR + " Look for similar ACs");
-            Display.display2Level(SurfExcel.reportSimilarValuesForField(allRows, "AC_name"), 3, false);
-
-            out.println(SEPARATOR + " Looking for similar names");
-            Display.display2Level(SurfExcel.reportSimilarValuesForField(allRows, "Name"), 3, false);
 
             /*
             out.println(SEPARATOR + "Similar names (ST edit distance = 1)");

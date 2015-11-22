@@ -12,6 +12,9 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class Dataset {
     Collection<Row> rows;
@@ -344,13 +347,23 @@ class Tokenizer {
         }
     }
 
+    static String[] replacements = new String[]{"[^A-Za-z\\s]", "", "TH", "T", "V", "W", "GH", "G", "BH", "B", "DH", "D", "JH", "J", "KH", "K", "MH", "M", "PH", "P","SH", "S","ZH", "Z", "Z", "S","Y","I","AU", "OU","OO", "U","EE", "I", "KSH", "X"};
+    static List<Pattern> replacementPatterns;
+    static {
+        // precompile patterns for performance. the patterns to be replaced
+        // // replacements is an array 2X the size of replacementPatterns.
+        replacementPatterns = new ArrayList<>();
+        for (int i = 0; i < replacements.length; i += 2) {
+            replacementPatterns.add(Pattern.compile(replacements[i]));
+        }
+    }
 
     /** canonicalizes Indian variations of spellings and replaces a run of repeated letters by a single letter */
     static String canonicalizeDesi(String s)
     {
-        // canonicalize standard Indian variations of spellings
-        s = s.replaceAll("TH", "T").replaceAll("V", "W").replaceAll("GH", "G").replaceAll("BH", "B").replaceAll("DH", "D").replaceAll("JH", "J").replaceAll("KH", "K").replaceAll("MH", "M").replaceAll("PH", "P").replaceAll("SH", "S").replaceAll("ZH", "Z").replaceAll("Y", "I");
-        s = s.replaceAll("AU", "OU").replaceAll("OO", "U").replaceAll("EE", "I").replace("KSH", "X"); // .replaceAll("YU", "U");
+        for (int i = 0; i < replacementPatterns.size(); i++) {
+            s = replacementPatterns.get(i).matcher(s).replaceAll(replacements[2*i+1]);
+        }
         char prev = ' ';
 
         // remove successive, duplicate chars, e.g.
@@ -366,6 +379,31 @@ class Tokenizer {
 //        if (!s.equals(result.toString()))
 //           out.println ("canonical: " + s + " -> " + result);
 
+        // these are from Gilles
+        List<String> tokens = Util.tokenize(s);
+        for (int i = 0; i < tokens.size(); i++) {
+            s = s.replaceAll("MD", "MOHAMMAD");
+            s = s.replaceAll("MOHAMED", "MOHAMMAD");
+            s = s.replaceAll("MOHMED", "MOHAMMAD");
+            s = s.replaceAll("PT", "PANDIT");
+            s = s.replaceAll("PD", "PRASAD");
+            s = s.replaceAll("PR", "PRASAD");
+            if (i == 0)
+                s = s.replaceAll("KU", "KUNWAR");
+            else
+                s = s.replaceAll("KU", "KUMAR"); // according to Gilles, KU in the middle of a name is KUMAR, but at the beginning its likely to be KUNWAR
+
+            // ignore titles
+            s = s.replaceAll("DR", "");
+            s = s.replaceAll("MR", "");
+            s = s.replaceAll("MRS", "");
+            s = s.replaceAll("SMT", "");
+            s = s.replaceAll("ENG", "");
+            s = s.replaceAll("ADV", "");
+            s = s.replaceAll("KUMAR", "");
+            s = s.replaceAll("SARDAR", "");
+            s = s.replaceAll("PANDIT", "");
+        }
         return result.toString();
     }
 
@@ -398,7 +436,7 @@ public class SurfExcel {
         EquivalenceHandler eh = new EquivalenceHandler(filename);
         String newField = "_id_" + field;
         for (Row r: allRows) {
-            r.set (newField, eh.getClassNum(r.get(field)));
+            r.set(newField, eh.getClassNum(r.get(field)));
         }
     }
 
@@ -500,6 +538,30 @@ public class SurfExcel {
 
         out.println ("Similar pairs found: " + result.size());
         out.println ("list size: " + listStField.size() + ", total comparisons: " + totalComparisons + " average: " + ((float) totalComparisons)/listStField.size());
+        return result;
+    }
+
+    /** looks for keys in keys1 that are also in keys2, within maxEditDistance */
+    public static List<Pair<String, String>> desiMatch2Lists(Collection<String> keys1, Collection<String> keys2, int maxEditDistance) {
+
+        // cannot canonicalize by space here because what we return has to be the same string passed in, in keys1/2.
+        // sort by length to make edit distance more efficient
+        List<String> stream1 = keys1.stream().sorted(stringLengthComparator).collect(Collectors.toList());
+        List<String> stream2 = keys2.stream().sorted(stringLengthComparator).collect(Collectors.toList());
+        List<Pair<String, String>> result = new ArrayList<>();
+
+        // stream1, stream2 are now sorted by descending length
+        outer:
+        for (String key1 : stream1)
+            for (String key2 : stream2) {
+                if (key1.length() - key2.length() > maxEditDistance) // to outer loop because no more key2 matches possible, the remaining key2's have even shorter length
+                    continue outer;
+                if (key2.length() - key1.length() > maxEditDistance) // no need to compare because of length difference, but the remaining key2's could still match
+                    continue;
+                if (Util1.editDistance(key1, key2) <= maxEditDistance)
+                    result.add(new Pair<String, String>(key1, key2));
+            }
+
         return result;
     }
 
@@ -868,6 +930,19 @@ class Display {
         }
     }
 
+    /** shows the diffs in matches (each key is shown with a few rows taken from map1/map2 for context).
+     * matches consists of pairs of <S1, S2>. where S1 is a key into map1, S2 is a key into map2. */
+    public static void displayListDiff( List<Pair<String, String>> matches, Multimap<String, Row> map1, Multimap<String, Row> map2, String description1, String description2) {
+        int count = 0;
+        int maxRows = 10;
+        for (Pair<String, String> p : matches) {
+            Display.display(description1 + " " + count + ".1.", map1.get(p.getFirst()), maxRows);
+            Display.display(description2 + " " + count + ".2.", map2.get(p.getSecond()), maxRows);
+            count++;
+            out.println();
+        }
+    }
+
     static void display(String prefix, Collection<Row> rows, int maxRows) {
         int count = 0;
         /** sort the rows by position -- we prefer to show more significant candidates first. Could also do this by year or some other criterion for the row */
@@ -887,6 +962,10 @@ class Display {
     }
 
     static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows) { displayPairs(rows, pairs, field, maxRows, true); }
+    static void displaySimilarValuesForField(Collection<Row> rows, String field, int maxEditDistance, int nRows) {
+        List<Pair<String, String>> closePairs = SurfExcel.valuesUnderEditDistance(rows, field, maxEditDistance);
+        Display.displayPairs(rows, closePairs, field, nRows);
+    }
 
     private static void displayPairs(Collection<Row> rows, List<Pair<String, String>> pairs, String field, int maxRows, boolean showKey) {
         Multimap<String, Row> map = SurfExcel.split(rows, field);

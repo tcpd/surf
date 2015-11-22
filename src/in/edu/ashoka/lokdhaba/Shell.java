@@ -20,6 +20,7 @@ public class Shell {
             "profile",
             "split", "sort",
             "filter",
+            "diff", "difference", "differences",
             "clear",
             "select", "selectNot",
             "show", "print", "about",
@@ -27,8 +28,9 @@ public class Shell {
             "display2Level",
             "displayPairs",
             "display",
-            "misspelling", "similar",
-            "desisimilar"
+            "misspelt", "similar",
+            "desisimilar",
+            "morethan", "atmost", "echo"
     };
 
     private static String[] rewriteTokens = new String[]{
@@ -106,6 +108,14 @@ public class Shell {
         return -1;
     }
 
+    private static int getIndexOfNumber(List<String> args, Dataset d) {
+        for (int i = 0; i < args.size(); i++) {
+            try { Integer.parseInt(args.get(i)); return i; }
+            catch (NumberFormatException nfe) { }
+        }
+        return 1;
+    }
+
     private static int getIndexOfVarName(List<String> args, Set<String> vars) {
         for (int i = 0; i < args.size(); i++) {
             if (vars.contains(args.get(i)))
@@ -137,6 +147,16 @@ public class Shell {
 
     private String extractCol(List<String> tokens, Dataset d) { return extractCol(tokens, d, false); }
 
+    private int extractNum(List<String> tokens, Dataset d) {
+        int i = getIndexOfNumber(tokens, d);
+
+        if (i >= 0) {
+            int x = Integer.parseInt(tokens.get(i));
+            return x;
+        }
+        return 1;
+    }
+
     private String extractCol(List<String> tokens, Dataset d, boolean promptIfNull) {
         // consider accommodating plurals: http://www.oxforddictionaries.com/words/plurals-of-nouns
         // consider also http://grammar.about.com/od/words/a/A-List-Of-Irregular-Plural-Nouns-In-English.htm
@@ -167,22 +187,22 @@ public class Shell {
         return cols;
     }
 
-    private Object extractVar(List<String> tokens) {
+    private Pair<String, Object> extractVar(List<String> tokens) {
         return extractVar(tokens, true);
     }
 
-    private Object extractVar(List<String> tokens, boolean promptIfNull) {
+    private Pair<String, Object> extractVar(List<String> tokens, boolean promptIfNull) {
         int i = getIndexOfVarName(tokens, vars.keySet());
         if (i >= 0) {
             String var = tokens.remove(i);
-            return vars.get(var);
+            return new Pair<>(var, vars.get(var));
         }
         if (vars.get("it") != null)
-            return vars.get("it");
+            return new Pair<>("it", vars.get("it"));
         if (promptIfNull) {
             prompt("on which data?");
             String var = getLineFromUser();
-            return vars.get(var);
+            new Pair<>(var, vars.get(var));
         }
         return null;
     }
@@ -268,13 +288,27 @@ public class Shell {
                     if (d.hasColumnName(oldName)) {
                         d.registerColumnAlias(oldName, newName);
                         // leave it unchanged
+                    } else {
+                        if (vars.keySet().contains(oldName)) {
+                            Object o = vars.get(oldName);
+                            // vars.put(oldName, newName);
+                            vars.put(newName, o); // also put the collection under its filename
+                            vars.put("it", o); // also put the collection under its filename
+                        }
                     }
+                }
 
-                    if (vars.keySet().contains(oldName)) {
-                        Object o = vars.get(oldName);
-                        vars.put(oldName, newName);
-                        vars.put("it", o); // also put the collection under its filename
-                    }
+                if ("diff".equals(cmd) || "difference".equals(cmd) || "differences".equals(cmd)) {
+                    Pair<String, Object> p1 = extractVar(args);
+                    Pair<String, Object> p2 = extractVar(args);
+                    Object o1 = p1.getSecond();
+                    Object o2 = p2.getSecond();
+                    if (o1 instanceof Multimap)
+                        o1 = ((Multimap) o1).keySet();
+                    if (o2 instanceof Multimap)
+                        o2 = ((Multimap) o2).keySet();
+
+                    Display.displayDiffs(p1.getFirst(), (Set<String>) o1, p2.getFirst(), (Set<String>) o2);
                 }
 
                 if ("profile".equals(cmd)) {
@@ -284,14 +318,14 @@ public class Shell {
                         continue;
                     }
 
-                    Object o = extractVar(args);
+                    Object o = extractVar(args).getSecond();
                     SurfExcel.profile(((Collection<Row>) o), col);
                     vars.put("it", o); // also put the collection under its filename
                 }
 
                 if ("split".equals(cmd)) {
                     Collection<String> cols = extractCols(args, d);
-                    Object o = extractVar(args);
+                    Object o = extractVar(args).getSecond();
                     if (Util.nullOrEmpty(cols)) {
                         error("sorry, need a column name");
                         continue;
@@ -312,7 +346,7 @@ public class Shell {
                 }
 
                 if ("filter".equals(cmd)) {
-                    Object o = extractVar(args);
+                    Object o = extractVar(args).getSecond();
                     Object var = null;
                     if (o instanceof Collection) {
                         // Collection<String> cols = extractCols(args, d);
@@ -329,11 +363,11 @@ public class Shell {
                 }
 
                 if ("echo".equals(cmd)) {
-                    print(Util.join(args, " "));
+                    print(Util.join(args, " ") + "\n");
                 }
 
                 if ("show".equals(cmd) || "lookfor".equals(cmd) || "print".equals(cmd) || "about".equals(cmd)) {
-                    Object o = extractVar(args);
+                    Object o = extractVar(args).getSecond();
                     if (o == null) {
                         error("sorry, need a column name");
                         continue;
@@ -347,24 +381,38 @@ public class Shell {
                     }
                 }
 
-                if ("misspelling".equals(cmd) || "similar".equals(cmd)) {
+                if ("similar".equals(cmd)) {
                     String col = extractCol(args, d);
                     if (col == null) {
                         error("sorry, need a column name");
                         continue;
                     }
-                    Object o = extractVar(args);
+                    Object o = extractVar(args).getSecond();
                     Display.displayPairs((Collection) o, SurfExcel.valuesUnderEditDistance((Collection) o, col, 1), col, 3);
                 }
 
-                if ("desisimilar".equals(cmd)) {
+                if ("misspelt".equals(cmd)) {
                     String col = extractCol(args, d);
                     if (col == null) {
                         error("sorry, need a column name");
                         continue;
                     }
-                    Object o = extractVar(args);
+                    Object o = extractVar(args).getSecond();
+                    Tokenizer.setupDesiVersions((Collection<Row>) o, col);
                     Display.display2Level(SurfExcel.reportSimilarDesiValuesForField((Collection<Row>) o, col), 3, false);
+                    Display.displaySimilarValuesForField((Collection<Row>) o, col, 2 /* edit distance */, 3 /* max rows */);
+                }
+
+                if ("morethan".equals(cmd) || "atmost".equals(cmd)) {
+                    int num = extractNum(args, d);
+                    Collection<String> cols = extractCols(args, d);
+                    String allCols = Util.join(cols, "-");
+                    Object o = extractVar(args).getSecond();
+                    Multimap<String, Row> map = SurfExcel.split((Collection<Row>) o, allCols);
+                    if ("morethan".equals(cmd))
+                        Display.display(SurfExcel.filter(map, "min", num+1));
+                    else if ("atmost".equals(cmd))
+                        Display.display(SurfExcel.filter(map, "max", num));
                 }
 
             } catch (Exception e) {

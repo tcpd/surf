@@ -32,18 +32,43 @@ public class Bihar {
         check if each name belongs to exactly one sex
         */
 
-        Dataset d = new Dataset("Bihar.csv");
+        Dataset d = new Dataset("/Users/hangal/lokdhaba/Bihar_mastersheet.csv");
         Collection<Row> allRows = d.rows;
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
-
-        // terminology: name, cname (canonical name), tname (name after tokenization), stname (name after tokenization, with sorted tokens)
-
-//        SurfExcel.assignIDs(allRows, "PC_name", "/Users/hangal/Downloads/control.pc-names.txt");
         d.registerColumnAlias("Cand1", "Name");
         d.registerColumnAlias("Sex1", "Sex");
         d.registerColumnAlias("Party1", "Party");
 
-        Display.displayPairs(allRows, SurfExcel.valuesUnderEditDistance(allRows, "AC_name", 2), "AC_name", 3 /* max rows */);
+        Tokenizer.setupDesiVersions(allRows, "AC_name");
+        Tokenizer.setupDesiVersions(allRows, "Name");
+
+        // terminology: name, cname (canonical name), tname (name after tokenization), stname (name after tokenization, with sorted tokens)
+
+        // look for incumbents
+        Collection<Row> winners = SurfExcel.select(allRows, "Position", "1");
+        Collection<Row> candidates = SurfExcel.select(allRows, "Year", "2015");
+
+        String stField = "_st_" + "Name";
+
+        /*
+        Multimap<String, Row> candidates2015ByName = SurfExcel.split(candidates, stField);
+
+        for (String year: new String[]{"2010", "2005.5", "2005", "2000", "1995", "1990", "1985", "1980", "1977", "1972", "1969", "1967", "1962"}) {
+            Collection<Row> winnersYear = SurfExcel.select(winners, "Year", year);
+            Multimap<String, Row> winnersYearByName = SurfExcel.split(winnersYear, stField);
+            List<Pair<String, String>> matches = SurfExcel.desiMatch2Lists(winnersYearByName.keySet(), candidates2015ByName.keySet(), 1);
+            out.println (SEPARATOR + "Comparing Winners-" + year + " with Candidates-2015 (" + matches.size() + " possible matches)");
+            Display.displayListDiff(matches, winnersYearByName, candidates2015ByName, "Winner-" + year, "Candidates-2015");
+        }
+
+        Multimap<String, Row> allWinnersByName = SurfExcel.split(winners, stField);
+        List<Pair<String, String>> matches = SurfExcel.desiMatch2Lists(candidates2015ByName.keySet(), allWinnersByName.keySet(), 1);
+        out.println (SEPARATOR + "Comparing Candidates-2015 with all past winners (" + matches.size() + " possible matches)");
+        Display.displayListDiff(matches, candidates2015ByName, allWinnersByName, "Candidates-2015", "Past-winner");
+        */
+
+        out.println (SEPARATOR + " Checking for ac_names with same canonicalized value");
+        Display.displaySimilarValuesForField(allRows, "AC_name", 2, 3 /* max rows */);
         SurfExcel.assign_unassignedIds(allRows, "AC_name");
         SurfExcel.profile(allRows, "AC_name");
 
@@ -76,7 +101,6 @@ public class Bihar {
             }
 
             out.println(SEPARATOR + " Check that there is at most 1 winner per seat per year");
-            Collection<Row> winners = SurfExcel.select(allRows, "Position", "1");
             Multimap<String, Row> winnersMap = SurfExcel.split(winners, "Year-AC_name");
             Display.display(SurfExcel.filter(winnersMap, "notequals", 1));
 
@@ -102,20 +126,18 @@ public class Bihar {
             Display.display(SurfExcel.filter(SurfExcel.split(nonIndependents, "Year-AC_name-Party"), "notequals", 1));
 
             // Check if every <year, PC> has at least 2 unique rows (otherwise its a walkover!)
-            out.println(SEPARATOR + " Check if there at least 2 candidates for every Year-AC");
+            out.println(SEPARATOR + " Check if there are at least 2 candidates for every Year-AC");
             Display.display(SurfExcel.filter(SurfExcel.split(allRows, "Year-AC_name"), "max", 1));
 
             out.println(SEPARATOR + " Look for possible misspellings in constituency name");
             Display.displayPairs(allRows, SurfExcel.valuesUnderEditDistance(allRows, "AC_name", 1), "AC_name", 3 /* max rows */);
 
             out.println(SEPARATOR + " Look for possible misspellings in Party");
-            Display.displayPairs(nonIndependents, SurfExcel.valuesUnderEditDistance(allRows, "Party", 1), "Party", 3 /* max rows */);
+            Display.displayPairs(nonIndependents, SurfExcel.valuesUnderEditDistance(nonIndependents, "Party", 1), "Party", 3 /* max rows */);
 
-            Tokenizer.setupDesiVersions(allRows, "AC_name");
             out.println(SEPARATOR + " Look for similar ACs");
             Display.display2Level(SurfExcel.reportSimilarDesiValuesForField(allRows, "AC_name"), 3, false);
 
-            Tokenizer.setupDesiVersions(allRows, "Name");
             out.println(SEPARATOR + " Looking for similar names");
             Display.display2Level(SurfExcel.reportSimilarDesiValuesForField(allRows, "Name"), 3, false);
 
@@ -123,8 +145,8 @@ public class Bihar {
             out.println(SEPARATOR + " Checking if each (C-R-S) name belongs to exactly one sex");
             Display.display2Level(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_st_Name"), "Sex"), "min", 2), 3 /* max rows */, false);
 
-            /*
-            out.println(SEPARATOR + "Similar names (ST edit distance = 1)");
+            /*wjfg
+                        out.println(SEPARATOR + "Similar names (ST edit distance = 1)");
             Display.displayPairs(allRows, similarPairsForField(allRows, "Name", 2), "_st_Name", 3, false);
             */
             out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = 1)");
@@ -132,4 +154,6 @@ public class Bihar {
             Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
         }
     }
+
+
 }

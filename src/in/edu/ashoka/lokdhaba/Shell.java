@@ -1,6 +1,7 @@
 package in.edu.ashoka.lokdhaba;
 
 import com.google.common.collect.Multimap;
+import edu.stanford.muse.util.Pair;
 import edu.stanford.muse.util.Util;
 
 import java.io.IOException;
@@ -373,7 +374,7 @@ public class Shell {
                         continue;
                     }
                     if (o instanceof Multimap) {
-                        Display.display2Level((Multimap) o, 3, true);
+                        Display.display2Level((Multimap) o, 3, true); // could be 1 or 2 level??
                     }
                     if (o instanceof Collection) {
                         Display.display ("", (Collection) o, 3);

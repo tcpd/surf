@@ -3,18 +3,20 @@ package in.edu.ashoka.lokdhaba;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
+import edu.stanford.muse.util.Pair;
 import edu.stanford.muse.util.UnionFindBox;
 import edu.stanford.muse.util.Util;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 class Dataset {
     Collection<Row> rows;
@@ -347,7 +349,7 @@ class Tokenizer {
         }
     }
 
-    static String[] replacements = new String[]{"[^A-Za-z\\s]", "", "TH", "T", "V", "W", "GH", "G", "BH", "B", "DH", "D", "JH", "J", "KH", "K", "MH", "M", "PH", "P","SH", "S","ZH", "Z", "Z", "S","Y","I","AU", "OU","OO", "U","EE", "I", "KSH", "X"};
+    static String[] replacements = new String[]{"[^A-Za-z\\s]", "", "TH", "T", "V", "W", "GH", "G", "BH", "B", "DH", "D", "JH", "J", "KH", "K", "MH", "M", "PH", "P", "SH", "S","ZH", "Z", "Z", "S","Y","I","AU", "OU","OO", "U","EE", "I", "KSH", "X"};
     static List<Pattern> replacementPatterns;
     static {
         // precompile patterns for performance. the patterns to be replaced
@@ -444,6 +446,7 @@ public class SurfExcel {
         out.println("WARNING " + s);
     }
 
+    /** given a set of rows, returns pairs of strings that are within ed edit distance, after canonicalization, etc. */
     public static List<Pair<String, String>> similarPairsForField(Collection<Row> rows, String field, int ed)
     {
         List<Pair<String, String>> result = new ArrayList<>();
@@ -546,8 +549,8 @@ public class SurfExcel {
 
         // cannot canonicalize by space here because what we return has to be the same string passed in, in keys1/2.
         // sort by length to make edit distance more efficient
-        List<String> stream1 = keys1.stream().sorted(stringLengthComparator).collect(Collectors.toList());
-        List<String> stream2 = keys2.stream().sorted(stringLengthComparator).collect(Collectors.toList());
+        List<String> stream1 = (List) keys1.stream().sorted(stringLengthComparator).collect(Collectors.toList());
+        List<String> stream2 = (List) keys2.stream().sorted(stringLengthComparator).collect(Collectors.toList());
         List<Pair<String, String>> result = new ArrayList<>();
 
         // stream1, stream2 are now sorted by descending length
@@ -673,6 +676,10 @@ public class SurfExcel {
     static Multimap <String, Row> split(Collection<Row> rows, String fieldSpec) {
         Multimap<String, Row> result = HashMultimap.create();
         String[] fields = fieldSpec.split(FIELDSPEC_SEPARATOR);
+        if (rows.size() > 0 && !(rows.iterator().next() instanceof Row)) {
+            out.println ("Sorry, unable to perform this split");
+        }
+
         for (Row r : rows) {
             String key = r.getFields(fields, FIELDSPEC_SEPARATOR);
             result.put(key, r);

@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Created by hangal on 9/17/15.
  */
-public class Bihar {
+public class Bihar extends Object {
     private static PrintStream out = System.out;
     private static String SEPARATOR = "========================================\n";
 
@@ -32,12 +32,16 @@ public class Bihar {
         check if each name belongs to exactly one sex
         */
 
-        Dataset d = new Dataset("/Users/hangal/lokdhaba/Bihar_mastersheet.csv");
+//        Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba/AE/State_Mastersheets/Bihar/Bihar_Mastersheet.csv");
+         Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba//GE/candidates/csv/candidates_info.csv");
         Collection<Row> allRows = d.rows;
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
-        d.registerColumnAlias("Cand1", "Name");
-        d.registerColumnAlias("Sex1", "Sex");
-        d.registerColumnAlias("Party1", "Party");
+//        d.registerColumnAlias("Cand1", "Name");
+        d.registerColumnAlias("Candidate_name", "Name");
+//        d.registerColumnAlias("Sex1", "Sex");
+        d.registerColumnAlias("Candidate_sex", "Sex");
+//        d.registerColumnAlias("Party1", "Party");
+        d.registerColumnAlias("Party_abbreviation", "Party");
 
         Tokenizer.setupDesiVersions(allRows, "AC_name");
         Tokenizer.setupDesiVersions(allRows, "Name");
@@ -145,15 +149,18 @@ public class Bihar {
             out.println(SEPARATOR + " Checking if each (C-R-S) name belongs to exactly one sex");
             Display.display2Level(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_st_Name"), "Sex"), "min", 2), 3 /* max rows */, false);
 
-            /*wjfg
+            /*
                         out.println(SEPARATOR + "Similar names (ST edit distance = 1)");
             Display.displayPairs(allRows, similarPairsForField(allRows, "Name", 2), "_st_Name", 3, false);
             */
+
+            Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
+            mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
+            mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "3"));
+
             out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = 1)");
             SurfExcel.similarPairsForField(allRows, "Name", 1);
             Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
         }
     }
-
-
 }

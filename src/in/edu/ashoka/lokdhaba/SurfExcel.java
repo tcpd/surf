@@ -113,6 +113,11 @@ class Dataset {
         String ccol = canonicalizeCol(col);
         return cColumnAliases.keySet().contains(ccol) || cColumns.contains(ccol);
     }
+
+    /** saves this dataset as a CSV  in the given file */
+    public void save(String file) {
+        TO BE IMPLEMENTED
+    }
 }
 
 class Row implements Comparable<Row> {

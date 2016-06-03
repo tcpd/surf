@@ -1,5 +1,6 @@
 package in.edu.ashoka.lokdhaba;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import edu.stanford.muse.util.Util;
 
@@ -161,6 +162,83 @@ public class Bihar extends Object {
             out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = 1)");
             SurfExcel.similarPairsForField(allRows, "Name", 1);
             Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
+            Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
+
+
         }
+
     }
+
+    /** returns a map:
+     *  canonical name -> set of {multimap for that canonical name}
+     *  canonical name: ab ai bh bh da el hai hy la pa va (2 values)
+     *  this cname maps to a bunch of real names, e.g.
+        dahyabhai vallabhbhai patel
+        patel dahyabhai vallabhbhai
+     each of these real names maps to a set of rows that have that real name
+        e.g. the first name maps to 2 rows:
+     43.1.) dahyabhai vallabhbhai patel ->
+     43.1.1.1) dahyabhai vallabhbhai patel-m-1998--ind-2- (row# 31551)
+     43.1.1.2) dahyabhai vallabhbhai patel-m-2009--inc-2- (row# 16667)
+
+        the second name maps to 2 rows:
+     43.2.) patel dahyabhai vallabhbhai
+     43.2.1.1) patel dahyabhai vallabhbhai-m-1999--inc-1- (row# 26834)
+     43.2.1.2) patel dahyabhai vallabhbhai-m-2004--inc-1- (row# 22143)
+
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static Multimap<String, Multimap<String, Row>> getSimilarPairs (String file) throws IOException {
+        Dataset d = new Dataset(file);
+        Collection<Row> allRows = d.rows;
+        Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
+//        d.registerColumnAlias("Cand1", "Name");
+        d.registerColumnAlias("Candidate_name", "Name");
+//        d.registerColumnAlias("Sex1", "Sex");
+        d.registerColumnAlias("Candidate_sex", "Sex");
+//        d.registerColumnAlias("Party1", "Party");
+        d.registerColumnAlias("Party_abbreviation", "Party");
+
+        Tokenizer.setupDesiVersions(allRows, "Name");
+
+        Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
+        mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
+        mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "3"));
+
+        out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = 1)");
+        SurfExcel.similarPairsForField(allRows, "Name", 1);
+        Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
+        Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
+        return resultMap;
+    }
+
+    /** return string -> rows with that name */
+    public static Multimap<String, Row> getExactSamePairs (String file) throws IOException {
+        Multimap<String, Row> resultMap = HashMultimap.create();
+        Dataset d = new Dataset(file);
+        Collection<Row> allRows = d.rows;
+        Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
+        d.registerColumnAlias("Candidate_name", "Name");
+        d.registerColumnAlias("Candidate_sex", "Sex");
+        d.registerColumnAlias("Party_abbreviation", "Party");
+
+        Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
+        mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
+        mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "3"));
+
+        // initially set a unique id for each row
+        int i = 0;
+        for (Row r: allRows) {
+            r.set ("id", Integer.toString(i));
+            i++;
+        }
+
+        for (Row r: mainCandidates)
+            resultMap.put(r.get("Name"), r);
+
+        return resultMap;
+    }
+
 }

@@ -34,7 +34,7 @@ public class Bihar extends Object {
         */
 
 //        Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba/AE/State_Mastersheets/Bihar/Bihar_Mastersheet.csv");
-         Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba//GE/candidates/csv/candidates_info.csv");
+         Dataset d = new Dataset("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
         Collection<Row> allRows = d.rows;
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
 //        d.registerColumnAlias("Cand1", "Name");
@@ -163,6 +163,23 @@ public class Bihar extends Object {
             SurfExcel.similarPairsForField(allRows, "Name", 1);
             Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
             Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
+
+            //for testing purpose
+            /*Multimap<String, Multimap<String, Row>> mappedNames = getSimilarPairs("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+            NameData nameData = new ConcreteNameData();
+            nameData.initialize();
+            nameData.iterateNameData();
+            Iterator iterator = nameData.iterator();
+            while(iterator.hasNext()) {
+            	NamePair np = (NamePair)iterator.next();
+            	out.println(np.getName1().get("Candidate_name"));
+                out.println(np.getName2().get("Candidate_name"));
+            }*/
+            
+            
+
+
+
 
 
         }

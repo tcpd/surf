@@ -116,8 +116,9 @@ class Dataset {
 
     /** saves this dataset as a CSV  in the given file */
     public void save(String file) {
-        TO BE IMPLEMENTED
+        // TO BE IMPLEMENTED
     }
+
 }
 
 class Row implements Comparable<Row> {
@@ -431,6 +432,9 @@ public class SurfExcel {
     private static PrintStream out = System.out;
     private static String SEPARATOR = "========================================\n";
     static String FIELDSPEC_SEPARATOR = "-";
+    static String ID_PREFIX = "_id_";
+    // When we want to assign id's to a column, we'll assign it in a special col. called id_<col>.
+    // e.g. id for PC will be in col. name _id_PC and id for candName will be in col. name _id_candName.
 
     static Comparator<String> stringLengthComparator = new Comparator<String>() {
         @Override
@@ -438,14 +442,6 @@ public class SurfExcel {
             return o2.length() - o1.length();
         }
     };
-
-    public static void assignIDs(Collection<Row> allRows, String field, String filename) {
-        EquivalenceHandler eh = new EquivalenceHandler(filename);
-        String newField = "_id_" + field;
-        for (Row r: allRows) {
-            r.set(newField, eh.getClassNum(r.get(field)));
-        }
-    }
 
     public static void warn (String s) {
         out.println("WARNING " + s);
@@ -611,8 +607,9 @@ public class SurfExcel {
             }
     }
 
-    static void assign_unassignedIds(Collection<Row> allRows, String field) {
-        String idField = "_id_" + field;
+    /* this method will assign id's like U-1, U-2, etc. to all rows whose _id_ field column is not assigned.
+    static void assignUnassignedIds(Collection<Row> allRows, String field) {
+        String idField = ID_PREFIX + field;
         Map<String, String> map = new LinkedHashMap<>();
         int unassigned_id_val = 0;
         for (Row r: allRows) {
@@ -630,9 +627,21 @@ public class SurfExcel {
         out.println ("Number of unassigned ids that were now assigned: " + unassigned_id_val);
     }
 
+    /** given a list of pairs of ids, assigns the first one's id to all rows that have the second id */
+    public void mergeIDs (List<Pair<String, String>>> samePairs) {
+        Multimap<String, Row> idToRows = SurfExcel.split (rows, ID_FIELD);
+
+        for (Pair<String, String> p: samePairs) {
+            String firstID = p.getFirst();
+            String secondID = p.getSecond();
+            for (Row r: idToRows.get(secondID))
+                // assign r.ID to firstID.
+        }
+    }
+
     /*
     static void profile(Collection<Row> allRows, String field) {
-        String idField = "_id_" + field;
+        String idField = ID_PREFIX + field;
         Multimap<String, String> map = LinkedHashMultimap.create();
         Set<String> seen = new LinkedHashSet<>(); // field vals that we have already seen
 
@@ -787,7 +796,7 @@ public class SurfExcel {
         for (Row r: rows) {
             String val = r.get(field);
             set.add(val);
-            String idField = "_id_" + field;
+            String idField = ID_PREFIX + field;
             String idVal = r.get(idField);
             if (!Util.nullOrEmpty(idField))
                 idMap.put(val, idVal);

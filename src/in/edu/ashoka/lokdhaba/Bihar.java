@@ -36,6 +36,7 @@ public class Bihar extends Object {
 //        Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba/AE/State_Mastersheets/Bihar/Bihar_Mastersheet.csv");
          Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba//GE/candidates/csv/candidates_info.csv");
         Collection<Row> allRows = d.rows;
+
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
 //        d.registerColumnAlias("Cand1", "Name");
         d.registerColumnAlias("Candidate_name", "Name");
@@ -214,31 +215,44 @@ public class Bihar extends Object {
         return resultMap;
     }
 
-    /** return string -> rows with that name */
-    public static Multimap<String, Row> getExactSamePairs (String file) throws IOException {
-        Multimap<String, Row> resultMap = HashMultimap.create();
-        Dataset d = new Dataset(file);
+    /** return canonical name -> {ids that map to that canonical name) */
+    public static Multimap<String, String> getExactSamePairs (Collection<Row> rows) throws IOException {
         Collection<Row> allRows = d.rows;
-        Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
-        d.registerColumnAlias("Candidate_name", "Name");
-        d.registerColumnAlias("Candidate_sex", "Sex");
-        d.registerColumnAlias("Party_abbreviation", "Party");
+        SurfExcel.assignUnassignedIds(d.rows, "Candidate_name");
 
         Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "3"));
-
-        // initially set a unique id for each row
-        int i = 0;
-        for (Row r: allRows) {
-            r.set ("id", Integer.toString(i));
-            i++;
-        }
 
         for (Row r: mainCandidates)
             resultMap.put(r.get("Name"), r);
 
         return resultMap;
     }
+    
+    /* what the jsp has to do:
+        Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
+        Dataset d = new Dataset(file);
+        d.registerColumnAlias("Candidate_name", "Name");
+        d.registerColumnAlias("Candidate_sex", "Sex");
+        d.registerColumnAlias("Party_abbreviation", "Party");
+        Multimap<String, String> resultMap = getExactSamePairs(d.rows);
 
+        Multimap<String, Row> idToRows = SurfExcel.split (d.rows, ID_PREFIX + "Candidate_name");
+
+        for (String canonicalVal: resultMap.keySet() {
+             Collection<String> idsForThisCVal = resultMap.get(canonicalVal);
+             // UI should allow for merging between any 2 of these ids.
+             for (String id: idsForThisCVal) {
+                 String id = p.getSecond();
+                 List<Row> rowsForThisId = idToRows.get(id);
+                 // now print these rows in one box -- its one cohesive unit, which cannot be broken down.
+             }
+        }
+
+        List<Pair<String, String>> mergedIds = ....
+        mergeIds(mergedIds); 
+
+     */
+       
 }

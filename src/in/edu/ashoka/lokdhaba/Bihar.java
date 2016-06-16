@@ -1,7 +1,10 @@
 package in.edu.ashoka.lokdhaba;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+
+import edu.stanford.muse.index.DataSet;
 import edu.stanford.muse.util.Util;
 
 import java.io.IOException;
@@ -75,7 +78,7 @@ public class Bihar extends Object {
 
         out.println (SEPARATOR + " Checking for ac_names with same canonicalized value");
         Display.displaySimilarValuesForField(allRows, "AC_name", 2, 3 /* max rows */);
-        SurfExcel.assign_unassignedIds(allRows, "AC_name");
+        SurfExcel.assignUnassignedIds(allRows, "AC_name");
         SurfExcel.profile(allRows, "AC_name");
 
         // perform some consistency checks
@@ -177,8 +180,8 @@ public class Bihar extends Object {
                 out.println(np.getName2().get("Candidate_name"));
             }*/
             
-            
-
+            //Multimap<String,String> mappedNames = getExactSamePairs("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+            //System.out.println();
 
 
 
@@ -229,20 +232,91 @@ public class Bihar extends Object {
         SurfExcel.similarPairsForField(allRows, "Name", 1);
         Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
         Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
+        
+        
+        
         return resultMap;
     }
+    
+    public static Multimap<String, Multimap<String, Row>> getSimilarPairs (Collection<Row> allRows, Dataset d) throws IOException {
+        
+        Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
+//        d.registerColumnAlias("Cand1", "Name");
+        d.registerColumnAlias("Candidate_name", "Name");
+//        d.registerColumnAlias("Sex1", "Sex");
+        d.registerColumnAlias("Candidate_sex", "Sex");
+//        d.registerColumnAlias("Party1", "Party");
+        d.registerColumnAlias("Party_abbreviation", "Party");
 
-    /** return canonical name -> {ids that map to that canonical name) */
-    public static Multimap<String, String> getExactSamePairs (Collection<Row> rows) throws IOException {
-        Collection<Row> allRows = d.rows;
-        SurfExcel.assignUnassignedIds(d.rows, "Candidate_name");
+        Tokenizer.setupDesiVersions(allRows, "Name");
 
         Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "3"));
 
-        for (Row r: mainCandidates)
-            resultMap.put(r.get("Name"), r);
+        out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = 1)");
+        SurfExcel.similarPairsForField(allRows, "Name", 1);
+        Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
+        Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
+        
+        //only show duplicates
+        List<String> list = new ArrayList<String>();
+        for(String key:resultMap.keySet()){
+        	if(resultMap.get(key).size()<2)
+        		list.add(key);
+        }
+        for(String key:list){
+        	resultMap.asMap().remove(key);
+        }
+        
+        return resultMap;
+    }
+
+    /** return canonical name -> {ids that map to that canonical name) */
+    public static Multimap<String, Row> getExactSamePairs (String file) throws IOException {
+    	Dataset d = new Dataset(file);
+        return getExactSamePairs(d.rows,d);
+        
+    }
+    
+    public static Multimap<String, Row> getExactSamePairs (Collection<Row> allRows, Dataset d) throws IOException {
+    	
+        
+    	//set ups what toString() of Row needs to print
+			Row.setToStringFields("Name-Sex-Year-PC_name-Party-Position-Votes");
+			
+			//creates aliases for column name
+			d.registerColumnAlias("Candidate_name", "Name");
+			d.registerColumnAlias("Candidate_sex", "Sex");
+			d.registerColumnAlias("Party_abbreviation", "Party");
+			
+			//creates canonical tokens; adds them to the row
+			Tokenizer.setupDesiVersions(allRows, "PC_name");
+	        Tokenizer.setupDesiVersions(allRows, "Name");
+	        
+	        //create multimap for pairs
+	        Multimap<String, Row> resultMap = LinkedHashMultimap.create();
+	        
+	        for(Row row:allRows){
+	        	resultMap.put(row.get("_st_Name"), row);
+	        }
+	        
+	        //only keep duplicates
+	        List<String> list = new ArrayList<String>();
+	        for(String key:resultMap.keySet()){
+	        	if(resultMap.get(key).size()<2)
+	        		list.add(key);
+	        }
+	        for(String key:list){
+	        	resultMap.asMap().remove(key);
+	        }
+	        
+			//test print
+			/*for(String key:resultMap.keySet()) {
+				for(Row row:resultMap.get(key)){
+					System.out.println(row);
+				}
+			}*/
 
         return resultMap;
     }

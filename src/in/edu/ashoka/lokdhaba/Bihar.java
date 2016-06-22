@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 
 import edu.stanford.muse.index.DataSet;
 import edu.stanford.muse.util.Util;
+import sun.font.CreatedFontTracker;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -282,8 +283,8 @@ public class Bihar extends Object {
     public static Multimap<String, Row> getExactSamePairs (Collection<Row> allRows, Dataset d) throws IOException {
     	
         
-    	//set ups what toString() of Row needs to print
-			Row.setToStringFields("Name-Sex-Year-PC_name-Party-Position-Votes");
+    		//set ups what toString() of Row needs to print
+			Row.setToStringFields("Name-Sex-Year-PC_name-Party-Position-Votes1-ID");
 			
 			//creates aliases for column name
 			d.registerColumnAlias("Candidate_name", "Name");
@@ -319,6 +320,23 @@ public class Bihar extends Object {
 			}*/
 
         return resultMap;
+    }
+    
+    public static void merge(HashMap<Row, String> rowToId, HashMap<String, Row> idToRow, String []ids) {
+    	String defaultId = ids[0];
+    	for(int i=1;i<ids.length;i++) {
+    		Row tempRow = idToRow.get(ids[i]);
+    		rowToId.put(tempRow, defaultId);
+    	}
+    }
+    
+    //generates the initial map; Every row has unique ID
+    public static void generateInitialIDMapper(Collection<Row> allRows, HashMap<Row, String> rowToId, HashMap<String, Row> idToRow) throws IOException {
+    	for(Row row:allRows){
+    		rowToId.put(row, row.get("ID"));
+    		idToRow.put(row.get("ID"), row);
+    	}
+    	
     }
     
     /* what the jsp has to do:

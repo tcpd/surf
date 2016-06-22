@@ -426,11 +426,11 @@ public class SurfExcel {
     }
 
 	public static void assignUnassignedIds(Collection<Row> allRows, String columnId) {
-		// any row which doesn't have an id assigned to it. Should be assigned one here.
+		// any row which doesn't have an id assigned to it. Should be assigned one here. Each row is assigned a unique number
+		long count=1;
 		for(Row row:allRows){
-			if(row.get(columnId).equals("")){
-				
-			}
+			row.set(columnId, String.valueOf(count));
+			count++;
 		}
 	}
 

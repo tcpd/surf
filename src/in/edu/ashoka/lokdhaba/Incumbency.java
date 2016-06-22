@@ -50,7 +50,7 @@ public class Incumbency extends HttpServlet implements HttpSessionActivationList
 	        d.registerColumnAlias("Candidate_name", "Name");
 	        d.registerColumnAlias("Candidate_sex", "Sex");
 	        d.registerColumnAlias("Party_abbreviation", "Party");
-	        Multimap<String, String> resultMap = Bihar.getExactSamePairs(d.rows);
+	        Multimap<String, String> resultMap = Bihar.getExactSamePairs(d.rows,d);
 
 	        Multimap<String, Row> idToRows = SurfExcel.split (d.rows, ID_PREFIX + "Candidate_name");
 	        

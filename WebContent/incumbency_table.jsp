@@ -79,6 +79,7 @@ public void jspInit() {
 
     %>
     <h4>Check for Incumbent here</h4>
+    <div style="display:table; margin:0 auto; padding:10px; border:1px solid black; border-radius:3px;">
     <form method="post">
     <table>
     <tr>
@@ -113,9 +114,16 @@ public void jspInit() {
 	}
 
 %>
-	<input type="submit" name="submit" value="Save"/>
-	</form>
+	
 	</table>
+	<p style="margin-bottom:0;">
+	<div style="position:fixed; top:.5in; right:.5in;">
+	<input type="submit" name="submit" value="Save" style="width:200px;"/>
+	</div>
+	</p>
+	
+	</form>
+	
 
 </body>
 </html>

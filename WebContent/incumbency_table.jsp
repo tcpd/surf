@@ -81,8 +81,8 @@ public void jspInit() {
     <h4>Check for Incumbent here</h4>
     <div style="display:table; margin:0 auto; padding:10px; border:1px solid black; border-radius:3px;">
     <form method="post">
-    <table>
-    <tr>
+    <table style="border: 3px solid #000000; border-collapse: collapse; padding:10px">
+    <tr style="border-bottom: 3px solid black;">
     	<th>Is same</th>
     	<th>Candidate</th>
     </tr>
@@ -92,22 +92,37 @@ public void jspInit() {
 
 <%
 	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
+	boolean newGroup=false, newPerson=false;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
+		newGroup=true;
 		for(String key:incumbentsGroup.keySet()){
+			newPerson=true;
 			for(Row row:incumbentsGroup.get(key)){
 				String tableData;
+				String rowStyleData;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
-					tableData = "Mapped";
+					tableData = "<mapped>";
 				} else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
 				}
+				if(newGroup==true){
+					newGroup=false;
+					newPerson=false;
+					rowStyleData = "style=\"border-top: 2px solid black;\"";
+				}else if(newPerson==true){
+						newPerson=false;
+						rowStyleData = "style=\"border-top: 1px solid red;\"";
+					}else{rowStyleData = "";}
+				
+				
 				%>
-				<tr>
+				<tr <%=rowStyleData %>>
 					<td><%=tableData %></td>
 					<td>
 					<%=row%>
 					</td>
 				</tr>
+				
 				<%
 			}
 		}
@@ -123,7 +138,7 @@ public void jspInit() {
 	</p>
 	
 	</form>
-	
+	</div>
 
 </body>
 </html>

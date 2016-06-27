@@ -284,12 +284,13 @@ public class Bihar extends Object {
     	
         
     		//set ups what toString() of Row needs to print
-			Row.setToStringFields("Name-Sex-Year-PC_name-Party-Position-Votes1-ID");
+			Row.setToStringFields("Name-Sex-Year-PC_name-Party-State-Position-Votes1-ID");
 			
 			//creates aliases for column name
 			d.registerColumnAlias("Candidate_name", "Name");
 			d.registerColumnAlias("Candidate_sex", "Sex");
 			d.registerColumnAlias("Party_abbreviation", "Party");
+			d.registerColumnAlias("State_name", "State");
 			
 			//creates canonical tokens; adds them to the row
 			Tokenizer.setupDesiVersions(allRows, "PC_name");

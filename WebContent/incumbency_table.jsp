@@ -4,6 +4,8 @@
     import="in.edu.ashoka.lokdhaba.SurfExcel"  
     import="in.edu.ashoka.lokdhaba.Dataset"
     import="in.edu.ashoka.lokdhaba.Row"
+    import="in.edu.ashoka.lokdhaba.MergeManager"
+    import="in.edu.ashoka.lokdhaba.JspMergeManager"
     import="java.util.*"
     import="in.edu.ashoka.lokdhaba.Bihar"
     import="com.google.common.collect.Multimap"
@@ -19,18 +21,14 @@
 <%!
 
 Dataset d;
-Multimap<String, Row> resultMap;
-HashMap<Row, String> rowToId;
-HashMap<String, Row> idToRow;
+MergeManager mergeManager;
+//Multimap<String, Row> resultMap;
+//HashMap<Row, String> rowToId;
+//HashMap<String, Row> idToRow;
+
 %>
 
-<%!
-public void sessionDidActivate(HttpSessionEvent arg0) {
-	// TODO Auto-generated method stub
-	
-	
-}
-%>
+
 
 <%!
 public void jspInit() {
@@ -38,11 +36,16 @@ public void jspInit() {
 	
 	try {
 		d = new Dataset(file);
-	    SurfExcel.assignUnassignedIds(d.getRows(), "ID");
+		mergeManager = new JspMergeManager(d);
+		mergeManager.initializeIds();
+	    mergeManager.performInitialMapping();
+	    mergeManager.addSimilarCandidates();
+	    
+	    /* SurfExcel.assignUnassignedIds(d.getRows(), "ID");
 	    rowToId = new HashMap<Row, String>();
 	    idToRow = new HashMap<String, Row>();
 	    Bihar.generateInitialIDMapper(d.getRows(),rowToId,idToRow);
-	    resultMap = Bihar.getExactSamePairs(d.getRows(),d);
+	    resultMap = Bihar.getExactSamePairs(d.getRows(),d); */
 	}catch(IOException ioex){
 		ioex.printStackTrace();
 	}
@@ -59,14 +62,14 @@ public void jspInit() {
 	PrintWriter writer = response.getWriter();
 	
 	
-	if(request.getParameter("save")!=null && request.getParameter("save").equals("true")) {
+	if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
 		String [] userRows = request.getParameterValues("row");
 		for(int i=0; i<userRows.length;i++)
 			System.out.println(userRows[i]);
-		if(userRows.length>0 && rowToId!=null && idToRow!=null){
-			Bihar.merge(rowToId,idToRow,userRows);
+		if(userRows.length>0){
+			mergeManager.merge(userRows);
 		}
 		
 	}
@@ -79,74 +82,38 @@ public void jspInit() {
     <form method="post">
     <table>
     <tr>
+    	<th>Is same</th>
     	<th>Candidate</th>
-    	<th>Is same?</th>
     </tr>
     
-    <!--  START OF A COMMENT HERE===================================================================
-    <% 
-    int i =0;
-    //List<Row> rowsTobeDisplayed = new ArrayList<Row>();
-    for (String canonicalVal: resultMap.keySet()) {
-         Collection<Row> idsForThisCVal = resultMap.get(canonicalVal);
-         
-         // UI should allow for merging between any 2 of these ids.
-         for (Row row: idsForThisCVal) {
-        	 
-        	 
-        	 
-        		 %>
-        		 
-            	 <tr>
-            	 <td>
-            	 <%=row.toString() %>
-            	 </td>
-            	 <td><input type="checkbox" name="row" value="<%=row.get("ID")%>"></td>
-            	 </tr>
-            	 
-            	 <%
-        	 }
-             // now print these rows in one box -- its one cohesive unit, which cannot be broken down.
-        	 
-             
-             
-             
-         }
+    
 
-
-%>
-END OF THE COMMENT============================================================================-->
 
 <%
-	//---------TRYING NEW STUFF HERE
-	HashSet<String> set = new LinkedHashSet<String>();
-	    for (String canonicalVal: resultMap.keySet()) {
-	         Collection<Row> idsForThisCVal = resultMap.get(canonicalVal);
-	         
-	         // UI should allow for merging between any 2 of these ids.
-	         
-	         for (Row row: idsForThisCVal) {
-	        	 if(row.get("ID").equals(rowToId.get(row)))
-	            	 set.add(rowToId.get(row));
-	        	 }
-	         
-	             // now print these rows in one box -- its one cohesive unit, which cannot be broken down.
-	        }
-	    
-	    for(String id:set){
-	       	 %>
-	       	 <tr>
-            	 <td>
-            	 <%=idToRow.get(id) %>
-            	 </td>
-            	 <td><input type="checkbox" name="row" value="<%=id%>"></td>
-           	 </tr>
-            	 
-            	 <%
-	       	 
-	        }
+	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
+	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
+		for(String key:incumbentsGroup.keySet()){
+			for(Row row:incumbentsGroup.get(key)){
+				String tableData;
+				if(mergeManager.isMappedToAnother(row.get("ID"))){
+					tableData = "Mapped";
+				} else {
+					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
+				}
+				%>
+				<tr>
+					<td><%=tableData %></td>
+					<td>
+					<%=row%>
+					</td>
+				</tr>
+				<%
+			}
+		}
+	}
+
 %>
-	<input type="submit" name="save" value="true"/>
+	<input type="submit" name="submit" value="Save"/>
 	</form>
 	</table>
 

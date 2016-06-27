@@ -15,6 +15,7 @@ public class JspMergeManager implements MergeManager{
 	Dataset d;
 	HashMap<Row, String> rowToId;
     HashMap<String, Row> idToRow;
+    Multimap<String, Row> resultMap;
     
     ArrayList<Collection<Row>> listOfSimilarCandidates; 
 	
@@ -31,7 +32,6 @@ public class JspMergeManager implements MergeManager{
 	@Override
 	public void addSimilarCandidates() {
 		listOfSimilarCandidates = new ArrayList<>();
-		Multimap<String, Row> resultMap;
 		try {
 			resultMap = Bihar.getExactSamePairs(d.getRows(), d);
 			for(String canonicalVal: resultMap.keySet()){
@@ -49,11 +49,27 @@ public class JspMergeManager implements MergeManager{
 
 	@Override
 	public void merge(String[] ids) {
+		Multimap<String, String> mp = LinkedHashMultimap.create();
+		for(String id:ids){
+			mp.put(idToRow.get(id).get("_st_name"), id);		//hardcoded for now; not recommended
+		}
+		
+		for(String key:mp.keySet()){
+			ArrayList<String> innerIds= new ArrayList<>();
+			innerIds.addAll(0, mp.get(key));
+			String defaultId = innerIds.get(0);
+			for(int i=1;i<innerIds.size();i++){
+				Row tempRow = idToRow.get(innerIds.get(i));
+				rowToId.put(tempRow, defaultId);
+			}
+			
+		}
+		/*
 		String defaultId = ids[0];
     	for(int i=1;i<ids.length;i++) {
     		Row tempRow = idToRow.get(ids[i]);
     		rowToId.put(tempRow, defaultId);
-    	}
+    	}*/
 		
 	}
 

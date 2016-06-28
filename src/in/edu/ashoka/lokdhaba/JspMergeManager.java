@@ -57,7 +57,7 @@ public class JspMergeManager implements MergeManager{
 		for(String key:mp.keySet()){
 			ArrayList<String> innerIds= new ArrayList<>();
 			innerIds.addAll(0, mp.get(key));
-			String defaultId = innerIds.get(0);
+			String defaultId = getRootId(innerIds.get(0));
 			for(int i=1;i<innerIds.size();i++){
 				Row tempRow = idToRow.get(innerIds.get(i));
 				rowToId.put(tempRow, defaultId);
@@ -82,7 +82,16 @@ public class JspMergeManager implements MergeManager{
 	@Override
 	public void save() {
 		// TODO Auto-generated method stub
-		
+		Collection<Row> rows = d.getRows();
+		for(Row row:rows){
+			row.set("mapped_ID", rowToId.get(row));
+		}
+		try {
+			d.save("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -131,6 +140,31 @@ public class JspMergeManager implements MergeManager{
 			listOfSet.add(mp);
 		}
 		return listOfSet;
+	}
+
+	@Override
+	public boolean isMappedToAnother(String id) {
+		if(rowToId.get(idToRow.get(id)).equals(id))
+			return false;
+		else 
+			return true;
+	}
+
+	@Override
+	public String getRootId(String id) {
+		while(!rowToId.get(idToRow.get(id)).equals(id)){
+			id = rowToId.get(idToRow.get(id));
+		}
+		return id;
+	}
+
+	@Override
+	public void updateMappedIds() {
+		for(Row row:rowToId.keySet()){
+			String id = getRootId(rowToId.get(row));
+			rowToId.put(row, id);
+		}
+		
 	}
 	
 	

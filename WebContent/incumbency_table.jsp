@@ -66,13 +66,13 @@ public void jspInit() {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
 		String [] userRows = request.getParameterValues("row");
-		for(int i=0; i<userRows.length;i++)
-			System.out.println(userRows[i]);
 		if(userRows.length>0){
 			mergeManager.merge(userRows);
+			mergeManager.updateMappedIds();
 		}
 		
 	}
+	mergeManager.save();
 	
 	
     
@@ -111,7 +111,7 @@ public void jspInit() {
 					rowStyleData = "style=\"border-top: 2px solid black;\"";
 				}else if(newPerson==true){
 						newPerson=false;
-						rowStyleData = "style=\"border-top: 1px solid red;\"";
+						rowStyleData = "style=\"border-top: 1px solid blue;\"";
 					}else{rowStyleData = "";}
 				
 				

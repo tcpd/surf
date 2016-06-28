@@ -20,5 +20,10 @@ public interface MergeManager {
 	public void deMerge(String [] ids);
 	public void save();
 	public ArrayList<Multimap<String,Row>> getIncumbents();
-
+	
+	//check whether this row is mapped to another name
+	public boolean isMappedToAnother(String id);
+	
+	public String getRootId(String id);
+	public void updateMappedIds();
 }

@@ -21,6 +21,10 @@ public class JspMergeManager implements MergeManager{
 	
 	public JspMergeManager(Dataset d) {
 		this.d=d;
+		d.addToActualColumnName("ID");
+		d.addToActualColumnName("mapped_ID");
+		
+		
 	}
 
 	@Override
@@ -165,6 +169,29 @@ public class JspMergeManager implements MergeManager{
 			rowToId.put(row, id);
 		}
 		
+	}
+
+	@Override
+	public boolean isFirstReading() {
+		Collection<Row> allRows = d.getRows();
+		boolean isAssigned= true;
+		for(Row row:allRows){
+			if(row.get("ID").equals(""))
+				isAssigned=false;
+			if(row.get("mapped_ID").equals(""))
+				isAssigned=false;
+		}
+		return !isAssigned;
+	}
+
+	@Override
+	public void load() {
+		rowToId = new HashMap<>();
+		idToRow = new HashMap<>();
+		for(Row row:d.getRows()){
+			idToRow.put(row.get("ID"), row);
+			rowToId.put(row, row.get("mapped_ID"));
+		}
 	}
 	
 	

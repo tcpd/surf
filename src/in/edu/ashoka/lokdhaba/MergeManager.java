@@ -19,6 +19,7 @@ public interface MergeManager {
 	public void merge(String [] ids);
 	public void deMerge(String [] ids);
 	public void save();
+	public void load();
 	public ArrayList<Multimap<String,Row>> getIncumbents();
 	
 	//check whether this row is mapped to another name
@@ -26,4 +27,7 @@ public interface MergeManager {
 	
 	public String getRootId(String id);
 	public void updateMappedIds();
+	
+	//check whether reading the file for the first time
+	public boolean isFirstReading();
 }

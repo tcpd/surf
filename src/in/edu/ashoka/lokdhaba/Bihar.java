@@ -313,6 +313,9 @@ public class Bihar extends Object {
 	        	resultMap.asMap().remove(key);
 	        }
 	        
+	        //remove nota
+	        resultMap.asMap().remove("ab he ne no of ove");
+	        
 			//test print
 			/*for(String key:resultMap.keySet()) {
 				for(Row row:resultMap.get(key)){
@@ -331,14 +334,7 @@ public class Bihar extends Object {
     	}
     }
     
-    //generates the initial map; Every row has unique ID
-    public static void generateInitialIDMapper(Collection<Row> allRows, HashMap<Row, String> rowToId, HashMap<String, Row> idToRow) throws IOException {
-    	for(Row row:allRows){
-    		rowToId.put(row, row.get("ID"));
-    		idToRow.put(row.get("ID"), row);
-    	}
-    	
-    }
+    
     
     /* what the jsp has to do:
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");

@@ -5,7 +5,6 @@
     import="in.edu.ashoka.lokdhaba.Dataset"
     import="in.edu.ashoka.lokdhaba.Row"
     import="in.edu.ashoka.lokdhaba.MergeManager"
-    import="in.edu.ashoka.lokdhaba.JspMergeManager"
     import="java.util.*"
     import="in.edu.ashoka.lokdhaba.Bihar"
     import="com.google.common.collect.Multimap"
@@ -19,12 +18,13 @@
 <body>
 
 <%!
-
+boolean isFirst;
 Dataset d;
 MergeManager mergeManager;
-//Multimap<String, Row> resultMap;
-//HashMap<Row, String> rowToId;
-//HashMap<String, Row> idToRow;
+//add other csv here
+static final String ge="/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+static final String bihar="";
+static final String rajasthan="";
 
 %>
 
@@ -32,31 +32,49 @@ MergeManager mergeManager;
 
 <%!
 public void jspInit() {
-	String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
-	
-	try {
-		d = new Dataset(file);
-		mergeManager = new JspMergeManager(d);
-		mergeManager.initializeIds();
-	    mergeManager.performInitialMapping();
-	    mergeManager.addSimilarCandidates();
-	    
-	    /* SurfExcel.assignUnassignedIds(d.getRows(), "ID");
-	    rowToId = new HashMap<Row, String>();
-	    idToRow = new HashMap<String, Row>();
-	    Bihar.generateInitialIDMapper(d.getRows(),rowToId,idToRow);
-	    resultMap = Bihar.getExactSamePairs(d.getRows(),d); */
-	}catch(IOException ioex){
-		ioex.printStackTrace();
-	}
-	
-    
+	isFirst=true;
     //writer.println("let's see where we are");
 	
 }
 %>
 
 <%
+
+	if(isFirst){
+		String file="";
+		if(request.getParameter("dataset").equals("ge")){
+			file = ge;
+		}
+		else if(request.getParameter("dataset").equals("bihar"))
+			file = bihar;
+		else if(request.getParameter("dataset").equals("rajasthan"))
+			file = rajasthan;
+		else {}
+		
+		try {
+			d = new Dataset(file);
+			mergeManager = MergeManager.getManager(request.getParameter("algorithm"), d);
+			
+			if(mergeManager.isFirstReading()){
+				mergeManager.initializeIds();
+			    mergeManager.performInitialMapping();
+			}else{
+				mergeManager.load();
+			}
+			mergeManager.addSimilarCandidates();
+		    
+		    
+		    /* SurfExcel.assignUnassignedIds(d.getRows(), "ID");
+		    rowToId = new HashMap<Row, String>();
+		    idToRow = new HashMap<String, Row>();
+		    Bihar.generateInitialIDMapper(d.getRows(),rowToId,idToRow);
+		    resultMap = Bihar.getExactSamePairs(d.getRows(),d); */
+		}catch(IOException ioex){
+			ioex.printStackTrace();
+		}
+		
+	    
+	}
 
 	response.setContentType("text/html");
 	PrintWriter writer = response.getWriter();
@@ -69,10 +87,11 @@ public void jspInit() {
 		if(userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
+			mergeManager.save();
 		}
 		
 	}
-	mergeManager.save();
+	
 	
 	
     

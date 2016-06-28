@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Incumbency Check</title>
+</head>
+<body>
+<h4 style="text-shadow: gray; font-style: italic;">Incumbency Checker</h4>
+
+<form action="incumbency_table.jsp" method="get" onsubmit="incumbency_table.jsp">
+Choose a DataSet:<select name="dataset" >
+					<option value="ge">General Election Candidate</option>
+					<option value="bihar">Bihar Election Candidate</option>
+					<option value="rajasthan">Rajasthan Election Candidate</option>
+				</select>
+<br>
+Candidate Generation Algorithm:<select name="algorithm">
+									<option value="exactSameName">Exact Same Name</option>
+									<option value="approximateIndian">Approximate Indian Name Matching Same Name</option>
+									<option value="editDistance1">Approximate Name with Edit Distance 1</option>
+									<option value="editDistance2">Approximate Name with Edit Distance 2</option>
+								</select>
+								<br><br>
+								<input type="submit">
+								</form>
+</body>
+</html>

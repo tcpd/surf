@@ -50,7 +50,7 @@ public abstract class MergeManager {
 	final public void merge(String [] ids){
 		Multimap<String, String> mp = LinkedHashMultimap.create();
 		for(String id:ids){
-			mp.put(idToRow.get(id).get("_st_name"), id);		//hardcoded for now; not recommended
+			mp.put(idToRow.get(id).get("common_group_id"), id);		//algorithm will decide the common_group_id
 		}
 		
 		for(String key:mp.keySet()){

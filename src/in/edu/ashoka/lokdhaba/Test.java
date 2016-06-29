@@ -54,6 +54,24 @@ public class Test {
 	}
 
 	public static void main(String[] args) throws IOException {
+		test2();
+	    
+	}
+	
+	public static void test2() throws IOException {
+		String ID_PREFIX = "ID";
+		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
+		
+	    Dataset d = new Dataset(file);
+	    MergeManager mergeManager = new JspMergeManager(d);
+	    mergeManager.initializeIds();
+	    mergeManager.performInitialMapping();
+	    mergeManager.addSimilarCandidates();
+	    mergeManager.merge(new String[]{"76174","76338","76689","76621"});
+	    ((JspMergeManager)mergeManager).display2();
+	}
+	
+	public static void test1() throws IOException{
 		String ID_PREFIX = "ID";
 		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
 		
@@ -77,7 +95,6 @@ public class Test {
 	    
 	    //testing purpose======================================
 	    display(resultMap,rowToId,idToRow);
-	    
 	}
 
 }

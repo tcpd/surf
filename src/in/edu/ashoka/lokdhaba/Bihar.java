@@ -300,6 +300,7 @@ public class Bihar extends Object {
 	        Multimap<String, Row> resultMap = LinkedHashMultimap.create();
 	        
 	        for(Row row:allRows){
+	        	row.set("common_group_id", row.get("_st_name"));
 	        	resultMap.put(row.get("_st_Name"), row);
 	        }
 	        

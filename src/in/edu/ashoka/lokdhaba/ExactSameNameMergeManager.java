@@ -38,7 +38,7 @@ public class ExactSameNameMergeManager extends MergeManager{
 		
 		
 	}
-	
+	//testing methods
 	public void display(){
 		int i=0;
 		for(Collection<Row> similarRows:listOfSimilarCandidates){

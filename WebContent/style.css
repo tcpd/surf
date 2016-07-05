@@ -1,0 +1,53 @@
+@CHARSET "UTF-8";
+.outer-table {
+	display:table; 
+	margin:0 auto; 
+	padding:0px; 
+	border:solid black; 
+	border-radius:3px;
+	border-style: groove;
+	border-width: 5px;
+}
+
+.actual-table {
+	border-color:gray;
+	border-width:10px;
+	border-collapse: collapse;
+	border-radius:8px;
+	border-style: groove; 
+	margin:7px auto;
+	
+}
+
+.table-row{
+	border-bottom: 3px solid black;
+}
+
+.table-row-new-person {
+	border-top: 2px solid black;
+}
+
+.table-row-same-person {
+	border-top: 1px solid blue;
+}
+
+.inside-table {
+	
+    background-color: lightgrey;
+}
+
+td { 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+tr {
+	padding-left: 10px;
+	border-left: 10px solid red;
+}
+
+.button-float {
+	position:fixed; 
+	top:.5in; 
+	right:.5in;
+}

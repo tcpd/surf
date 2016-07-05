@@ -13,6 +13,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="style.css">
 <title>Incumbency Checker</title>
 </head>
 <body>
@@ -99,10 +100,10 @@ public void jspInit() {
 
     %>
     <h4>Check for Incumbent here</h4>
-    <div style="display:table; margin:0 auto; padding:10px; border:1px solid black; border-radius:3px;">
     <form method="post">
-    <table style="border: 3px solid #000000; border-collapse: collapse; padding:10px">
-    <tr style="border-bottom: 3px solid black;">
+    <table class="actual-table">
+    <tbody class="inside-table">
+    <tr class="table-row">
     	<th>Is same</th>
     	<th>Candidate</th>
     </tr>
@@ -128,10 +129,10 @@ public void jspInit() {
 				if(newGroup==true){
 					newGroup=false;
 					newPerson=false;
-					rowStyleData = "style=\"border-top: 2px solid black;\"";
+					rowStyleData = "class=\"table-row-new-person\"";
 				}else if(newPerson==true){
 						newPerson=false;
-						rowStyleData = "style=\"border-top: 1px solid blue;\"";
+						rowStyleData = "class=\"table-row-same-person\"";
 					}else{rowStyleData = "";}
 				
 				
@@ -149,16 +150,15 @@ public void jspInit() {
 	}
 
 %>
-	
+	</tbody>
 	</table>
 	<p style="margin-bottom:0;">
-	<div style="position:fixed; top:.5in; right:.5in;">
+	<div class="button-float">
 	<input type="submit" name="submit" value="Save" style="width:200px;"/>
 	</div>
 	</p>
 	
 	</form>
-	</div>
 
 </body>
 </html>

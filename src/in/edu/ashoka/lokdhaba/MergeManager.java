@@ -14,7 +14,7 @@ public abstract class MergeManager {
 	Dataset d;
 	HashMap<Row, String> rowToId;
     HashMap<String, Row> idToRow;
-    Multimap<String, Row> resultMap;
+    
     
     ArrayList<Collection<Row>> listOfSimilarCandidates; 
     

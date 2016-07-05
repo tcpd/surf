@@ -54,8 +54,22 @@ public class Test {
 	}
 
 	public static void main(String[] args) throws IOException {
-		test2();
+		test3();
 	    
+	}
+	
+	public static void test3() throws IOException {
+		String ID_PREFIX = "ID";
+		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
+		
+	    Dataset d = new Dataset(file);
+	    MergeManager mergeManager = new SimilarNameMergeManager(d);
+	    mergeManager.initializeIds();
+	    mergeManager.performInitialMapping();
+	    mergeManager.addSimilarCandidates();
+	    ((SimilarNameMergeManager)mergeManager).display2();
+	    //mergeManager.merge(new String[]{"76174","76338","76689","76621"});
+	    //((JspMergeManager)mergeManager).display2();
 	}
 	
 	public static void test2() throws IOException {
@@ -63,12 +77,12 @@ public class Test {
 		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
 		
 	    Dataset d = new Dataset(file);
-	    MergeManager mergeManager = new JspMergeManager(d);
+	    MergeManager mergeManager = new ExactSameNameMergeManager(d);
 	    mergeManager.initializeIds();
 	    mergeManager.performInitialMapping();
 	    mergeManager.addSimilarCandidates();
 	    mergeManager.merge(new String[]{"76174","76338","76689","76621"});
-	    ((JspMergeManager)mergeManager).display2();
+	    ((ExactSameNameMergeManager)mergeManager).display2();
 	}
 	
 	public static void test1() throws IOException{
@@ -80,7 +94,7 @@ public class Test {
 	    
 	    HashMap<Row, String> rowToId = new HashMap<>();
 	    HashMap<String, Row> idToRow = new HashMap<>();
-	    Bihar.generateInitialIDMapper(d.getRows(),rowToId,idToRow);
+	    //Bihar.generateInitialIDMapper(d.getRows(),rowToId,idToRow);
 	    
 	    Multimap<String, Row> resultMap = Bihar.getExactSamePairs(d.getRows(),d);
 	    

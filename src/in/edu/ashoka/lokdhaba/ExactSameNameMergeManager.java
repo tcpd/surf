@@ -25,7 +25,7 @@ public class ExactSameNameMergeManager extends MergeManager{
 	public void addSimilarCandidates() {
 		listOfSimilarCandidates = new ArrayList<>();
 		try {
-			resultMap = Bihar.getExactSamePairs(d.getRows(), d);
+			Multimap<String, Row> resultMap = Bihar.getExactSamePairs(d.getRows(), d);
 			for(String canonicalVal: resultMap.keySet()){
 				listOfSimilarCandidates.add(resultMap.get(canonicalVal));
 			}

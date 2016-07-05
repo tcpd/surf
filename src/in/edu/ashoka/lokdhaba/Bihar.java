@@ -241,15 +241,7 @@ public class Bihar extends Object {
     
     public static Multimap<String, Multimap<String, Row>> getSimilarPairs (Collection<Row> allRows, Dataset d) throws IOException {
         
-        Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
-//        d.registerColumnAlias("Cand1", "Name");
-        d.registerColumnAlias("Candidate_name", "Name");
-//        d.registerColumnAlias("Sex1", "Sex");
-        d.registerColumnAlias("Candidate_sex", "Sex");
-//        d.registerColumnAlias("Party1", "Party");
-        d.registerColumnAlias("Party_abbreviation", "Party");
-
-        Tokenizer.setupDesiVersions(allRows, "Name");
+        initRowFormat(allRows, d);
 
         Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
@@ -280,21 +272,25 @@ public class Bihar extends Object {
         
     }
     
+    public static void initRowFormat(Collection<Row> allRows, Dataset d) {
+    	//set ups what toString() of Row needs to print
+		Row.setToStringFields("Name-Sex-Year-PC_name-Party-State-Position-Votes1-ID");
+		
+		//creates aliases for column name
+		d.registerColumnAlias("Candidate_name", "Name");
+		d.registerColumnAlias("Candidate_sex", "Sex");
+		d.registerColumnAlias("Party_abbreviation", "Party");
+		d.registerColumnAlias("State_name", "State");
+		
+		//creates canonical tokens; adds them to the row
+		Tokenizer.setupDesiVersions(allRows, "PC_name");
+        Tokenizer.setupDesiVersions(allRows, "Name");
+    }
+    
     public static Multimap<String, Row> getExactSamePairs (Collection<Row> allRows, Dataset d) throws IOException {
     	
         
-    		//set ups what toString() of Row needs to print
-			Row.setToStringFields("Name-Sex-Year-PC_name-Party-State-Position-Votes1-ID");
-			
-			//creates aliases for column name
-			d.registerColumnAlias("Candidate_name", "Name");
-			d.registerColumnAlias("Candidate_sex", "Sex");
-			d.registerColumnAlias("Party_abbreviation", "Party");
-			d.registerColumnAlias("State_name", "State");
-			
-			//creates canonical tokens; adds them to the row
-			Tokenizer.setupDesiVersions(allRows, "PC_name");
-	        Tokenizer.setupDesiVersions(allRows, "Name");
+    		initRowFormat(allRows, d);
 	        
 	        //create multimap for pairs
 	        Multimap<String, Row> resultMap = LinkedHashMultimap.create();

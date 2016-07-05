@@ -28,7 +28,11 @@ public class ExactSameNameMergeManager extends MergeManager{
 			Multimap<String, Row> resultMap = Bihar.getExactSamePairs(d.getRows(), d);
 			for(String canonicalVal: resultMap.keySet()){
 				listOfSimilarCandidates.add(resultMap.get(canonicalVal));
+				for(Row row:resultMap.get(canonicalVal)){
+					row.set("common_group_id", row.get("_st_Name"));
+				}
 			}
+			
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

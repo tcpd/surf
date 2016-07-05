@@ -21,6 +21,9 @@ public abstract class MergeManager {
     public static MergeManager getManager(String algo, Dataset d){
     	if(algo.equals("exactSameName"))
     		return new ExactSameNameMergeManager(d);
+    	else if(algo.equals("editDistance1")){
+    		return new SimilarNameMergeManager(d);
+    	}
 		return null;
     }
 	

@@ -25,6 +25,7 @@ public class SimilarNameMergeManager extends MergeManager {
 					for(String innerKey:map.keySet()){
 						for(Row row:map.get(innerKey)){
 							temp.add(row);
+							row.set("common_group_id", outerKey);
 						}
 					}
 				}

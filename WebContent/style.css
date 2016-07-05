@@ -41,10 +41,6 @@ td {
     padding-right: 10px;
 }
 
-tr {
-	padding-left: 10px;
-	border-left: 10px solid red;
-}
 
 .button-float {
 	position:fixed; 

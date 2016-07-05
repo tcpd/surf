@@ -168,7 +168,7 @@ public class Bihar extends Object {
             SurfExcel.similarPairsForField(allRows, "Name", 1);
             Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
             Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
-
+            
             //for testing purpose
             /*Multimap<String, Multimap<String, Row>> mappedNames = getSimilarPairs("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
             NameData nameData = new ConcreteNameData();
@@ -235,7 +235,6 @@ public class Bihar extends Object {
         Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
         
         
-        
         return resultMap;
     }
     
@@ -296,7 +295,7 @@ public class Bihar extends Object {
 	        Multimap<String, Row> resultMap = LinkedHashMultimap.create();
 	        
 	        for(Row row:allRows){
-	        	row.set("common_group_id", row.get("_st_name"));
+	        	row.set("common_group_id", row.get("_st_Name"));
 	        	resultMap.put(row.get("_st_Name"), row);
 	        }
 	        

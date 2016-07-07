@@ -7,9 +7,12 @@ import java.util.Collection;
 import com.google.common.collect.Multimap;
 
 public class SimilarNameMergeManager extends MergeManager {
-
-	public SimilarNameMergeManager(Dataset d) {
+	
+	int distance;
+	
+	public SimilarNameMergeManager(Dataset d, int distance) {
 		super(d);
+		this.distance = distance;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -17,7 +20,7 @@ public class SimilarNameMergeManager extends MergeManager {
 	public void addSimilarCandidates() {
 		listOfSimilarCandidates = new ArrayList<>();
 		try {
-			Multimap<String, Multimap<String, Row>> resultMap = Bihar.getSimilarPairs(d.getRows(), d);
+			Multimap<String, Multimap<String, Row>> resultMap = Bihar.getSimilarPairs(d.getRows(), d, distance);
 			for(String outerKey:resultMap.keySet()){
 				Collection<Row> temp = new ArrayList<>();
 				Collection<Multimap<String, Row>> similarNamesMap = resultMap.get(outerKey);

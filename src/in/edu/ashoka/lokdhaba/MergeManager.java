@@ -22,7 +22,10 @@ public abstract class MergeManager {
     	if(algo.equals("exactSameName"))
     		return new ExactSameNameMergeManager(d);
     	else if(algo.equals("editDistance1")){
-    		return new SimilarNameMergeManager(d);
+    		return new SimilarNameMergeManager(d,1);
+    	}
+    	else if(algo.equals("editDistance2")){
+    		return new SimilarNameMergeManager(d, 2);
     	}
 		return null;
     }

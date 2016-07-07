@@ -238,7 +238,7 @@ public class Bihar extends Object {
         return resultMap;
     }
     
-    public static Multimap<String, Multimap<String, Row>> getSimilarPairs (Collection<Row> allRows, Dataset d) throws IOException {
+    public static Multimap<String, Multimap<String, Row>> getSimilarPairs (Collection<Row> allRows, Dataset d, int distance) throws IOException {
         
         initRowFormat(allRows, d);
 
@@ -246,9 +246,9 @@ public class Bihar extends Object {
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "3"));
 
-        out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = 1)");
-        SurfExcel.similarPairsForField(allRows, "Name", 1);
-        Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
+        out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = "+distance+")");
+        SurfExcel.similarPairsForField(allRows, "Name", distance);
+        //Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
         Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
         
         //only show duplicates
@@ -318,6 +318,14 @@ public class Bihar extends Object {
 					System.out.println(row);
 				}
 			}*/
+	        
+	    System.out.println("Group of Exact Same Names found: "+ resultMap.keySet().size());
+	    int listSize = 0;
+	    for(String key:resultMap.keySet()){
+	    	listSize+=resultMap.get(key).size();
+	    }
+	    System.out.println("list size: "+listSize);
+	    
 
         return resultMap;
     }

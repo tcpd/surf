@@ -54,7 +54,7 @@ public class Test {
 	}
 
 	public static void main(String[] args) throws IOException {
-		test3();
+		test2();
 	    
 	}
 	
@@ -63,7 +63,7 @@ public class Test {
 		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
 		
 	    Dataset d = new Dataset(file);
-	    MergeManager mergeManager = new SimilarNameMergeManager(d);
+	    MergeManager mergeManager = new SimilarNameMergeManager(d,1);
 	    mergeManager.initializeIds();
 	    mergeManager.performInitialMapping();
 	    mergeManager.addSimilarCandidates();
@@ -82,7 +82,7 @@ public class Test {
 	    mergeManager.performInitialMapping();
 	    mergeManager.addSimilarCandidates();
 	    mergeManager.merge(new String[]{"76174","76338","76689","76621"});
-	    ((ExactSameNameMergeManager)mergeManager).display2();
+	    ((ExactSameNameMergeManager)mergeManager).display();
 	}
 	
 	public static void test1() throws IOException{

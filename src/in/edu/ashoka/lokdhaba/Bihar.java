@@ -312,6 +312,25 @@ public class Bihar extends Object {
 	        //remove nota
 	        resultMap.asMap().remove("ab he ne no of ove");
 	        
+	        //remove groups where position is below 5==== EXPERIMENTAL
+	        
+	        /*list.clear();
+	        for(String key:resultMap.keySet()){
+	        	Collection<Row> temp = resultMap.get(key);
+	        	boolean flag=true;
+	        	for(Row row:temp){
+	        		if((!row.get("Position").equals("NA"))&& Integer.valueOf(row.get("Position"))>5){
+	        			flag=false;
+	        		}
+	        	}
+	        	if(!flag)
+	        		list.add(key);
+	        }
+	        for(String key:list){
+	        	resultMap.asMap().remove(key);
+	        }
+	        */
+	        
 			//test print
 			/*for(String key:resultMap.keySet()) {
 				for(Row row:resultMap.get(key)){

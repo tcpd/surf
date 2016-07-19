@@ -104,8 +104,17 @@ public void jspInit() {
     <table class="actual-table">
     <tbody class="inside-table">
     <tr class="table-row">
-    	<th>Is same</th>
-    	<th>Candidate</th>
+    	<th class="cell-table">Is same</th>
+    	<th class="cell-table">Name</th>
+    	<th class="cell-table">Sex</th>
+    	<th class="cell-table">Year</th>
+    	<th class="cell-table">Constiuency</th>
+    	<th class="cell-table">Party</th>
+    	<th class="cell-table">State</th>
+    	<th class="cell-table">Position</th>
+    	<th class="cell-table">Votes</th>
+    	<th class="cell-table">ID</th>
+    	<th>Mapped ID</th>
     </tr>
     
     
@@ -122,7 +131,7 @@ public void jspInit() {
 				String tableData;
 				String rowStyleData;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
-					tableData = "<mapped>";
+					tableData = "<mapped dummy tag>";
 				} else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
 				}
@@ -138,9 +147,36 @@ public void jspInit() {
 				
 				%>
 				<tr <%=rowStyleData %>>
-					<td><%=tableData %></td>
-					<td>
-					<%=row%>
+					<td class="cell-table"><%=tableData %></td>
+					<td class="cell-table">
+					<%=row.get("Name")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("Sex")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("Year")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("PC_name")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("Party")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("State")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("Position")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("Votes1")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("ID")%>
+					</td>
+					<td class="cell-table">
+					<%=row.get("mapped_ID")%>
 					</td>
 				</tr>
 				
@@ -156,7 +192,7 @@ public void jspInit() {
 	<div class="button-float">
 	<input type="submit" name="submit" value="Save" style="width:200px;"/>
 	</div>
-	</p>
+	
 	
 	</form>
 

@@ -28,7 +28,7 @@
 }
 
 .table-row-same-person {
-	border-top: 1px solid blue;
+	border-top: 1px solid green;
 }
 
 .inside-table {
@@ -36,10 +36,20 @@
     background-color: lightgrey;
 }
 
+.cell-table {
+	border-right:2px solid black;
+}
+
 td { 
     padding-left: 10px;
     padding-right: 10px;
 }
+
+table {
+	border-left: 1px solid black
+	table-layout: fixed;
+}
+
 
 
 .button-float {

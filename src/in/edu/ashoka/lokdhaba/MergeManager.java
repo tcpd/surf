@@ -15,17 +15,33 @@ public abstract class MergeManager {
 	HashMap<Row, String> rowToId;
     HashMap<String, Row> idToRow;
     
+    //future algorithms will need references here
+    static ExactSameNameMergeManager exactSameNameMergeManager;
+    static SimilarNameMergeManager similarNameMergeManagerED1;
+    static SimilarNameMergeManager similarNameMergeManagerED2;
     
     ArrayList<Collection<Row>> listOfSimilarCandidates; 
     
+    //this is a factory method which generates the right manager
+    // these methods are singleton
     public static MergeManager getManager(String algo, Dataset d){
-    	if(algo.equals("exactSameName"))
-    		return new ExactSameNameMergeManager(d);
+    	if(algo.equals("exactSameName")){
+    		if(exactSameNameMergeManager==null){
+    			exactSameNameMergeManager= new ExactSameNameMergeManager(d);
+    		}
+    			return exactSameNameMergeManager;
+    	}	
     	else if(algo.equals("editDistance1")){
-    		return new SimilarNameMergeManager(d,1);
+    		if(similarNameMergeManagerED1==null){
+    			similarNameMergeManagerED1 = new SimilarNameMergeManager(d, 1);
+    		}
+    			return similarNameMergeManagerED1;
     	}
     	else if(algo.equals("editDistance2")){
-    		return new SimilarNameMergeManager(d, 2);
+    		if(similarNameMergeManagerED2==null){
+    			similarNameMergeManagerED1 = new SimilarNameMergeManager(d, 2);
+    		}
+    			return similarNameMergeManagerED2;
     	}
 		return null;
     }
@@ -93,6 +109,8 @@ public abstract class MergeManager {
 			rowToId.put(row, row.get("mapped_ID"));
 		}
 	}
+	
+	//returns a list of group of similar named incumbents
 	final public ArrayList<Multimap<String,Row>> getIncumbents(){
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
 		for(Collection<Row> similarRows:listOfSimilarCandidates){

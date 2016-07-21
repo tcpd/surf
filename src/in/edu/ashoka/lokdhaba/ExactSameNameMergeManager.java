@@ -12,17 +12,19 @@ import com.google.common.collect.MutableClassToInstanceMap;
 
 public class ExactSameNameMergeManager extends MergeManager{
 	
-	
+	boolean algorithmRun;
 	
 	public ExactSameNameMergeManager(Dataset d) {
 		super(d);
-		
+		algorithmRun = false;
 	}
 
 	
 
 	@Override
 	public void addSimilarCandidates() {
+		if(algorithmRun)
+			return;
 		listOfSimilarCandidates = new ArrayList<>();
 		try {
 			Multimap<String, Row> resultMap = Bihar.getExactSamePairs(d.getRows(), d);
@@ -38,7 +40,7 @@ public class ExactSameNameMergeManager extends MergeManager{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		algorithmRun=true;
 		
 		
 	}

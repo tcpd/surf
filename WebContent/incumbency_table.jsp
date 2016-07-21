@@ -55,15 +55,7 @@ public void jspInit() {
 		
 		try {
 			d = new Dataset(file);
-			mergeManager = MergeManager.getManager(request.getParameter("algorithm"), d);
-			
-			if(mergeManager.isFirstReading()){
-				mergeManager.initializeIds();
-			    mergeManager.performInitialMapping();
-			}else{
-				mergeManager.load();
-			}
-			mergeManager.addSimilarCandidates();
+			Bihar.initRowFormat(d.getRows(), d);
 		    
 		    
 		    /* SurfExcel.assignUnassignedIds(d.getRows(), "ID");
@@ -77,6 +69,17 @@ public void jspInit() {
 		
 	    isFirst = false;
 	}
+	
+	//get merge manager
+	mergeManager = MergeManager.getManager(request.getParameter("algorithm"), d);
+	
+	if(mergeManager.isFirstReading()){
+		mergeManager.initializeIds();
+	    mergeManager.performInitialMapping();
+	}else{
+		mergeManager.load();
+	}
+	mergeManager.addSimilarCandidates();
 
 	response.setContentType("text/html");
 	PrintWriter writer = response.getWriter();

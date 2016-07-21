@@ -3,6 +3,7 @@ package in.edu.ashoka.lokdhaba;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +21,7 @@ import org.apache.commons.csv.CSVRecord;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
-public class Dataset {
+public class Dataset implements Serializable{
 	public static String NEW_LINE_SEPARATOR = "\n";
     Collection<Row> rows;
     Collection<String> actualColumnName;

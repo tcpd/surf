@@ -9,6 +9,7 @@ import com.google.common.collect.Multimap;
 public class SimilarNameMergeManager extends MergeManager {
 	
 	int distance;
+	boolean algorithmRun;
 	
 	public SimilarNameMergeManager(Dataset d, int distance) {
 		super(d);
@@ -18,6 +19,8 @@ public class SimilarNameMergeManager extends MergeManager {
 
 	@Override
 	public void addSimilarCandidates() {
+		if(algorithmRun)
+			return;
 		listOfSimilarCandidates = new ArrayList<>();
 		try {
 			Multimap<String, Multimap<String, Row>> resultMap = Bihar.getSimilarPairs(d.getRows(), d, distance);
@@ -38,7 +41,7 @@ public class SimilarNameMergeManager extends MergeManager {
 		}catch(IOException e){
 			e.printStackTrace();
 		}
-
+		algorithmRun = true;
 	}
 	
 	public void display2(){

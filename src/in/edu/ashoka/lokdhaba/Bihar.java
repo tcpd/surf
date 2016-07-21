@@ -240,7 +240,7 @@ public class Bihar extends Object {
     
     public static Multimap<String, Multimap<String, Row>> getSimilarPairs (Collection<Row> allRows, Dataset d, int distance) throws IOException {
         
-        initRowFormat(allRows, d);
+        //initRowFormat(allRows, d);
 
         Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
         mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
@@ -289,7 +289,7 @@ public class Bihar extends Object {
     public static Multimap<String, Row> getExactSamePairs (Collection<Row> allRows, Dataset d) throws IOException {
     	
         
-    		initRowFormat(allRows, d);
+    		//initRowFormat(allRows, d);
 	        
 	        //create multimap for pairs
 	        Multimap<String, Row> resultMap = LinkedHashMultimap.create();

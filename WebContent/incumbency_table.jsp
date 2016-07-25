@@ -111,7 +111,7 @@ public void jspInit() {
     	<th class="cell-table">Name</th>
     	<th class="cell-table">Sex</th>
     	<th class="cell-table">Year</th>
-    	<th class="cell-table">Constiuency</th>
+    	<th class="cell-table">Constituency</th>
     	<th class="cell-table">Party</th>
     	<th class="cell-table">State</th>
     	<th class="cell-table">Position</th>

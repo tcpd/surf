@@ -39,7 +39,7 @@ public abstract class MergeManager {
     	}
     	else if(algo.equals("editDistance2")){
     		if(similarNameMergeManagerED2==null){
-    			similarNameMergeManagerED1 = new SimilarNameMergeManager(d, 2);
+    			similarNameMergeManagerED2 = new SimilarNameMergeManager(d, 2);
     		}
     			return similarNameMergeManagerED2;
     	}

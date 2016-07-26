@@ -15,7 +15,7 @@ public abstract class MergeManager {
 	HashMap<Row, String> rowToId;
     HashMap<String, Row> idToRow;
     
-    //future algorithms will need references here
+    //future algorithms will need references here; this is to keep objects in memory for faster reloading of page
     static ExactSameNameMergeManager exactSameNameMergeManager;
     static SimilarNameMergeManager similarNameMergeManagerED1;
     static SimilarNameMergeManager similarNameMergeManagerED2;
@@ -24,6 +24,9 @@ public abstract class MergeManager {
     
     //this is a factory method which generates the right manager
     // these methods are singleton
+    //for new algorithms these need to be updated
+    
+    
     public static MergeManager getManager(String algo, Dataset d){
     	if(algo.equals("exactSameName")){
     		if(exactSameNameMergeManager==null){
@@ -45,6 +48,10 @@ public abstract class MergeManager {
     	}
 		return null;
     }
+    
+    
+    
+    
 	
     public MergeManager(Dataset d){
     	this.d=d;

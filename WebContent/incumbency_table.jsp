@@ -89,7 +89,7 @@ public void jspInit() {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
 		String [] userRows = request.getParameterValues("row");
-		if(userRows.length>0){
+		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.save();

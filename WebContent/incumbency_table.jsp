@@ -80,6 +80,7 @@ public void jspInit() {
 		mergeManager.load();
 	}
 	mergeManager.addSimilarCandidates();
+	
 
 	response.setContentType("text/html");
 	PrintWriter writer = response.getWriter();
@@ -92,7 +93,7 @@ public void jspInit() {
 		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
-			mergeManager.save();
+			mergeManager.save(ge);
 		}
 		
 	}
@@ -125,6 +126,10 @@ public void jspInit() {
 
 <%
 	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
+    		
+		//checking stuff
+		mergeManager.getListCount(incumbentsList);
+    		
 	boolean newGroup=false, newPerson=false;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
 		newGroup=true;

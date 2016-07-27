@@ -22,6 +22,8 @@ public abstract class MergeManager {
     
     ArrayList<Collection<Row>> listOfSimilarCandidates; 
     
+    
+    
     //this is a factory method which generates the right manager
     // these methods are singleton
     //for new algorithms these need to be updated
@@ -57,6 +59,7 @@ public abstract class MergeManager {
     	this.d=d;
 		d.addToActualColumnName("ID");
 		d.addToActualColumnName("mapped_ID");
+		//d.addToActualColumnName("is_processed");
     }
     
 	//initialize the id's for each row
@@ -80,6 +83,7 @@ public abstract class MergeManager {
 		Multimap<String, String> mp = LinkedHashMultimap.create();
 		for(String id:ids){
 			mp.put(idToRow.get(id).get("common_group_id"), id);		//algorithm will decide the common_group_id
+			idToRow.get(id).set("is_processed", "true"); 	//set is_processed to true; this will keep track of number of rows being processed
 		}
 		
 		for(String key:mp.keySet()){
@@ -96,13 +100,13 @@ public abstract class MergeManager {
 	final public void deMerge(String [] ids){
 		//TO BE IMPLEMENTED
 	}
-	final public void save(){
+	final public void save(String filePath){
 		Collection<Row> rows = d.getRows();
 		for(Row row:rows){
 			row.set("mapped_ID", rowToId.get(row));
 		}
 		try {
-			d.save("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv");
+			d.save(filePath);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -129,6 +133,8 @@ public abstract class MergeManager {
 		}
 		return listOfSet;
 	}
+	
+	
 	
 	//check whether this row is mapped to another name
 	final public boolean isMappedToAnother(String id){
@@ -162,6 +168,30 @@ public abstract class MergeManager {
 				isAssigned=false;
 		}
 		return !isAssigned;
+	}
+	
+	public int [] getListCount(ArrayList<Multimap<String,Row>> groupLists){
+		int [] statusCount = new int[3];
+		if(listOfSimilarCandidates==null){
+			System.out.println("0");
+			return null;
+		}
+		int i=0;
+		int j=0;
+		System.out.println("total number of groups:" + groupLists.size());
+		for(Multimap mp:groupLists){
+			//System.out.println("Unique person identified: "+mp.keySet().size());
+			i+=mp.keySet().size();
+			j+=mp.values().size();
+		}
+		//System.out.println("Unique person identified: " + i);
+		//System.out.println("Unique rows identified: " + j);
+		//System.out.println("Redundency removed:  "+(j-i));
+		statusCount[0] = i;
+		statusCount[1] = j;
+		statusCount[2] = j-i;
+		return statusCount;
+		
 	}
 	
 }

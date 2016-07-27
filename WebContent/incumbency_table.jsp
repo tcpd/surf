@@ -25,7 +25,7 @@ Dataset d;
 MergeManager mergeManager;
 
 //add other csv here or eventually take the file input from user
-static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+static final String ge="/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
 static final String bihar="";
 static final String rajasthan="";
 

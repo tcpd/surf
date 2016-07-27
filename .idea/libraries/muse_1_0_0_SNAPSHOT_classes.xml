@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="muse-1.0.0-SNAPSHOT-classes">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/muse-1.0.0-SNAPSHOT-classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -25,7 +25,7 @@ Dataset d;
 MergeManager mergeManager;
 
 //add other csv here or eventually take the file input from user
-static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+static final String ge="/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
 static final String bihar="";
 static final String rajasthan="";
 
@@ -81,6 +81,7 @@ public void jspInit() {
 		mergeManager.load();
 	}
 	mergeManager.addSimilarCandidates();
+	
 
 	response.setContentType("text/html");
 	PrintWriter writer = response.getWriter();
@@ -90,10 +91,10 @@ public void jspInit() {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
 		String [] userRows = request.getParameterValues("row");
-		if(userRows.length>0){
+		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
-			mergeManager.save();
+			mergeManager.save(ge);
 		}
 		
 	}
@@ -147,6 +148,10 @@ public void jspInit() {
 
 <%
 	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
+    		
+		//checking stuff
+		mergeManager.getListCount(incumbentsList);
+    		
 	boolean newGroup=false, newPerson=false;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
 		newGroup=true;

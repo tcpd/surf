@@ -13,6 +13,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="style.css">
 <title>Incumbency Checker</title>
 </head>
@@ -24,7 +25,7 @@ Dataset d;
 MergeManager mergeManager;
 
 //add other csv here or eventually take the file input from user
-static final String ge="/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
 static final String bihar="";
 static final String rajasthan="";
 
@@ -103,12 +104,33 @@ public void jspInit() {
     
 
     %>
-    <h4>Check for Incumbent here</h4>
-    <form method="post">
-    <table class="actual-table">
+<form method="post">
+    <nav class="navbar navbar-default navbar-fixed-top">
+  <div class="containerir-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Incumbency Checker</a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav navbar-right"> 
+      	<!--<li><p class="navbar-text">Group 5 of 20</p></li>-->
+      	<div class="save-button"><li><input type="submit" name="submit" value="Save"/></li></div>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+    <div class="table-div">
+    <table class="table table-hover">
     <tbody class="inside-table">
     <tr class="table-row">
-    	<th class="cell-table">Is same</th>
+    	<th class="cell-table">Same?</th>
     	<th class="cell-table">Name</th>
     	<th class="cell-table">Sex</th>
     	<th class="cell-table">Year</th>
@@ -118,7 +140,7 @@ public void jspInit() {
     	<th class="cell-table">Position</th>
     	<th class="cell-table">Votes</th>
     	<th class="cell-table">ID</th>
-    	<th>Mapped ID</th>
+    	<th>Person ID</th>
     </tr>
     
     
@@ -196,13 +218,12 @@ public void jspInit() {
 %>
 	</tbody>
 	</table>
+<!--</div>
 	<p style="margin-bottom:0;">
 	<div class="button-float">
-	<input type="submit" name="submit" value="Save" style="width:200px;"/>
-	</div>
-	
-	
-	</form>
+	<input type="submit" name="submit" value="Save"/>
+	</div>-->
+</form>
 
 </body>
 </html>

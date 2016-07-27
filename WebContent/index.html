@@ -3,25 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <title>Incumbency Check</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<h4 style="text-shadow: gray; font-style: italic;">Incumbency Checker</h4>
+<h1 class="text-center" style="padding-top:20px;">Incumbency Checker</h1>
 
+<div class="user-input">
 <form action="incumbency_table.jsp" method="get" onsubmit="incumbency_table.jsp">
-Choose a DataSet:<select name="dataset" >
-					<option value="ge">General Election Candidate</option>
-					<option value="bihar">Bihar Election Candidate</option>
-					<option value="rajasthan">Rajasthan Election Candidate</option>
-				</select>
-<br>
-Candidate Generation Algorithm:<select name="algorithm">
-									<option value="exactSameName">Exact Same Name</option>
-									<option value="approximateIndian">Approximate Indian Name Matching Same Name</option>
-									<option value="editDistance1">Approximate Name with Edit Distance 1</option>
-									<option value="editDistance2">Approximate Name with Edit Distance 2</option>
-								</select>
-								<br><br>
-								<input type="submit">
-								</form>
+	<div class="form-group">
+		<label for="election">Which Election data?</label>
+		<select class="form-control" name="dataset">
+			<option value="ge">General Election Candidate</option>
+			<option value="bihar">Bihar Election Candidate</option>
+			<option value="rajasthan">Rajasthan Election Candidate</option>
+		</select>
+	</div>
+	<div class="form-group" name="algorithm">
+		<label for="election">Which Algorithm?</label>
+		<select class="form-control" name="algorithm">
+				<option value="exactSameName">Exact Same Name</option>
+				<option value="approximateIndian">Approximate Indian Name Matching Same Name</option>
+				<option value="editDistance1">Approximate Name with Edit Distance 1</option>
+				<option value="editDistance2">Approximate Name with Edit Distance 2</option>
+		</select>
+	</div>
+	<div class="submit-button">
+  <button type="submit" class="btn btn-default">Submit</button>
+</div>
+</form>
+</div>						
 </body>
 </html>

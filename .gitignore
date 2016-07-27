@@ -1,0 +1,14 @@
+/build/
+.classpath
+.idea/compiler.xml
+.idea/copyright/profiles_settings.xml
+.idea/libraries/muse_1_0_0_SNAPSHOT_classes.xml
+.idea/misc.xml
+.idea/workspace.xml
+.project
+.settings/.jsdtscope
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.wst.common.component
+.settings/org.eclipse.wst.common.project.facet.core.xml
+.settings/org.eclipse.wst.jsdt.ui.superType.container
+.settings/org.eclipse.wst.jsdt.ui.superType.name

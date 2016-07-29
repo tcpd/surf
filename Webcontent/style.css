@@ -47,11 +47,9 @@ body{
 	width: 2.5em;
 }
 
-.save-button{
-	margin-top: 15px;
-	margin-right:40px;
+#saveButton{
+	margin-right:10px;
 }
-
 .prog-text{
 	font-size: 5px;
 }

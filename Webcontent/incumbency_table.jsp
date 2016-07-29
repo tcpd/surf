@@ -15,11 +15,34 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="style.css">
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+    <script>
+    var Record = function(){
+    this.Name = "";
+    this.Sex = "";
+    this.Year = "";
+    this.Constituency = "";
+    this.Party = "";
+    this.State = "";
+    this.Position = "";
+    this.Votes = "";
+    this.ID = "";
+    this.mappedID = "";
+    this.groupID = "";
+    }
+
+    var Group = function(){
+    this.groupID = "";
+    this.groupMembers = new Array();
+    }
+    </script>
 <title>Incumbency Checker</title>
 </head>
 <body>
 
 <%!
+//Setting Up the required variables
+
 boolean isFirst;
 Dataset d;
 MergeManager mergeManager;
@@ -42,6 +65,7 @@ public void jspInit() {
 %>
 
 <%
+
 
 	if(isFirst){
 		String file="";
@@ -80,31 +104,37 @@ public void jspInit() {
 	}else{
 		mergeManager.load();
 	}
+	
 	mergeManager.addSimilarCandidates();
 	
 
-	response.setContentType("text/html");
-	PrintWriter writer = response.getWriter();
-	
-	
-	if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
+	//response.setContentType("text/html");
+	//PrintWriter writer = response.getWriter();
+
+	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
+	int[] progressData = mergeManager.getListCount(incumbentsList);
+
+		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
+
 		String [] userRows = request.getParameterValues("row");
 		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.save(ge);
 		}
-		
 	}
+		
+%>
+
 	
-	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
-	int[] progressData = mergeManager.getListCount(incumbentsList);
-	
+
+		
     
 
-    %>
+
+
 <form method="post">
     <nav class="navbar navbar-default navbar-fixed-top">
   <div class="containerir-fluid">
@@ -119,13 +149,14 @@ public void jspInit() {
       <a class="navbar-brand" href="#">Incumbency Checker</a>
     </div>
     <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right"> 
+    <input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
+    <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav"> 
       	<li><div class="navbar-text"><%= progressData[0] %> Total Records</div><li>
-      	<li><div class="navbar-text prog-text"><%= progressData[2] %> Records Mapped</div></li>
-      	<li><div class="save-button"><input type="submit" name="submit" value="Save"/></div></li>
+      	<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
       </ul>
-    </div><!-- /.navbar-collapse -->
+    </div>
+    <!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
     <div class="table-div">
@@ -150,9 +181,8 @@ public void jspInit() {
 
 <%
 	
-    		
-		//checking stuff
-		mergeManager.getListCount(incumbentsList);
+    //checking stuff
+	//mmergeManager.getListCount(incumbentsList);
     		
 	boolean newGroup=false, newPerson=false;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){

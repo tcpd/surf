@@ -106,7 +106,7 @@ public void jspInit() {
 			mergeManager.save(ge);
 		}
 	}
-	incumbentsList = mergeManager.getIncumbents();
+	incumbentsList = mergeManager.getIncumbents();	//use overloaded method getIncumbents(attribute, value)to filter
 	int[] progressData = mergeManager.getListCount(incumbentsList);
 	Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State"});
 	

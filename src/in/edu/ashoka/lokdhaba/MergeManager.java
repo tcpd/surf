@@ -125,6 +125,22 @@ public abstract class MergeManager {
 	}
 	
 	//returns a list of group of similar named incumbents
+	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String value){
+		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
+		for(Collection<Row> similarRows:listOfSimilarCandidates){
+			Multimap<String, Row> mp = LinkedHashMultimap.create();
+			for(Row row:similarRows){
+				if(row.get(attribute).equals(value))
+					mp.put(rowToId.get(row), row);
+				else
+					continue;
+			}
+			if(mp.values().size()>1)	//check whether there are more than 1 member in a group
+				listOfSet.add(mp);
+		}
+		return listOfSet;
+	}
+	
 	final public ArrayList<Multimap<String,Row>> getIncumbents(){
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
 		for(Collection<Row> similarRows:listOfSimilarCandidates){
@@ -207,7 +223,7 @@ public abstract class MergeManager {
 			}
 			attributeMap.put(attribute, valueSet);
 		}
-		System.out.println(attributeMap);
+		
 		return attributeMap; 
 	}
 	

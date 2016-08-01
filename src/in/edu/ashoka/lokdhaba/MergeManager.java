@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -20,6 +22,7 @@ public abstract class MergeManager {
     static SimilarNameMergeManager similarNameMergeManagerED1;
     static SimilarNameMergeManager similarNameMergeManagerED2;
     
+    static Map<String,Set<String>> attributesDataSet;
     ArrayList<Collection<Row>> listOfSimilarCandidates; 
     
     
@@ -192,6 +195,20 @@ public abstract class MergeManager {
 		statusCount[2] = j-i;
 		return statusCount;
 		
+	}
+	
+	public Map<String,Set<String>> getAttributesDataSet(String [] attributes){
+		Map<String,Set<String>> attributeMap = new HashMap<>();
+		
+		for(String attribute:attributes){
+			Set<String> valueSet = new HashSet<>();
+			for(Row row:d.getRows()){
+				valueSet.add(row.get(attribute));
+			}
+			attributeMap.put(attribute, valueSet);
+		}
+		System.out.println(attributeMap);
+		return attributeMap; 
 	}
 	
 }

@@ -15,11 +15,16 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="style.css">
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
 <title>Incumbency Checker</title>
 </head>
 <body>
 
+
+
 <%!
+//Setting Up the required variables
+
 boolean isFirst;
 Dataset d;
 MergeManager mergeManager;
@@ -42,6 +47,7 @@ public void jspInit() {
 %>
 
 <%
+
 
 	if(isFirst){
 		String file="";
@@ -80,30 +86,33 @@ public void jspInit() {
 	}else{
 		mergeManager.load();
 	}
+	
 	mergeManager.addSimilarCandidates();
 	
 
-	response.setContentType("text/html");
-	PrintWriter writer = response.getWriter();
-	
-	
-	if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
+	//response.setContentType("text/html");
+	//PrintWriter writer = response.getWriter();
+
+	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
+
+		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
+
 		String [] userRows = request.getParameterValues("row");
 		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.save(ge);
 		}
-		
 	}
+	incumbentsList = mergeManager.getIncumbents();
+	int[] progressData = mergeManager.getListCount(incumbentsList);
+	Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State"});
 	
-	
-	
-    
 
-    %>
+%>
+
 <form method="post">
     <nav class="navbar navbar-default navbar-fixed-top">
   <div class="containerir-fluid">
@@ -118,12 +127,14 @@ public void jspInit() {
       <a class="navbar-brand" href="#">Incumbency Checker</a>
     </div>
     <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right"> 
-      	<!--<li><p class="navbar-text">Group 5 of 20</p></li>-->
-      	<div class="save-button"><li><input type="submit" name="submit" value="Save"/></li></div>
+    <input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
+    <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav"> 
+      	<li><div class="navbar-text"><%= progressData[0] %> Total Records</div><li>
+      	<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
       </ul>
-    </div><!-- /.navbar-collapse -->
+    </div>
+    <!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
     <div class="table-div">
@@ -147,10 +158,8 @@ public void jspInit() {
 
 
 <%
-	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
-    		
-		//checking stuff
-		mergeManager.getListCount(incumbentsList);
+	
+    //checking stuff
     		
 	boolean newGroup=false, newPerson=false;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
@@ -168,10 +177,10 @@ public void jspInit() {
 				if(newGroup==true){
 					newGroup=false;
 					newPerson=false;
-					rowStyleData = "class=\"table-row-new-person\"";
+					rowStyleData = "class=\"table-row-new-person trow\"";
 				}else if(newPerson==true){
 						newPerson=false;
-						rowStyleData = "class=\"table-row-same-person\"";
+						rowStyleData = "class=\"table-row-same-person trow\"";
 					}else{rowStyleData = "";}
 				
 				
@@ -218,12 +227,16 @@ public void jspInit() {
 %>
 	</tbody>
 	</table>
-<!--</div>
-	<p style="margin-bottom:0;">
-	<div class="button-float">
-	<input type="submit" name="submit" value="Save"/>
-	</div>-->
 </form>
+<script type = "text/javascript">
+	$("document").ready(function(){
+		$(".trow").on("click", function(){
+			$(this).toggleClass("success");
+			var checkboxValue = $(this).find("td:first-child input[type]").prop("checked");
+			$(this).find("td:first-child input[type]").prop("checked", !checkboxValue);
+		});
+	});
 
+</script>
 </body>
 </html>

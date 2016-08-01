@@ -47,16 +47,12 @@ body{
 	width: 2.5em;
 }
 
-.save-button{
-	margin-top: 15px;
-	margin-right:40px;
+#saveButton{
+	margin-right:30px;
 }
 
-/*.button-float {
-	margin-top: 20px;
-	margin-left: 20px;
-	position:fixed;
-	top:.5in; 
-	right:.5in;
-	border-radius: 5%;
-}*/
+.trow{
+	font-weight: bold;
+}
+
+

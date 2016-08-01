@@ -20,6 +20,8 @@
 </head>
 <body>
 
+
+
 <%!
 //Setting Up the required variables
 
@@ -173,10 +175,10 @@ public void jspInit() {
 				if(newGroup==true){
 					newGroup=false;
 					newPerson=false;
-					rowStyleData = "class=\"table-row-new-person\"";
+					rowStyleData = "class=\"table-row-new-person trow\"";
 				}else if(newPerson==true){
 						newPerson=false;
-						rowStyleData = "class=\"table-row-same-person\"";
+						rowStyleData = "class=\"table-row-same-person trow\"";
 					}else{rowStyleData = "";}
 				
 				
@@ -224,6 +226,15 @@ public void jspInit() {
 	</tbody>
 	</table>
 </form>
+<script type = "text/javascript">
+	$("document").ready(function(){
+		$(".trow").on("click", function(){
+			$(this).toggleClass("success");
+			var checkboxValue = $(this).find("td:first-child input[type]").prop("checked");
+			$(this).find("td:first-child input[type]").prop("checked", !checkboxValue);
+		});
+	});
 
+</script>
 </body>
 </html>

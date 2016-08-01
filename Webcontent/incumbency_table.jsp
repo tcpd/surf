@@ -16,26 +16,6 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="style.css">
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
-    <script>
-    var Record = function(){
-    this.Name = "";
-    this.Sex = "";
-    this.Year = "";
-    this.Constituency = "";
-    this.Party = "";
-    this.State = "";
-    this.Position = "";
-    this.Votes = "";
-    this.ID = "";
-    this.mappedID = "";
-    this.groupID = "";
-    }
-
-    var Group = function(){
-    this.groupID = "";
-    this.groupMembers = new Array();
-    }
-    </script>
 <title>Incumbency Checker</title>
 </head>
 <body>
@@ -112,7 +92,6 @@ public void jspInit() {
 	//PrintWriter writer = response.getWriter();
 
 	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
-	int[] progressData = mergeManager.getListCount(incumbentsList);
 
 		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
@@ -125,15 +104,10 @@ public void jspInit() {
 			mergeManager.save(ge);
 		}
 	}
-		
+	incumbentsList = mergeManager.getIncumbents();
+	int[] progressData = mergeManager.getListCount(incumbentsList);
+
 %>
-
-	
-
-		
-    
-
-
 
 <form method="post">
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -182,7 +156,6 @@ public void jspInit() {
 <%
 	
     //checking stuff
-	//mmergeManager.getListCount(incumbentsList);
     		
 	boolean newGroup=false, newPerson=false;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){

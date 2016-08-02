@@ -55,4 +55,8 @@ body{
 	font-weight: bold;
 }
 
+.filterForm{
+	display: table;
+	margin-left:40%;
+}
 

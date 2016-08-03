@@ -16,6 +16,42 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="style.css">
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+<script>
+
+//function to strip alphabet from id
+function stripId(commentId){
+	var str = "";
+	for(var i=0;i<commentId.length;i++){
+		if(commentId[i]>='0' && commentId[i]<='9')
+			str+=commentId[i];
+	}
+	return str;
+}
+
+//script function to handle comments
+function commentHandler(commentId){
+	var commentNode = document.getElementById(commentId);
+	var id = stripId(commentId)
+	
+	var child = commentNode.childNodes[0];
+	if(child.tagName=="input"){
+		child.focus();
+		return;
+	}
+	var text = commentNode.innerText;
+	var inputNode = document.createElement("input");
+	inputNode.setAttribute("name", "commentParam"+id);
+	inputNode.setAttribute("id","input"+commentId);
+	inputNode.setAttribute("value",text);
+	inputNode.setAttribute("onclick","");
+	commentNode.replaceChild(inputNode, commentNode.childNodes[0]);
+
+	var node = commentNode.childNodes[0];
+	node.focus();
+	
+	
+}
+</script>
 <title>Incumbency Checker</title>
 </head>
 <body>
@@ -93,16 +129,28 @@ public void jspInit() {
 	//response.setContentType("text/html");
 	//PrintWriter writer = response.getWriter();
 
-	ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents();
+	ArrayList<Multimap<String, Row>> incumbentsList;
 
 		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
 
 		String [] userRows = request.getParameterValues("row");
+		//collect comment related information
+		Map<String,String[]> parameterMap = request.getParameterMap();
+		
+		Map<String,String> map = new HashMap<String,String>();
+		for(String name:parameterMap.keySet()){
+			if(name.contains("commentParam")){
+				map.put(name.substring(12),parameterMap.get(name)[0]);	//strip the key value before storing
+			}
+			
+		}
+		System.out.println(map);
 		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
+			mergeManager.updateComments(map);
 			mergeManager.save(ge);
 		}
 	}
@@ -152,6 +200,7 @@ public void jspInit() {
     	<th class="cell-table">Votes</th>
     	<th class="cell-table">ID</th>
     	<th>Person ID</th>
+    	<th>Comments</th>
     </tr>
     
     
@@ -217,17 +266,29 @@ public void jspInit() {
 					<td class="cell-table">
 					<%=row.get("mapped_ID")%>
 					</td>
+					<td class="cell-table">
+					<div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')">
+					<%=row.get("comments")%>
+					</div>
+					</td>
 				</tr>
 				
 				<%
 			}
 		}
 	}
+	
+	
 
 %>
+
+
 	</tbody>
 	</table>
 </form>
+
+<!--  script for highlighting and clicking the row-->
+
 <script type = "text/javascript">
 	$("document").ready(function(){
 		$(".trow").on("click", function(){
@@ -236,7 +297,6 @@ public void jspInit() {
 			$(this).find("td:first-child input[type]").prop("checked", !checkboxValue);
 		});
 	});
-
 </script>
 </body>
 </html>

@@ -62,6 +62,7 @@ public abstract class MergeManager {
     	this.d=d;
 		d.addToActualColumnName("ID");
 		d.addToActualColumnName("mapped_ID");
+		d.addToActualColumnName("comments");
 		//d.addToActualColumnName("is_processed");
     }
     
@@ -76,6 +77,7 @@ public abstract class MergeManager {
 		for(Row row:d.getRows()){
     		rowToId.put(row, row.get("ID"));
     		idToRow.put(row.get("ID"), row);
+    		row.set("comments", ""); 	//set comments to empty on initial mapping
     	}
 	}
 	
@@ -86,7 +88,7 @@ public abstract class MergeManager {
 		Multimap<String, String> mp = LinkedHashMultimap.create();
 		for(String id:ids){
 			mp.put(idToRow.get(id).get("common_group_id"), id);		//algorithm will decide the common_group_id
-			idToRow.get(id).set("is_processed", "true"); 	//set is_processed to true; this will keep track of number of rows being processed
+			//idToRow.get(id).set("is_processed", "true"); 	//set is_processed to true; this will keep track of number of rows being processed
 		}
 		
 		for(String key:mp.keySet()){
@@ -211,6 +213,13 @@ public abstract class MergeManager {
 		statusCount[2] = j-i;
 		return statusCount;
 		
+	}
+	
+	public void updateComments(Map<String,String> map){
+		for(String key:map.keySet()){
+			idToRow.get(key).set("comments", map.get(key));
+			//System.out.println(idToRow.get(key).get("comments"));
+		}
 	}
 	
 	public Map<String,Set<String>> getAttributesDataSet(String [] attributes){

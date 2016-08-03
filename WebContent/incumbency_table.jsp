@@ -19,6 +19,14 @@
     <title>Incumbency Checker</title>
 </head>
 <body>
+<script>
+if("<%=request.getParameter("filterParam")%>" != "null" && "<%=request.getParameter("filterValue")%>" != "null"){
+	$("#filterParamform").hide();
+}
+else{
+	$("#filterValueform").hide();
+}
+</script>
 
 <%!
    //Setting Up the required variables
@@ -99,16 +107,16 @@
    ArrayList<Multimap<String, Row>> incumbentsList = mergeManager.getIncumbents("State", "haryana");
 
 
-   if(request.getParameter("state") != null){
-	   if(request.getParameter("state").equals("All States")){
+   if(request.getParameter("filterValue") != null){
+	   if(request.getParameter("filterValue").equals("All States")){
 		   incumbentsList = mergeManager.getIncumbents();
 	   }
 	   else{
-		   incumbentsList = mergeManager.getIncumbents("State", request.getParameter("state"));
+		   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
 	   }
    }
    else{
-	   incumbentsList = mergeManager.getIncumbents("State", "haryana");
+	   incumbentsList = mergeManager.getIncumbents("State", "haryana"); //Default
    }
 
    if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
@@ -123,12 +131,12 @@
        }
    }
    
-   if(request.getParameter("state") != null){
-	   if(request.getParameter("state").equals("All States")){
+   if(request.getParameter("filterValue") != null){
+	   if(request.getParameter("filterValue").equals("All States")){
 		   incumbentsList = mergeManager.getIncumbents();
 	   }
 	   else{
-		   incumbentsList = mergeManager.getIncumbents("State", request.getParameter("state"));
+		   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
 	   }
    }
    else{
@@ -138,20 +146,44 @@
    int[] progressData = mergeManager.getListCount(incumbentsList);
 
 %>
-<div class="filterForm">
+<div class="filterForm" id="filterParamform">
+
 <form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
 				<div class="form-group">
-					<!--<select class="form-control" id="filterParam" name="paramName"></select>-->
-					<select class="form-control" id="filterValue" name="state">
-				<% if(request.getParameter("state") != null){
-					%><option><%=request.getParameter("state")%></option><% 
+				<select class="form-control" id="fiterParam" name="filterParam">
+				<% if(request.getParameter("filterParam") != null){
+					%><option><%=request.getParameter("filterParam")%></option><% 
 				}%>
-					<option value="All States"> All States</option>
+					<option value="State">States</option>
+					<option value="PC_name">Constituencies</option>
+					<option value="Party">Party</option>
+			</select>
+			<button type="submit" class="btn btn-default">Select FilterParam</button>
+</form>
+</div>
+<div class="filterForm" id="filterValueform">
+<form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
+			<div class="form-group">
+				<select class="form-control" id="fiterParam" name="filterParam">
+				<% if(request.getParameter("filterParam") != null){
+					%><option ><%=request.getParameter("filterParam")%></option><% 
+				}%>
+					<option value="State" >States</option>
+					<option value="PC_name" >Constituencies</option>
+					<option value="Party" >Party</option>
+			</select>
+			<select class="form-control" id="filterValue" name="filterValue">
+				<% if(request.getParameter("filterValue") != null){
+					%><option><%=request.getParameter("filterValue")%></option><% 
+				}%>
+					<option value="All States">All</option>
 					<option disabled>──────────</option>
 			</select>
 			<!--<select class="form-control" id="constDrop" name="const">
 				<option>Constituency</option>
 			</select>-->
+				</div>
+
 				</div>
 				<button type="submit" class="btn btn-default">Filter</button>
 </form>
@@ -174,11 +206,9 @@
            <input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
            <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
                <ul class="nav navbar-nav">
-              	   <li><div class="navbar-text" id="stateClick">State</div></li>
-              	   <li><div class="navbar-text" id="constClick">Constituency</div></li>
-              	   <li><div class="navbar-text" id="partyClick">Party</div></li>
                    <li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
                    <li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
+                   <!--<li><div class="navbar-text" id="test">Howdy</div></li>-->
                </ul>
            </div>
            <!-- /.navbar-collapse -->
@@ -284,6 +314,7 @@ for(var i = 0; i<filterParams.length; i++){
 
  };
  */
+ 
 
 <% Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State", "PC_name", "Party"});%>
 
@@ -305,19 +336,19 @@ filterDataValues["Party"] = new Array();
 
  var filterValue = document.getElementById("filterValue");
  
+
+ 
 // var filterParam = $("#filterParam").val();
-
-var values = filterDataValues["State"];
-
-$("#stateClick").on("click", function(){
-	values = filterDataValues["State"];
-});
-$("constClick").on("click", function(){
-	values = filterDataValues["PC_name"];
-});
-$("partyClick").on("click", function(){
-	values = filterDataValues["Party"];
-});
+var values = new Array();
+var filterParam = "<%=request.getParameter("filterParam")%>";
+if(filterParam != "null"){
+	values = filterDataValues[filterParam];
+}
+else{
+	filterParam = 
+	values = filterDataValues["State"];	
+}
+		
 
  for(var i = 0; i < values.length; i++) {
 	    var opt = values[i];
@@ -327,8 +358,10 @@ $("partyClick").on("click", function(){
 	    filterValue.appendChild(el);
  };
  
+
+ 
 $("#test").on("click", function(){
-	document.write(filterDataValues["State"]);
+	document.write("<%=request.getParameter("filterParam")%>" + "<%=request.getParameter("filterValue")%>");
 });
 </script>
 

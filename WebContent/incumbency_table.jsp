@@ -169,12 +169,19 @@ else{
 			
 		}
 		System.out.println(map);
+		boolean shouldSave = false;	//change to true in your code block if you want to update the csv
 		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
-			mergeManager.updateComments(map);
-			mergeManager.save(ge);
+			shouldSave = true;
 		}
+		if(!map.isEmpty()){
+			mergeManager.updateComments(map);
+			shouldSave = true;
+		}
+		
+		if(shouldSave)
+			mergeManager.save(ge);
 	}
 	
 		if(request.getParameter("filterValue") != null){

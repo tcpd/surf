@@ -1,14 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"
-    import="java.io.*"
-    import="in.edu.ashoka.lokdhaba.SurfExcel"  
-    import="in.edu.ashoka.lokdhaba.Dataset"
-    import="in.edu.ashoka.lokdhaba.Row"
-    import="in.edu.ashoka.lokdhaba.MergeManager"
-    import="java.util.*"
-    import="in.edu.ashoka.lokdhaba.Bihar"
-    import="com.google.common.collect.Multimap"
-    %>
+         pageEncoding="UTF-8"
+         import="java.io.*"
+         import="in.edu.ashoka.lokdhaba.SurfExcel"
+         import="in.edu.ashoka.lokdhaba.Dataset"
+         import="in.edu.ashoka.lokdhaba.Row"
+         import="in.edu.ashoka.lokdhaba.MergeManager"
+         import="java.util.*"
+         import="in.edu.ashoka.lokdhaba.Bihar"
+         import="com.google.common.collect.Multimap"
+%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -55,35 +55,40 @@ function commentHandler(commentId){
 <title>Incumbency Checker</title>
 </head>
 <body>
-
-
+<script>
+if("<%=request.getParameter("filterParam")%>" != "null" && "<%=request.getParameter("filterValue")%>" != "null"){
+	$("#filterParamform").hide();
+}
+else{
+	$("#filterValueform").hide();
+}
+</script>
 
 <%!
-//Setting Up the required variables
+   //Setting Up the required variables
 
-boolean isFirst;
-Dataset d;
-MergeManager mergeManager;
+   boolean isFirst;
+   Dataset d;
+   MergeManager mergeManager;
 
-//add other csv here or eventually take the file input from user
-static final String ge="/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
-static final String bihar="";
-static final String rajasthan="";
+   //add other csv here or eventually take the file input from user
+   static final String ge="/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+   static final String bihar="";
+   static final String rajasthan="";
 
 %>
 
 
 
 <%!
-public void jspInit() {
-	isFirst=true;
-    //writer.println("let's see where we are");
-	
-}
+   public void jspInit() {
+       isFirst=true;
+       //writer.println("let's see where we are");
+
+   }
 %>
 
 <%
-
 
 	if(isFirst){
 		String file="";
@@ -114,7 +119,12 @@ public void jspInit() {
 	}
 	
 	//get merge manager
-	mergeManager = MergeManager.getManager(request.getParameter("algorithm"), d);
+	if(request.getParameter("algorithm")!=null){
+		mergeManager = MergeManager.getManager(request.getParameter("algorithm"), d);
+	}
+	else{
+		mergeManager = MergeManager.getManager("exactSameName", d);
+	}
 	
 	if(mergeManager.isFirstReading()){
 		mergeManager.initializeIds();
@@ -130,6 +140,18 @@ public void jspInit() {
 	//PrintWriter writer = response.getWriter();
 
 	ArrayList<Multimap<String, Row>> incumbentsList;
+	
+	if(request.getParameter("filterValue") != null){
+		   if(request.getParameter("filterValue").equals("All States")){
+			   incumbentsList = mergeManager.getIncumbents();
+		   }
+		   else{
+			   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
+		   }
+	   }
+	   else{
+		   incumbentsList = mergeManager.getIncumbents(); //Default
+	   }
 
 		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
@@ -154,37 +176,92 @@ public void jspInit() {
 			mergeManager.save(ge);
 		}
 	}
-	incumbentsList = mergeManager.getIncumbents();	//use overloaded method getIncumbents(attribute, value)to filter
+	
+		if(request.getParameter("filterValue") != null){
+			   if(request.getParameter("filterValue").equals("All States")){
+				   incumbentsList = mergeManager.getIncumbents();
+			   }
+			   else{
+				   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
+			   }
+		   }
+		   else{
+			   incumbentsList = mergeManager.getIncumbents(); //Default
+		   }
+		
 	int[] progressData = mergeManager.getListCount(incumbentsList);
-	Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State"});
+	//Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State"});
 	
 
 %>
+<div class="filterForm" id="filterParamform">
+
+<form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
+				<div class="form-group">
+				<select class="form-control" id="fiterParam" name="filterParam">
+				<% if(request.getParameter("filterParam") != null){
+					%><option><%=request.getParameter("filterParam")%></option><% 
+				}%>
+					<option value="State">States</option>
+					<option value="PC_name">Constituencies</option>
+					<option value="Party">Party</option>
+			</select>
+			<button type="submit" class="btn btn-default">Select FilterParam</button>
+</form>
+</div>
+<div class="filterForm" id="filterValueform">
+<form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
+			<div class="form-group">
+				<select class="form-control" id="fiterParam" name="filterParam">
+				<% if(request.getParameter("filterParam") != null){
+					%><option ><%=request.getParameter("filterParam")%></option><% 
+				}%>
+					<option value="State" >States</option>
+					<option value="PC_name" >Constituencies</option>
+					<option value="Party" >Party</option>
+			</select>
+			<select class="form-control" id="filterValue" name="filterValue">
+				<% if(request.getParameter("filterValue") != null){
+					%><option><%=request.getParameter("filterValue")%></option><% 
+				}%>
+					<option value="All States">All</option>
+					<option disabled>──────────</option>
+			</select>
+			<!--<select class="form-control" id="constDrop" name="const">
+				<option>Constituency</option>
+			</select>-->
+				</div>
+
+				</div>
+				<button type="submit" class="btn btn-default">Filter</button>
+</form>
+</div>
 
 <form method="post">
     <nav class="navbar navbar-default navbar-fixed-top">
-  <div class="containerir-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#">Incumbency Checker</a>
-    </div>
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
-    <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav"> 
-      	<li><div class="navbar-text"><%= progressData[0] %> Total Records</div><li>
-      	<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
-      </ul>
-    </div>
-    <!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>
+  <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+           <div class="navbar-header">
+               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                   <span class="sr-only">Toggle navigation</span>
+                   <span class="icon-bar"></span>
+                   <span class="icon-bar"></span>
+                   <span class="icon-bar"></span>
+               </button>
+               <a class="navbar-brand" href="#">Incumbency Checker</a>
+           </div>
+           <!-- Collect the nav links, forms, and other content for toggling -->
+           <input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
+           <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
+               <ul class="nav navbar-nav">
+                   <li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
+                   <li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
+                   <!--<li><div class="navbar-text" id="test">Howdy</div></li>-->
+               </ul>
+           </div>
+           <!-- /.navbar-collapse -->
+       </div><!-- /.container-fluid -->
+   </nav>
     <div class="table-div">
     <table class="table table-hover">
     <tbody class="inside-table">
@@ -203,10 +280,12 @@ public void jspInit() {
     	<th>Comments</th>
     </tr>
     
-    
 
 
-<%
+           <%
+
+
+
 	
     //checking stuff
     		
@@ -287,16 +366,72 @@ public void jspInit() {
 	</table>
 </form>
 
-<!--  script for highlighting and clicking the row-->
+<script type="text/javascript">
+var filterParams = ["State", "PC_name", "Party"];
 
+
+ 
+ 
+
+<% Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State", "PC_name", "Party"});%>
+
+var filterDataValues = {};
+filterDataValues["State"] = new Array();
+filterDataValues["PC_name"] = new Array();
+filterDataValues["Party"] = new Array();
+
+ <%
+ for(String key : filterData.keySet()){
+ 	for(String value:filterData.get(key)){
+ 		%>
+ 		filterDataValues["<%=key%>"].push("<%=value%>");
+ 		<%
+ 	}
+ 	
+ }
+ %>
+
+ var filterValue = document.getElementById("filterValue");
+ 
+
+ 
+// var filterParam = $("#filterParam").val();
+var values = new Array();
+var filterParam = "<%=request.getParameter("filterParam")%>";
+if(filterParam != "null"){
+	values = filterDataValues[filterParam];
+}
+else{
+	filterParam = 
+	values = filterDataValues["State"];	
+}
+		
+
+ for(var i = 0; i < values.length; i++) {
+	    var opt = values[i];
+	    var el = document.createElement("option");
+	    el.textContent = opt;
+	    el.value = opt;
+	    filterValue.appendChild(el);
+ };
+ 
+
+ 
+$("#test").on("click", function(){
+	document.write("<%=request.getParameter("filterParam")%>" + "<%=request.getParameter("filterValue")%>");
+});
+</script>
+
+<!-- script for highlighting and checking rows -->
 <script type = "text/javascript">
-	$("document").ready(function(){
-		$(".trow").on("click", function(){
-			$(this).toggleClass("success");
-			var checkboxValue = $(this).find("td:first-child input[type]").prop("checked");
-			$(this).find("td:first-child input[type]").prop("checked", !checkboxValue);
-		});
-	});
+   $("document").ready(function(){
+       $(".trow").on("click", function(){
+           $(this).toggleClass("success");
+           var checkboxValue = $(this).find("td:first-child input[type]").prop("checked");
+           $(this).find("td:first-child input[type]").prop("checked", !checkboxValue);
+       });
+   });
+
 </script>
 </body>
 </html>

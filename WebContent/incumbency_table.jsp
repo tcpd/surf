@@ -38,7 +38,10 @@ function commentHandler(commentId){
 		child.focus();
 		return;
 	}
+	
 	var text = commentNode.innerText;
+	if(text==null)
+		text="";
 	var inputNode = document.createElement("input");
 	inputNode.setAttribute("name", "commentParam"+id);
 	inputNode.setAttribute("id","input"+commentId);
@@ -48,6 +51,8 @@ function commentHandler(commentId){
 
 	var node = commentNode.childNodes[0];
 	node.focus();
+	
+	
 	
 	
 }
@@ -352,10 +357,10 @@ else{
 					<td class="cell-table">
 					<%=row.get("mapped_ID")%>
 					</td>
-					<td class="cell-table">
-					<div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')">
+					<td class="cell-table" id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')">
+					<%-- <div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')"> --%>
 					<%=row.get("comments")%>
-					</div>
+					<!-- </div> -->
 					</td>
 				</tr>
 				

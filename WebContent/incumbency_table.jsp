@@ -16,7 +16,9 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="style.css">
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script>
+
 
 //function to strip alphabet from id
 function stripId(commentId){
@@ -151,7 +153,7 @@ else{
 	
 	if(request.getParameter("filterParam") != null){
 		   if(request.getParameter("filterValue") != null){
-			   if(request.getParameter("filterValue").equals("All States")){
+			   if(request.getParameter("filterValue").equals("All Records")){
 				   incumbentsList = mergeManager.getIncumbents();
 			   }
 			   else{
@@ -200,7 +202,7 @@ else{
 	
 		if(request.getParameter("filterParam") != null){
 			   if(request.getParameter("filterValue") != null){
-				   if(request.getParameter("filterValue").equals("All States")){
+				   if(request.getParameter("filterValue").equals("All Records")){
 					   incumbentsList = mergeManager.getIncumbents();
 				   }
 				   else{
@@ -220,38 +222,16 @@ else{
 	
 
 %>
-<div id="filterParamform">
-
-<form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
-				<div class="form-group">
-				<select class="form-control" id="fiterParam" name="filterParam">
-				<% if(request.getParameter("filterParam") != null){
-					%><option><%=request.getParameter("filterParam")%></option><% 
-				}%>
-					<option value="State">States</option>
-					<option value="PC_name">Constituencies</option>
-					<option value="Party">Party</option>
-			</select>
-			<button type="submit" class="btn btn-default">Select Filter Parameter</button>
-</form>
-</div>
 <div id="filterValueform">
 <form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
 			<div class="form-group">
-				<select class="form-control" id="fiterParam" name="filterParam">
-				<% if(request.getParameter("filterParam") != null){
-					%><option ><%=request.getParameter("filterParam")%></option><% 
-				}%>
-					<option value="State" >States</option>
-					<option value="PC_name" >Constituencies</option>
+				<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
+					<option value="State" id="Primary">State</option>
 					<option value="Party" >Party</option>
+					<option value="PC_name" >Constituencies</option>
 			</select>
 			<select class="form-control" id="filterValue" name="filterValue">
-				<% if(request.getParameter("filterValue") != null){
-					%><option><%=request.getParameter("filterValue")%></option><% 
-				}%>
-					<option value="All States">All</option>
-					<option disabled>──────────</option>
+				<option value="All Records">All Records</option>
 			</select>
 			<!--<select class="form-control" id="constDrop" name="const">
 				<option>Constituency</option>
@@ -309,9 +289,6 @@ else{
 
 
            <%
-
-
-
 	
     //checking stuff
     		
@@ -395,10 +372,6 @@ else{
 <script type="text/javascript">
 var filterParams = ["State", "PC_name", "Party"];
 
-
- 
- 
-
 <% Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State", "PC_name", "Party"});%>
 
 var filterDataValues = {};
@@ -417,29 +390,42 @@ filterDataValues["Party"] = new Array();
  }
  %>
 
- var filterValue = document.getElementById("filterValue");
- 
 
  
 // var filterParam = $("#filterParam").val();
-var values = new Array();
-var filterParam = "<%=request.getParameter("filterParam")%>";
-if(filterParam != "null"){
-	values = filterDataValues[filterParam];
-}
-else{
-	filterParam = 
-	values = filterDataValues["State"];	
-}
-		
 
- for(var i = 0; i < values.length; i++) {
+var values = new Array();
+
+var filterValue = document.getElementById("filterValue");
+values = filterDataValues["State"];
+for(var i = 0; i < values.length; i++) {
+    var opt = values[i];
+    var el = document.createElement("option");
+    el.textContent = opt;
+    el.value = opt;
+    filterValue.appendChild(el);
+};
+
+function populateDropdown() {
+    var filterParamValue = document.getElementById("filterParam").value;
+	while(filterValue.hasChildNodes()){
+		filterValue.removeChild(filterValue.firstChild);
+	}
+	var allRecords = document.createElement("option");
+	allRecords.textContent = "All Records";
+	allRecords.value = "All Records";
+	filterValue.appendChild(allRecords);
+	values = filterDataValues[filterParamValue];
+	for(var i = 0; i < values.length; i++) {
 	    var opt = values[i];
 	    var el = document.createElement("option");
 	    el.textContent = opt;
 	    el.value = opt;
 	    filterValue.appendChild(el);
- };
+	};
+
+}
+
  
 
  

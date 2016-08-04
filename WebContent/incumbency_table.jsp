@@ -348,7 +348,7 @@ else{
 					<td class="cell-table">
 					<%=row.get("mapped_ID")%>
 					</td>
-					<td class="cell-table" id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')">
+					<td class="cell-table" id="comment-<%=row.get("ID")%>" onclick="commentHandler('comment-<%=row.get("ID")%>')">
 					<%-- <div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')"> --%>
 					<%=row.get("comments")%>
 					<!-- </div> -->
@@ -396,6 +396,8 @@ filterDataValues["Party"] = new Array();
 
 var values = new Array();
 
+//Sets default for filterValue
+
 var filterValue = document.getElementById("filterValue");
 values = filterDataValues["State"];
 values.sort();
@@ -406,6 +408,8 @@ for(var i = 0; i < values.length; i++) {
     el.value = opt;
     filterValue.appendChild(el);
 };
+
+//Populates Dropdown on the basis of the filter Parameters
 
 function populateDropdown() {
     var filterParamValue = document.getElementById("filterParam").value;
@@ -439,11 +443,18 @@ $("#test").on("click", function(){
 <!-- script for highlighting and checking rows -->
 <script type = "text/javascript">
    $("document").ready(function(){
-       $(".trow").on("click", function(){
-           $(this).toggleClass("success");
-           var checkboxValue = $(this).find("td:first-child input[type]").prop("checked");
-           $(this).find("td:first-child input[type]").prop("checked", !checkboxValue);
+       $("tr td:not(:last-child)").on("click", function(){
+    	   $(this).parent().toggleClass("success");
+           var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
+           $(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
        });
+       $("tr td:first-child)").on("click", function(){
+           $(this).parent().toggleClass("success");
+       });
+
+
+       
+       
    });
 
 </script>

@@ -77,7 +77,7 @@ else{
    MergeManager mergeManager;
 
    //add other csv here or eventually take the file input from user
-   static final String ge="/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+   static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
    static final String bihar="";
    static final String rajasthan="";
 
@@ -125,10 +125,13 @@ else{
 	
 	//get merge manager
 	if(request.getParameter("algorithm")!=null){
-		mergeManager = MergeManager.getManager(request.getParameter("algorithm"), d);
+		String algorithm = request.getParameter("algorithm").toString();
+		mergeManager = MergeManager.getManager(algorithm, d);
+		session.setAttribute("algorithm", algorithm);
 	}
 	else{
-		mergeManager = MergeManager.getManager("exactSameName", d);
+		String algorithm = session.getAttribute("algorithm").toString();
+		mergeManager = MergeManager.getManager(algorithm, d);
 	}
 	
 	if(mergeManager.isFirstReading()){
@@ -146,24 +149,30 @@ else{
 
 	ArrayList<Multimap<String, Row>> incumbentsList;
 	
-	if(request.getParameter("filterValue") != null){
-		   if(request.getParameter("filterValue").equals("All States")){
-			   incumbentsList = mergeManager.getIncumbents();
+	if(request.getParameter("filterParam") != null){
+		   if(request.getParameter("filterValue") != null){
+			   if(request.getParameter("filterValue").equals("All States")){
+				   incumbentsList = mergeManager.getIncumbents();
+			   }
+			   else{
+				   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
+			   }   
 		   }
-		   else{
-			   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
-		   }
-	   }
-	   else{
-		   incumbentsList = mergeManager.getIncumbents(); //Default
-	   }
+	}
+	else{
+		 incumbentsList = mergeManager.getIncumbents(); //Default
+	}
+	
+
 
 		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
 		//System.out.println(checkedRows);
 
 		String [] userRows = request.getParameterValues("row");
-		//collect comment related information
+		
+		//Collect comment related information
+		
 		Map<String,String[]> parameterMap = request.getParameterMap();
 		
 		Map<String,String> map = new HashMap<String,String>();
@@ -189,24 +198,29 @@ else{
 			mergeManager.save(ge);
 	}
 	
-		if(request.getParameter("filterValue") != null){
-			   if(request.getParameter("filterValue").equals("All States")){
-				   incumbentsList = mergeManager.getIncumbents();
+		if(request.getParameter("filterParam") != null){
+			   if(request.getParameter("filterValue") != null){
+				   if(request.getParameter("filterValue").equals("All States")){
+					   incumbentsList = mergeManager.getIncumbents();
+				   }
+				   else{
+					   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
+				   }   
 			   }
 			   else{
-				   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
+				   incumbentsList = mergeManager.getIncumbents();
 			   }
-		   }
-		   else{
-			   incumbentsList = mergeManager.getIncumbents(); //Default
-		   }
+		}
+		else{
+			 incumbentsList = mergeManager.getIncumbents(); //Default
+		}
 		
 	int[] progressData = mergeManager.getListCount(incumbentsList);
 	//Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State"});
 	
 
 %>
-<div class="filterForm" id="filterParamform">
+<div id="filterParamform">
 
 <form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
 				<div class="form-group">
@@ -218,10 +232,10 @@ else{
 					<option value="PC_name">Constituencies</option>
 					<option value="Party">Party</option>
 			</select>
-			<button type="submit" class="btn btn-default">Select FilterParam</button>
+			<button type="submit" class="btn btn-default">Select Filter Parameter</button>
 </form>
 </div>
-<div class="filterForm" id="filterValueform">
+<div id="filterValueform">
 <form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
 			<div class="form-group">
 				<select class="form-control" id="fiterParam" name="filterParam">

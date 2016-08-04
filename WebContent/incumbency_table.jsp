@@ -398,6 +398,7 @@ var values = new Array();
 
 var filterValue = document.getElementById("filterValue");
 values = filterDataValues["State"];
+values.sort();
 for(var i = 0; i < values.length; i++) {
     var opt = values[i];
     var el = document.createElement("option");
@@ -416,6 +417,7 @@ function populateDropdown() {
 	allRecords.value = "All Records";
 	filterValue.appendChild(allRecords);
 	values = filterDataValues[filterParamValue];
+	values.sort();
 	for(var i = 0; i < values.length; i++) {
 	    var opt = values[i];
 	    var el = document.createElement("option");

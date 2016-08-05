@@ -62,14 +62,6 @@ function commentHandler(commentId){
 <title>Incumbency Checker</title>
 </head>
 <body>
-<script>
-if("<%=request.getParameter("filterParam")%>" != "null" && "<%=request.getParameter("filterValue")%>" != "null"){
-	$("#filterParamform").hide();
-}
-else{
-	$("#filterValueform").hide();
-}
-</script>
 
 <%!
    //Setting Up the required variables
@@ -150,22 +142,6 @@ else{
 	//PrintWriter writer = response.getWriter();
 
 	ArrayList<Multimap<String, Row>> incumbentsList;
-	
-	if(request.getParameter("filterParam") != null){
-		   if(request.getParameter("filterValue") != null){
-			   if(request.getParameter("filterValue").equals("All Records")){
-				   incumbentsList = mergeManager.getIncumbents();
-			   }
-			   else{
-				   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
-			   }   
-		   }
-	}
-	else{
-		 incumbentsList = mergeManager.getIncumbents(); //Default
-	}
-	
-
 
 		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
@@ -217,29 +193,22 @@ else{
 			 incumbentsList = mergeManager.getIncumbents(); //Default
 		}
 		
-	int[] progressData = mergeManager.getListCount(incumbentsList);
-	//Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State"});
-	
+	int[] progressData = mergeManager.getListCount(incumbentsList);	
 
 %>
-<div id="filterValueform">
-<form class="navbar-form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
-			<div class="form-group">
-				<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
-					<option value="State" id="Primary">State</option>
-					<option value="Party" >Party</option>
-					<option value="PC_name" >Constituencies</option>
-			</select>
-			<select class="form-control" id="filterValue" name="filterValue">
-				<option value="All Records">All Records</option>
-			</select>
-			<!--<select class="form-control" id="constDrop" name="const">
-				<option>Constituency</option>
-			</select>-->
-				</div>
-
-				</div>
-				<button type="submit" class="btn btn-default">Filter</button>
+<div class="container filterForm">
+<form class="form-inline" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
+<div class="form-group">
+	<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
+		<option value="State" id="Primary">State</option>
+		<option value="Party" >Party</option>
+		<option value="PC_name" >Constituencies</option>
+	</select>
+	<select class="form-control" id="filterValue" name="filterValue">
+		<option value="All Records">All Records</option>
+	</select>
+	<button type="submit" class="btn btn-default">Filter</button>
+</div>
 </form>
 </div>
 
@@ -448,13 +417,6 @@ $("#test").on("click", function(){
            var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
            $(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
        });
-       $("tr td:first-child)").on("click", function(){
-           $(this).parent().toggleClass("success");
-       });
-
-
-       
-       
    });
 
 </script>

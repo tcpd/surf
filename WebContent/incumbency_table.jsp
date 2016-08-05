@@ -62,15 +62,6 @@ function commentHandler(commentId){
 <title>Incumbency Checker</title>
 </head>
 <body>
-<script>
-if("<%=request.getParameter("filterParam")%>" != "null" && "<%=request.getParameter("filterValue")%>" != "null"){
-	$("#filterParamform").hide();
-}
-else{
-	$("#filterValueform").hide();
-}
-</script>
-
 <%!
    //Setting Up the required variables
 
@@ -150,22 +141,6 @@ else{
 	//PrintWriter writer = response.getWriter();
 
 	ArrayList<Multimap<String, Row>> incumbentsList;
-	
-	if(request.getParameter("filterParam") != null){
-		   if(request.getParameter("filterValue") != null){
-			   if(request.getParameter("filterValue").equals("All Records")){
-				   incumbentsList = mergeManager.getIncumbents();
-			   }
-			   else{
-				   incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
-			   }   
-		   }
-	}
-	else{
-		 incumbentsList = mergeManager.getIncumbents(); //Default
-	}
-	
-
 
 		if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 		//String checkedRows = request.getParameter("row");
@@ -210,11 +185,11 @@ else{
 				   }   
 			   }
 			   else{
-				   incumbentsList = mergeManager.getIncumbents();
+				   incumbentsList = mergeManager.getIncumbents("State", "haryana");
 			   }
 		}
 		else{
-			 incumbentsList = mergeManager.getIncumbents(); //Default
+			 incumbentsList = mergeManager.getIncumbents("State", "haryana"); //Default
 		}
 		
 	int[] progressData = mergeManager.getListCount(incumbentsList);
@@ -439,10 +414,10 @@ $("#test").on("click", function(){
 <!-- script for highlighting and checking rows -->
 <script type = "text/javascript">
    $("document").ready(function(){
-       $(".trow").on("click", function(){
-           $(this).toggleClass("success");
-           var checkboxValue = $(this).find("td:first-child input[type]").prop("checked");
-           $(this).find("td:first-child input[type]").prop("checked", !checkboxValue);
+       $("tr td:not(:last-child)").on("click", function(){
+           $(this).parent().toggleClass("success");
+           var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
+           $(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
        });
    });
 

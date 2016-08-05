@@ -10,7 +10,7 @@
   	<servlet-name>IncumbencyTable</servlet-name>
   	<jsp-file>/incumbency_table.jsp</jsp-file>
   	<init-param>
-  		<param-name>filePath</param-name>
+  		<param-name>gePath</param-name>
   		<param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv</param-value>
   	</init-param>
   </servlet>

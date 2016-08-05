@@ -70,10 +70,9 @@ function commentHandler(commentId){
    MergeManager mergeManager;
 
    //add other csv here or eventually take the file input from user
-   static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+   //static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
    static final String bihar="";
    static final String rajasthan="";
-
 %>
 
 
@@ -87,7 +86,9 @@ function commentHandler(commentId){
 %>
 
 <%
-
+	//paths go here
+	String ge = pageContext.getServletConfig().getInitParameter("gePath").toString();
+	
 	if(isFirst){
 		String file="";
 		if(request.getParameter("dataset").equals("ge")){

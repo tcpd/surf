@@ -3,9 +3,12 @@ package in.edu.ashoka.lokdhaba;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -128,6 +131,7 @@ public abstract class MergeManager {
 	
 	//returns a list of group of similar named incumbents
 	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String value){
+		
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
 		for(Collection<Row> similarRows:listOfSimilarCandidates){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
@@ -140,6 +144,7 @@ public abstract class MergeManager {
 			if(mp.values().size()>1)	//check whether there are more than 1 member in a group
 				listOfSet.add(mp);
 		}
+		sortAlphabetically(listOfSet);
 		return listOfSet;
 	}
 	
@@ -152,9 +157,23 @@ public abstract class MergeManager {
 			}
 			listOfSet.add(mp);
 		}
+		sortAlphabetically(listOfSet);
 		return listOfSet;
 	}
 	
+	final public void sortAlphabetically(ArrayList<Multimap<String,Row>> listOfSet){
+		//Queue<String> pq = new PriorityQueue<>();
+		listOfSet.sort(new Comparator<Multimap<String,Row>>(){
+
+			@Override
+			public int compare(Multimap<String, Row> o1, Multimap<String, Row> o2) {
+				
+				return o1.values().iterator().next().get("Name").compareTo(o2.values().iterator().next().get("Name"));
+			}
+			
+		});
+		
+	}
 	
 	
 	//check whether this row is mapped to another name

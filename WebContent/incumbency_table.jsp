@@ -9,6 +9,7 @@ import="java.util.*"
 import="in.edu.ashoka.lokdhaba.Bihar"
 import="com.google.common.collect.Multimap"
 %>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -19,6 +20,8 @@ import="com.google.common.collect.Multimap"
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script>
 
+
+//SCRIPTS TO HANDLE COMMENTS
 
 //function to strip alphabet from id
 function stripId(commentId){
@@ -62,17 +65,20 @@ function commentHandler(commentId){
 <title>Incumbency Checker</title>
 </head>
 <body>
+
 	<%!
-   //Setting Up the required variables
+   //SETTING UP RREQUIRED VARIABLES
 
 	boolean isFirst;
 	Dataset d;
 	MergeManager mergeManager;
 
-   //add other csv here or eventually take the file input from user
-   //static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
-	static final String bihar="";
-	static final String rajasthan="";
+	
+
+    //add other csv here or eventually take the file input from user
+    //static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
+	//static final String bihar="";
+	//static final String rajasthan="";
 	%>
 
 
@@ -86,114 +92,128 @@ function commentHandler(commentId){
    %>
 
    <%
+   
+   //setUpParameter sets up a parameter which can be used across same page reloads and different pages.
+	
+   public final String setUpParameter(String param){
+	   if(request.getParameter(param)!= null){
+			param = request.getParameter(param).toString();
+			session.setAttribute(param, param);
+			return param;
+		}
+	   
+	   else{
+			param = session.getAttribute(param);
+			return param;
+		}   
+    }
+   
+   	String algorithm = setUpParameter("algorithm");
+   	String dataset = setUpParameter("dataset");
+   	String filterParam = setUpParameter("filterParam");
+   	String filterValue = setUpParameter("filterValue");
+
+   
+   
 	//paths go here
    String ge = pageContext.getServletConfig().getInitParameter("gePath").toString();
    
-   if(isFirst){
-   String file="";
-   if(request.getParameter("dataset").equals("ge")){
-   file = ge;
-}
-else if(request.getParameter("dataset").equals("bihar"))
-file = bihar;
-else if(request.getParameter("dataset").equals("rajasthan"))
-file = rajasthan;
-else {}
-
-try {
-d = new Dataset(file);
-Bihar.initRowFormat(d.getRows(), d);
-
-
-		    /* SurfExcel.assignUnassignedIds(d.getRows(), "ID");
-		    rowToId = new HashMap<Row, String>();
-		    idToRow = new HashMap<String, Row>();
-		    Bihar.generateInitialIDMapper(d.getRows(),rowToId,idToRow);
-		    resultMap = Bihar.getExactSamePairs(d.getRows(),d); */
-		}catch(IOException ioex){
+	if(isFirst){
+	String file="";
+	if(request.getParameter("dataset").equals("ge")){
+	file = ge;
+	}
+	else if(request.getParameter("dataset").equals("bihar"))
+	file = bihar;
+	else if(request.getParameter("dataset").equals("rajasthan"))
+	file = rajasthan;
+	else {}
+	
+	try {
+	d = new Dataset(file);
+	Bihar.initRowFormat(d.getRows(), d);
+	
+	}
+	
+	catch(IOException ioex){
 		ioex.printStackTrace();
 	}
 	
 	isFirst = false;
-}
+	}
 
-	//get merge manager
-if(request.getParameter("algorithm")!=null){
-String algorithm = request.getParameter("algorithm").toString();
-mergeManager = MergeManager.getManager(algorithm, d);
-session.setAttribute("algorithm", algorithm);
-}
-else{
-String algorithm = session.getAttribute("algorithm").toString();
-mergeManager = MergeManager.getManager(algorithm, d);
-}
+	//SETs UP mergeManager
+	mergeManager = MergeManager.getManager(algorithm, d);
 
-if(mergeManager.isFirstReading()){
-mergeManager.initializeIds();
-mergeManager.performInitialMapping();
-}else{
-mergeManager.load();
-}
-
-mergeManager.addSimilarCandidates();
+	
+	//Initial Mapping by mergeManager
+	if(mergeManager.isFirstReading()){
+		mergeManager.initializeIds();
+		mergeManager.performInitialMapping();
+	}
+	else{
+	    mergeManager.load();
+	}
+	
+	mergeManager.addSimilarCandidates();
 
 
 	//response.setContentType("text/html");
 	//PrintWriter writer = response.getWriter();
 
-ArrayList<Multimap<String, Row>> incumbentsList;
-
-if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
-		//String checkedRows = request.getParameter("row");
-		//System.out.println(checkedRows);
-
-		String [] userRows = request.getParameterValues("row");
-		
-		//Collect comment related information
-		
-		Map<String,String[]> parameterMap = request.getParameterMap();
-		
-		Map<String,String> map = new HashMap<String,String>();
-		for(String name:parameterMap.keySet()){
-		if(name.contains("commentParam")){
-				map.put(name.substring(12),parameterMap.get(name)[0]);	//strip the key value before storing
-			}
+	ArrayList<Multimap<String, Row>> incumbentsList;
+	
+	if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
+			//String checkedRows = request.getParameter("row");
+			//System.out.println(checkedRows);
+	
+			String [] userRows = request.getParameterValues("row");
 			
+			//Collect comment related information
+			
+			Map<String,String[]> parameterMap = request.getParameterMap();
+			
+			Map<String,String> map = new HashMap<String,String>();
+			for(String name:parameterMap.keySet()){
+			if(name.contains("commentParam")){
+					map.put(name.substring(12),parameterMap.get(name)[0]);	//strip the key value before storing
+				}
+				
+			}
+			System.out.println(map);
+			boolean shouldSave = false;	//change to true in your code block if you want to update the csv
+			if(userRows!=null && userRows.length>0){
+			mergeManager.merge(userRows);
+			mergeManager.updateMappedIds();
+			shouldSave = true;
 		}
-		System.out.println(map);
-		boolean shouldSave = false;	//change to true in your code block if you want to update the csv
-		if(userRows!=null && userRows.length>0){
-		mergeManager.merge(userRows);
-		mergeManager.updateMappedIds();
+		if(!map.isEmpty()){
+		mergeManager.updateComments(map);
 		shouldSave = true;
-	}
-	if(!map.isEmpty()){
-	mergeManager.updateComments(map);
-	shouldSave = true;
-}
-
-if(shouldSave)
-mergeManager.save(ge);
-}
-
-if(request.getParameter("filterParam") != null){
-if(request.getParameter("filterValue") != null){
-if(request.getParameter("filterValue").equals("All Records")){
-incumbentsList = mergeManager.getIncumbents();
-}
-else{
-incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
-}   
-}
-else{
-incumbentsList = mergeManager.getIncumbents("State", "haryana");
-}
-}
-else{
-			 incumbentsList = mergeManager.getIncumbents("State", "haryana"); //Default
-			}
-			
-			int[] progressData = mergeManager.getListCount(incumbentsList);	
+		}
+		
+		if(shouldSave)
+		mergeManager.save(ge);
+		}
+		
+			if(filterParam != null){
+			if(filterValue != null){
+			if(filterValue.equals("All Records")){
+			incumbentsList = mergeManager.getIncumbents();
+		}
+		else{
+			incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
+		}   
+		}
+		else{
+			incumbentsList = mergeManager.getIncumbents();
+		}
+		}
+		else{
+			incumbentsList = mergeManager.getIncumbents(); //Default
+		}
+					
+		int[] progressData = mergeManager.getListCount(incumbentsList);	
 
 			%>
 			<div class="container filterForm">

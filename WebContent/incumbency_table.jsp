@@ -90,12 +90,12 @@ function commentHandler(commentId){
 
    }
    %>
-
-   <%
+   
+   <!--
    
    //setUpParameter sets up a parameter which can be used across same page reloads and different pages.
 	
-   public final String setUpParameter(String param){
+   final String setUpParameter(String param){
 	   if(request.getParameter(param)!= null){
 			param = request.getParameter(param).toString();
 			session.setAttribute(param, param);
@@ -107,40 +107,79 @@ function commentHandler(commentId){
 			return param;
 		}   
     }
-   
-   	String algorithm = setUpParameter("algorithm");
-   	String dataset = setUpParameter("dataset");
-   	String filterParam = setUpParameter("filterParam");
-   	String filterValue = setUpParameter("filterValue");
+   -->
 
    
+   <%
    
+	//SETTING UP THE 4 VARIABLES
+	
+	String algorithm, dataset, filterParam, filterValue;
+	
+	   if(request.getParameter("algorithm")!= null){
+			algorithm = request.getParameter("algorithm").toString();
+			session.setAttribute("algorithm", algorithm);	
+			
+	   }
+	   
+	   else{
+			algorithm = session.getAttribute("algorithm").toString();
+		}
+	   
+	   if(request.getParameter("dataset")!= null){
+			dataset = request.getParameter("dataset").toString();
+			session.setAttribute("dataset", dataset);	
+			
+	   }
+	   
+	   else{
+			dataset = session.getAttribute("dataset").toString();
+		}
+	   
+	   if(request.getParameter("filterParam")!= null){
+			filterParam = request.getParameter("filterParam").toString();
+			session.setAttribute("filterParam", filterParam);	
+		}
+	   
+	   else{
+			filterParam = session.getAttribute("filterParam").toString();
+		}
+	   
+	   if(request.getParameter("filterValue")!= null){
+			filterValue = request.getParameter("filterValue").toString();
+			session.setAttribute("filterValue", filterValue);	
+		}
+	   
+	   else{
+			filterValue = session.getAttribute("filterValue").toString();
+		}
+   
+	   
+	//SETTING UP THE DATASET FOR MERGEMANAGER
+	
 	//paths go here
-   String ge = pageContext.getServletConfig().getInitParameter("gePath").toString();
+    String ge = pageContext.getServletConfig().getInitParameter("gePath").toString();
    
 	if(isFirst){
-	String file="";
-	if(request.getParameter("dataset").equals("ge")){
-	file = ge;
-	}
-	else if(request.getParameter("dataset").equals("bihar"))
-	file = bihar;
-	else if(request.getParameter("dataset").equals("rajasthan"))
-	file = rajasthan;
-	else {}
+		String file="";
+		if(request.getParameter("dataset").equals("ge")){
+			file = ge;
+		}
 	
-	try {
-	d = new Dataset(file);
-	Bihar.initRowFormat(d.getRows(), d);
-	
-	}
-	
-	catch(IOException ioex){
-		ioex.printStackTrace();
+		try {
+			d = new Dataset(file);
+			Bihar.initRowFormat(d.getRows(), d);
+		
+		}
+		
+		catch(IOException ioex){
+			ioex.printStackTrace();
+		}
+		
+		isFirst = false;
 	}
 	
-	isFirst = false;
-	}
+
 
 	//SETs UP mergeManager
 	mergeManager = MergeManager.getManager(algorithm, d);
@@ -162,6 +201,8 @@ function commentHandler(commentId){
 	//PrintWriter writer = response.getWriter();
 
 	ArrayList<Multimap<String, Row>> incumbentsList;
+	
+	//SAVES MERGES AND COMMENTS 
 	
 	if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
 			//String checkedRows = request.getParameter("row");
@@ -195,6 +236,8 @@ function commentHandler(commentId){
 		if(shouldSave)
 		mergeManager.save(ge);
 		}
+	
+		//WORKING WITH FILTER PARAMETERS
 		
 			if(filterParam != null){
 			if(filterValue != null){
@@ -215,7 +258,9 @@ function commentHandler(commentId){
 					
 		int[] progressData = mergeManager.getListCount(incumbentsList);	
 
-			%>
+	%>
+	
+
 			<div class="container filterForm">
 				<form class="form-inline" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
 					<div class="form-group">
@@ -277,34 +322,37 @@ function commentHandler(commentId){
 							
 
 
-							<%
+<%
 							
-    //checking stuff
+    //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 							
-							boolean newGroup=false, newPerson=false;
-							for(Multimap<String, Row> incumbentsGroup:incumbentsList){
-							newGroup=true;
-							for(String key:incumbentsGroup.keySet()){
-							newPerson=true;
-							for(Row row:incumbentsGroup.get(key)){
-							String tableData;
-							String rowStyleData;
-							if(mergeManager.isMappedToAnother(row.get("ID"))){
-							tableData = "<mapped dummy tag>";
-						} else {
-						tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
-					}
-					if(newGroup==true){
+	boolean newGroup=false, newPerson=false;
+	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
+		newGroup=true;
+		for(String key:incumbentsGroup.keySet()){
+			newPerson=true;
+			for(Row row:incumbentsGroup.get(key)){
+				String tableData;
+				String rowStyleData;
+				if(mergeManager.isMappedToAnother(row.get("ID"))){
+					tableData = "<mapped dummy tag>";
+				} 
+				else {
+					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
+				}
+				if(newGroup==true){
 					newGroup=false;
 					newPerson=false;
 					rowStyleData = "class=\"table-row-new-person trow\"";
-				}else if(newPerson==true){
-				newPerson=false;
-				rowStyleData = "class=\"table-row-same-person trow\"";
-			}else{rowStyleData = "";}
+				}
+				else if(newPerson==true){
+					newPerson=false;
+					rowStyleData = "class=\"table-row-same-person trow\"";
+				}
+				else{rowStyleData = "";}
 			
 			
-			%>
+%>
 			<tr <%=rowStyleData %>>
 				<td class="cell-table"><%=tableData %></td>
 				<td class="cell-table">
@@ -359,14 +407,17 @@ function commentHandler(commentId){
 </form>
 
 <script type="text/javascript">
-var filterParams = ["State", "PC_name", "Party"];
 
-<% Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(new String[]{"State", "PC_name", "Party"});%>
+//CONSTRUCTS MAPS FROM FILTER PARAMETERS TO FILTER VALUES
+
+<% String[] filterParams = {"State", "PC_name", "Party"}; //Enter new parameters here
+
+Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(filterParams);%>
 
 var filterDataValues = {};
-filterDataValues["State"] = new Array();
-filterDataValues["PC_name"] = new Array();
-filterDataValues["Party"] = new Array();
+<% for(int i = 0; i<filterParams.length; i++){ %>
+	filterDataValues["<%=filterParams[i]%>"] = new Array();
+<%}%>
 
 <%
 for(String key : filterData.keySet()){
@@ -380,15 +431,12 @@ for(String key : filterData.keySet()){
 %>
 
 
-
-// var filterParam = $("#filterParam").val();
-
 var values = new Array();
 
-//Sets default for filterValue
+//SETS DEFAULT FOR FILTERVALUE
 
 var filterValue = document.getElementById("filterValue");
-values = filterDataValues["State"];
+values = filterDataValues["State"]; //Default
 values.sort();
 for(var i = 0; i < values.length; i++) {
 	var opt = values[i];
@@ -398,7 +446,7 @@ for(var i = 0; i < values.length; i++) {
 	filterValue.appendChild(el);
 };
 
-//Populates Dropdown on the basis of the filter Parameters
+//POPULATES DROPDOWN FOR FILTER VALUES
 
 function populateDropdown() {
 	var filterParamValue = document.getElementById("filterParam").value;
@@ -422,14 +470,14 @@ function populateDropdown() {
 }
 
 
-
+//TESTING SCRIPT 
 
 $("#test").on("click", function(){
-	document.write("<%=request.getParameter("filterParam")%>" + "<%=request.getParameter("filterValue")%>");
+
 });
 </script>
 
-<!-- script for highlighting and checking rows -->
+<!-- SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS -->
 <script type = "text/javascript">
 $("document").ready(function(){
 	$("tr td:not(:last-child)").on("click", function(){

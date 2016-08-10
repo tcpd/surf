@@ -275,21 +275,21 @@ function commentHandler(commentId){
 		//WORKING WITH FILTER PARAMETERS
 		
 			if(filterParam != null){
-			if(filterValue != null){
-			if(filterValue.equals("All Records")){
-			incumbentsList = mergeManager.getIncumbents();
-		}
-		else{
-			incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameter("filterValue"));
-		}   
-		}
-		else{
-			incumbentsList = mergeManager.getIncumbents();
-		}
-		}
-		else{
-			incumbentsList = mergeManager.getIncumbents(); //Default
-		}
+				if(filterValue != null){
+					if(filterValue.equals("All Records")){
+						incumbentsList = mergeManager.getIncumbents();
+					}
+					else{
+						incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), new String[]{request.getParameter("filterValue")});
+					}   
+				}
+				else{
+					incumbentsList = mergeManager.getIncumbents();
+				}
+			}
+			else{
+				incumbentsList = mergeManager.getIncumbents(); //Default
+			}
 					
 		int[] progressData = mergeManager.getListCount(incumbentsList);	
 

@@ -272,7 +272,7 @@ function commentHandler(commentId){
 		//check whether rows have been marked for demerge; if yes,call the demerge method
 		String [] rowsToBeDemerged = request.getParameterValues("demerges");
 		//testing deMerge; Remove later
-		rowsToBeDemerged = new String[]{"22118","31530"};
+		//rowsToBeDemerged = new String[]{"22118","31530"};
 		if(rowsToBeDemerged!=null){
 			mergeManager.deMerge(rowsToBeDemerged);
 			shouldSave = true;

@@ -13,6 +13,15 @@
 <div class="user-input">
 <form action="incumbency_table.jsp" method="get" onsubmit="incumbency_table.jsp">
 	<div class="form-group">
+		<label for="userName">Username:</label>
+		<input type="text" class="form-control" id="userName" name="userName">
+	</div>
+	<div class="form-group">
+		<label for="email">Email:</label>
+		<input type="email" class="form-control" id="email" name="email">
+	</div>
+	<div class="form-group">
+	<hr>
 		<label for="election">Which Election data?</label>
 		<select class="form-control" name="dataset">
 			<option value="ge">General Election Candidate</option>
@@ -20,7 +29,7 @@
 			<option value="rajasthan">Rajasthan Election Candidate</option>
 		</select>
 	</div>
-	<div class="form-group" name="algorithm">
+	<div class="form-group">
 		<label for="election">Which Algorithm?</label>
 		<select class="form-control" name="algorithm">
 				<option value="exactSameName">Exact Same Name</option>
@@ -29,7 +38,7 @@
 				<option value="editDistance2">Approximate Name with Edit Distance 2</option>
 		</select>
 	</div>
-	<div class="form-group" name="filterParam">
+	<div class="form-group">
 		<label for="filterParam">Filter By?</label>
 		<select class="form-control" id="filterParam" name="filterParam">
 				<option value="State">State</option>
@@ -37,7 +46,7 @@
 				<option value="Party">Party</option>option
 		</select>
 	</div>
-	<div class="form-group" name="filterValue">
+	<div class="form-group">
 		<label for="filterValue">Filter Value?</label>
 		<select class="form-control" id="filterValue" name="filterValue">
 			    <option value="All Records">All Records</option>

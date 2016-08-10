@@ -18,8 +18,7 @@ body{
     border: 1px solid black;
     border-radius: 2%;
 	box-shadow: 5px 5px 2.5px #888888;
-	min-width:30%;
-	max-width:300px;
+	min-width:25%;
 }
 .submit-button{
 	display:table;
@@ -59,7 +58,6 @@ body{
 }
 
 .filterForm{
-	margin-left:5%;
 }
 
 

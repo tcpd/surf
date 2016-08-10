@@ -296,8 +296,18 @@ function commentHandler(commentId){
 	%>
 	
 
-			<div class="container filterForm">
-				<form class="form-inline" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
+
+	<!-- Modal -->
+	<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Filter Menu</h4>
+	      </div>
+	      <div class="modal-body">
+	       	<div class="filterForm">
+				<form class="form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
 					<div class="form-group">
 							<select class="form-control" name="dataset">
 								<option value="ge">General Election Candidate</option>
@@ -323,54 +333,65 @@ function commentHandler(commentId){
 						<select class="form-control" id="filterValue" name="filterValue">
 							<option value="All Records">All Records</option>
 						</select>
-						<button type="submit" class="btn btn-default">Submit</button>
 					</div>
-				</form>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
+	      		</div>
 			</div>
-			<form method="post">
-				<nav class="navbar navbar-default navbar-fixed-top">
-					<div class="container-fluid">
-						<!-- Brand and toggle get grouped for better mobile display -->
-						<div class="navbar-header">
-							<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-								<span class="sr-only">Toggle navigation</span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-							</button>
-							<a class="navbar-brand" href="#">Incumbency Checker</a>
-						</div>
-						<!-- Collect the nav links, forms, and other content for toggling -->
-						<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
-						<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
-							<ul class="nav navbar-nav">
-								<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
-								<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
-								<li><div class="navbar-text"><%= userName%></div></li>
-								<li><div class="navbar-text"><%= email%></div></li>
-								<!--<li><div class="navbar-text" id="test">Howdy</div></li>-->
-							</ul>
-						</div>
-						<!-- /.navbar-collapse -->
-					</div><!-- /.container-fluid -->
-				</nav>
-				<div class="table-div">
-					<table class="table table-hover">
-						<tbody class="inside-table">
-							<tr class="table-row">
-								<th class="cell-table">Same?</th>
-								<th class="cell-table">Name</th>
-								<th class="cell-table">Sex</th>
-								<th class="cell-table">Year</th>
-								<th class="cell-table">Constituency</th>
-								<th class="cell-table">Party</th>
-								<th class="cell-table">State</th>
-								<th class="cell-table">Position</th>
-								<th class="cell-table">Votes</th>
-								<th class="cell-table">ID</th>
-								<th>Person ID</th>
-								<th>Comments</th>
-							</tr>
+   		</form>
+    </div>
+  </div>
+</div>
+	
+
+	<form method="post">
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">Incumbency Checker</a>
+				</div>
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
+				<button type="button" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
+						<span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+				</button>
+				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav">
+						<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
+						<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
+						<li><div class="navbar-text"><%= userName%></div></li>
+						<!--<li><div class="navbar-text" id="test">Howdy</div></li>-->
+					</ul>
+				</div>
+
+				<!-- /.navbar-collapse -->
+			</div><!-- /.container-fluid -->
+		</nav>
+		<div class="table-div">
+			<table class="table table-hover">
+				<tbody class="inside-table">
+					<tr class="table-row">
+						<th class="cell-table">Same?</th>
+						<th class="cell-table">Name</th>
+						<th class="cell-table">Sex</th>
+						<th class="cell-table">Year</th>
+						<th class="cell-table">Constituency</th>
+						<th class="cell-table">Party</th>
+						<th class="cell-table">State</th>
+						<th class="cell-table">Position</th>
+						<th class="cell-table">Votes</th>
+						<th class="cell-table">ID</th>
+						<th>Person ID</th>
+						<th>Comments</th>
+					</tr>
 <%
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS

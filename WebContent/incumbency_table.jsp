@@ -114,7 +114,27 @@ function commentHandler(commentId){
    
 	//SETTING UP THE 4 VARIABLES
 	
-	String algorithm, dataset, filterParam, filterValue;
+	String userName, email, algorithm, dataset, filterParam, filterValue;
+   
+		if(request.getParameter("userName")!= null){
+			userName = request.getParameter("userName").toString();
+			session.setAttribute("userName", userName);	
+				
+		}
+		   
+		else{
+			userName = session.getAttribute("userName").toString();
+		}
+		
+		if(request.getParameter("email")!= null){
+			email = request.getParameter("email").toString();
+			session.setAttribute("email", email);	
+				
+		}
+		   
+		else{
+			email = session.getAttribute("email").toString();
+		}
 	
 	   if(request.getParameter("algorithm")!= null){
 			algorithm = request.getParameter("algorithm").toString();
@@ -178,7 +198,6 @@ function commentHandler(commentId){
 		
 		isFirst = false;
 	}
-	
 
 
 	//SETs UP mergeManager
@@ -296,6 +315,8 @@ function commentHandler(commentId){
 							<ul class="nav navbar-nav">
 								<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
 								<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
+								<li><div class="navbar-text"><%= userName%></div></li>
+								<li><div class="navbar-text"><%= email%></div></li>
 								<!--<li><div class="navbar-text" id="test">Howdy</div></li>-->
 							</ul>
 						</div>
@@ -319,9 +340,6 @@ function commentHandler(commentId){
 								<th>Person ID</th>
 								<th>Comments</th>
 							</tr>
-							
-
-
 <%
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS

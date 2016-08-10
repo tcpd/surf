@@ -112,29 +112,35 @@ function commentHandler(commentId){
    
    <%
    
-	//SETTING UP THE 4 VARIABLES
+	//SETTING UP THE VARIABLES which can be used in the whole session
 	
 	String userName, email, algorithm, dataset, filterParam, filterValue;
    
-		if(request.getParameter("userName")!= null){
-			userName = request.getParameter("userName").toString();
-			session.setAttribute("userName", userName);	
-				
-		}
-		   
-		else{
-			userName = session.getAttribute("userName").toString();
-		}
-		
-		if(request.getParameter("email")!= null){
-			email = request.getParameter("email").toString();
-			session.setAttribute("email", email);	
-				
-		}
-		   
-		else{
-			email = session.getAttribute("email").toString();
-		}
+	if(request.getParameter("userName")!= null){
+		userName = request.getParameter("userName").toString();
+		session.setAttribute("userName", userName);	
+			
+	}
+	   
+	else{
+		userName = session.getAttribute("userName").toString();
+	}
+	
+	if(request.getParameter("email")!= null){
+		email = request.getParameter("email").toString();
+		session.setAttribute("email", email);	
+			
+	}
+	   
+	else{
+		email = session.getAttribute("email").toString();
+	}
+   
+   //Check if the user is entering for the first time. 
+   
+	String checkVar = "algorithm";
+   
+	if(session.getAttribute(checkVar) != null || request.getParameter(checkVar) != null){
 	
 	   if(request.getParameter("algorithm")!= null){
 			algorithm = request.getParameter("algorithm").toString();
@@ -173,6 +179,16 @@ function commentHandler(commentId){
 	   else{
 			filterValue = session.getAttribute("filterValue").toString();
 		}
+	}
+	
+	else{
+		   //SET DEFAULTS FOR THE VARIABLE
+		   
+		   algorithm = "exactSameName";
+		   dataset = "ge";
+		   filterParam = "State";
+		   filterValue = "All Records";
+	}
    
 	   
 	//SETTING UP THE DATASET FOR MERGEMANAGER
@@ -182,7 +198,7 @@ function commentHandler(commentId){
    
 	if(isFirst){
 		String file="";
-		if(request.getParameter("dataset").equals("ge")){
+		if(dataset.equals("ge")){
 			file = ge;
 		}
 	
@@ -283,19 +299,34 @@ function commentHandler(commentId){
 			<div class="container filterForm">
 				<form class="form-inline" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
 					<div class="form-group">
+							<select class="form-control" name="dataset">
+								<option value="ge">General Election Candidate</option>
+								<option value="bihar">Bihar Election Candidate</option>
+								<option value="rajasthan">Rajasthan Election Candidate</option>
+							</select>
+					</div>
+					<div class="form-group">
+						<select class="form-control" name="algorithm">
+								<option value="exactSameName">Exact Same Name</option>
+								<option value="approximateIndian">Approximate Indian Name Matching Same Name</option>
+								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
+								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
+						</select>
+					</div>
+					<div class="form-group">
 						<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
 							<option value="State" id="Primary">State</option>
 							<option value="Party" >Party</option>
 							<option value="PC_name" >Constituencies</option>
 						</select>
+					</div>
 						<select class="form-control" id="filterValue" name="filterValue">
 							<option value="All Records">All Records</option>
 						</select>
-						<button type="submit" class="btn btn-default">Filter</button>
+						<button type="submit" class="btn btn-default">Submit</button>
 					</div>
 				</form>
 			</div>
-
 			<form method="post">
 				<nav class="navbar navbar-default navbar-fixed-top">
 					<div class="container-fluid">

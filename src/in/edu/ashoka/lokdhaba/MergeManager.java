@@ -107,8 +107,13 @@ public abstract class MergeManager {
 			
 		}
 	}
+	//basic version; might need improvements
 	final public void deMerge(String [] ids){
-		//TO BE IMPLEMENTED
+		for(String id:ids){
+			Row row = idToRow.get(id);
+			rowToId.put(row, row.get("ID"));
+			//System.out.println();
+		}
 	}
 	final public void save(String filePath){
 		Collection<Row> rows = d.getRows();

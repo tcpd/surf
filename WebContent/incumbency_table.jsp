@@ -269,8 +269,17 @@ function commentHandler(commentId){
 		shouldSave = true;
 		}
 		
+		//check whether rows have been marked for demerge; if yes,call the demerge method
+		String [] rowsToBeDemerged = request.getParameterValues("demerges");
+		//testing deMerge; Remove later
+		rowsToBeDemerged = new String[]{"22118","31530"};
+		if(rowsToBeDemerged!=null){
+			mergeManager.deMerge(rowsToBeDemerged);
+			shouldSave = true;
+		}
+		
 		if(shouldSave)
-		mergeManager.save(ge);
+			mergeManager.save(ge);
 		}
 	
 		//WORKING WITH FILTER PARAMETERS

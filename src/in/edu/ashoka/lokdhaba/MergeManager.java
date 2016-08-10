@@ -66,6 +66,8 @@ public abstract class MergeManager {
 		d.addToActualColumnName("ID");
 		d.addToActualColumnName("mapped_ID");
 		d.addToActualColumnName("comments");
+		d.addToActualColumnName("user_name");
+		d.addToActualColumnName("email");
 		//d.addToActualColumnName("is_processed");
     }
     
@@ -260,4 +262,10 @@ public abstract class MergeManager {
 		return attributeMap; 
 	}
 	
+	public final void updateUserIds(String []userRows, String userName, String email){
+			for(String id:userRows){
+				idToRow.get(id).set("user_name", userName);
+				idToRow.get(id).set("email", email);
+			}
+		}
 }

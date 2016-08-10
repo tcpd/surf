@@ -261,6 +261,7 @@ function commentHandler(commentId){
 			if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
+			mergeManager.updateUserIds(userRows,userName,email);
 			shouldSave = true;
 		}
 		if(!map.isEmpty()){

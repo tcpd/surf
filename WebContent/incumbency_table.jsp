@@ -280,7 +280,7 @@ function commentHandler(commentId){
 						incumbentsList = mergeManager.getIncumbents();
 					}
 					else{
-						incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), new String[]{request.getParameter("filterValue")});
+						incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameterValues("filterValue"));
 					}   
 				}
 				else{
@@ -318,7 +318,6 @@ function commentHandler(commentId){
 					<div class="form-group">
 						<select class="form-control" name="algorithm">
 								<option value="exactSameName">Exact Same Name</option>
-								<option value="approximateIndian">Approximate Indian Name Matching Same Name</option>
 								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
 								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
 						</select>
@@ -330,7 +329,7 @@ function commentHandler(commentId){
 							<option value="PC_name" >Constituencies</option>
 						</select>
 					</div>
-						<select class="form-control" id="filterValue" name="filterValue">
+						<select multiple class="form-control" id="filterValue" name="filterValue">
 							<option value="All Records">All Records</option>
 						</select>
 					</div>
@@ -368,7 +367,7 @@ function commentHandler(commentId){
 						<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
 						<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
-						<!--<li><div class="navbar-text" id="test">Howdy</div></li>-->
+						<!-- <li><div class="navbar-text" id="test">Howdy</div></li>-->
 					</ul>
 				</div>
 
@@ -536,19 +535,16 @@ function populateDropdown() {
 		el.value = opt;
 		filterValue.appendChild(el);
 	};
-
 }
 
 
 //TESTING SCRIPT 
-
 $("#test").on("click", function(){
-
+	document.write("<%=request.getParameterValues("filterValue")%>");
 });
-</script>
 
-<!-- SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS -->
-<script type = "text/javascript">
+//SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS 
+
 $("document").ready(function(){
 	$("tr td:not(:last-child)").on("click", function(){
 		$(this).parent().toggleClass("success");

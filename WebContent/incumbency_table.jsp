@@ -388,7 +388,8 @@ function commentHandler(commentId){
 			<table class="table table-hover">
 				<tbody class="inside-table">
 					<tr class="table-row">
-						<th class="cell-table">Same?</th>
+						<th class="cell-table">Merge</th>
+						<th class="cell-table">Unmerge</th>
 						<th class="cell-table">Name</th>
 						<th class="cell-table">Sex</th>
 						<th class="cell-table">Year</th>
@@ -413,11 +414,14 @@ function commentHandler(commentId){
 			for(Row row:incumbentsGroup.get(key)){
 				String tableData;
 				String rowStyleData;
+				String unMerge;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
 					tableData = "<mapped dummy tag>";
+					unMerge = "<input type=\"checkbox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 				} 
 				else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
+					unMerge = "<input type=\"checkbox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 				}
 				if(newGroup==true){
 					newGroup=false;
@@ -434,6 +438,7 @@ function commentHandler(commentId){
 %>
 			<tr <%=rowStyleData %>>
 				<td class="cell-table"><%=tableData %></td>
+				<td class="cell-table"><%=unMerge %></td>
 				<td class="cell-table">
 					<%=row.get("Name")%>
 				</td>
@@ -550,7 +555,7 @@ function populateDropdown() {
 
 //TESTING SCRIPT 
 $("#test").on("click", function(){
-	document.write("<%=request.getParameterValues("filterValue")%>");
+	document.write("<%=request.getParameterValues("demerges")%>");
 });
 
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS 

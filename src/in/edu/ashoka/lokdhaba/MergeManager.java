@@ -109,10 +109,32 @@ public abstract class MergeManager {
 	}
 	//basic version; might need improvements
 	final public void deMerge(String [] ids){
+		//First take care of rows with different id and mapped id
 		for(String id:ids){
 			Row row = idToRow.get(id);
+			if(row.get("ID").equals(row.get("mapped_ID")))
+				continue;
 			rowToId.put(row, row.get("ID"));
 			//System.out.println();
+		}
+		
+		//Now take care of rows with same id and mapped id
+		for(String id:ids){
+			Row row = idToRow.get(id);
+			
+			if(id.equals(row.get("mapped_ID"))){
+				ArrayList<Row> samePersonRows = new ArrayList<>();
+				for(Row tempRow:d.getRows()){
+					if(tempRow.get("mapped_ID").equals(id) && isMappedToAnother(tempRow.get("ID"))){
+						samePersonRows.add(tempRow);
+					}
+				}
+				if(samePersonRows!=null){
+					for(Row tempRow:samePersonRows){
+						rowToId.put(tempRow, samePersonRows.get(0).get("ID"));
+					}
+				}
+			}
 		}
 	}
 	final public void save(String filePath){

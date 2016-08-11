@@ -261,6 +261,7 @@ function commentHandler(commentId){
 			if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
+			mergeManager.updateUserIds(userRows,userName,email);
 			shouldSave = true;
 		}
 		if(!map.isEmpty()){
@@ -268,8 +269,17 @@ function commentHandler(commentId){
 		shouldSave = true;
 		}
 		
+		//check whether rows have been marked for demerge; if yes,call the demerge method
+		String [] rowsToBeDemerged = request.getParameterValues("demerges");
+		//testing deMerge; Remove later
+		//rowsToBeDemerged = new String[]{"26827","31908", "63686", "70245", "8576", "31906", "26815"};
+		if(rowsToBeDemerged!=null){
+			mergeManager.deMerge(rowsToBeDemerged);
+			shouldSave = true;
+		}
+		
 		if(shouldSave)
-		mergeManager.save(ge);
+			mergeManager.save(ge);
 		}
 	
 		//WORKING WITH FILTER PARAMETERS

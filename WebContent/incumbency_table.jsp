@@ -19,10 +19,11 @@ import="com.google.common.collect.Multimap"
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"   integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="   crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
- 	 <link href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" type="text/css" rel="stylesheet" />
-	<script src="//code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script>
-	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script>
-	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script>
+<!--  	 <link href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" type="text/css" rel="stylesheet" /> -->
+<!-- 	<script src="//code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script> -->
+<!-- 	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script> -->
+<!-- 	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script> -->
+	<script src="https://use.fontawesome.com/437c97c8c3.js"></script>
 	<script>
 	
 //SCRIPTS TO HANDLE COMMENTS
@@ -110,6 +111,10 @@ function commentHandler(commentId){
 		}   
     }
    -->
+   
+<div id="loading">
+  <img id="loading-image" src="https://s-media-cache-ak0.pinimg.com/564x/a3/ed/70/a3ed7024b3aeda6ca80c2c820e7636c4.jpg" alt="LOADING.."/>
+</div>
 
    <%
    
@@ -287,6 +292,7 @@ function commentHandler(commentId){
 		
 			if(!filterValue.equals("All Records") && request.getParameterValues("filterValue")!= null){
 				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
+				//int[] progressData = mergeManager.getListCount(incumbentsList);
 			}
 			else{
 				incumbentsList = mergeManager.getIncumbents();
@@ -481,17 +487,9 @@ function commentHandler(commentId){
 </form>
 <script type="text/javascript">
 
-// // RIGHT CLICK MENU SCRIPT 
-// $(".trow").contextmenu({
-//     delegate: ".hasmenu",	
-
-// $("tr td:not(:nth-last-child(2))").contextmenu(function(){
-// 		$(this).parent().toggleClass("warning");
-// 		var checkboxValue = $(this).parent().find("td:last-child input[type]").prop("checked");
-// 		$(this).parent().find("td:last-child input[type]").prop("checked", !checkboxValue);
-// });
-// });
-
+ $(window).load(function() {
+    $('#loading').hide();
+ });
 
 //CONSTRUCTS MAPS FROM FILTER PARAMETERS TO FILTER VALUES
 

@@ -16,11 +16,15 @@ import="com.google.common.collect.Multimap"
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="style.css">
-	<script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"   integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="   crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+ 	 <link href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<script src="//code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script>
+	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script>
 	<script>
-
-
+	
 //SCRIPTS TO HANDLE COMMENTS
 
 //function to strip alphabet from id
@@ -31,7 +35,7 @@ function stripId(commentId){
 			str+=commentId[i];
 	}
 	return str;
-}
+};
 
 //script function to handle comments
 function commentHandler(commentId){
@@ -55,14 +59,12 @@ function commentHandler(commentId){
 	commentNode.replaceChild(inputNode, commentNode.childNodes[0]);
 
 	var node = commentNode.childNodes[0];
-	node.focus();
-	
-	
-	
-	
-}
+	node.focus();	
+};
+
+
 </script>
-<title>Incumbency Checker</title>
+<title>Candidate Mapper</title>
 </head>
 <body>
 
@@ -109,7 +111,6 @@ function commentHandler(commentId){
     }
    -->
 
-   
    <%
    
 	//SETTING UP THE VARIABLES which can be used in the whole session
@@ -284,22 +285,12 @@ function commentHandler(commentId){
 	
 		//WORKING WITH FILTER PARAMETERS
 		
-			if(filterParam != null){
-				if(filterValue != null){
-					if(filterValue.equals("All Records")){
-						incumbentsList = mergeManager.getIncumbents();
-					}
-					else{
-						incumbentsList = mergeManager.getIncumbents(request.getParameter("filterParam"), request.getParameterValues("filterValue"));
-					}   
-				}
-				else{
-					incumbentsList = mergeManager.getIncumbents();
-				}
+			if(!filterValue.equals("All Records") && request.getParameterValues("filterValue")!= null){
+				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
 			}
 			else{
-				incumbentsList = mergeManager.getIncumbents(); //Default
-			}
+				incumbentsList = mergeManager.getIncumbents();
+			}   
 					
 		int[] progressData = mergeManager.getListCount(incumbentsList);	
 
@@ -365,7 +356,7 @@ function commentHandler(commentId){
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">Incumbency Checker</a>
+					<a class="navbar-brand" href="#">Candidate Mapper</a>
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
@@ -377,7 +368,7 @@ function commentHandler(commentId){
 						<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
 						<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
-						<!-- <li><div class="navbar-text" id="test">Howdy</div></li>-->
+<!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
 					</ul>
 				</div>
 
@@ -389,7 +380,6 @@ function commentHandler(commentId){
 				<tbody class="inside-table">
 					<tr class="table-row">
 						<th class="cell-table">Merge</th>
-						<th class="cell-table">Unmerge</th>
 						<th class="cell-table">Name</th>
 						<th class="cell-table">Sex</th>
 						<th class="cell-table">Year</th>
@@ -401,6 +391,7 @@ function commentHandler(commentId){
 						<th class="cell-table">ID</th>
 						<th>Person ID</th>
 						<th>Comments</th>
+						<th class="cell-table">Unmerge</th>
 					</tr>
 <%
 							
@@ -437,8 +428,7 @@ function commentHandler(commentId){
 			
 %>
 			<tr <%=rowStyleData %>>
-				<td class="cell-table"><%=tableData %></td>
-				<td class="cell-table"><%=unMerge %></td>
+				<td class="cell-table mergeCol"><%=tableData %></td>
 				<td class="cell-table">
 					<%=row.get("Name")%>
 				</td>
@@ -474,6 +464,7 @@ function commentHandler(commentId){
 					<%=row.get("comments")%>
 					<!-- </div> -->
 				</td>
+				<td class="cell-table unMergeCol"><%=unMerge %></td>
 			</tr>
 			
 			<%
@@ -485,12 +476,22 @@ function commentHandler(commentId){
 
 %>
 
-
 </tbody>
 </table>
 </form>
-
 <script type="text/javascript">
+
+// // RIGHT CLICK MENU SCRIPT 
+// $(".trow").contextmenu({
+//     delegate: ".hasmenu",	
+
+// $("tr td:not(:nth-last-child(2))").contextmenu(function(){
+// 		$(this).parent().toggleClass("warning");
+// 		var checkboxValue = $(this).parent().find("td:last-child input[type]").prop("checked");
+// 		$(this).parent().find("td:last-child input[type]").prop("checked", !checkboxValue);
+// });
+// });
+
 
 //CONSTRUCTS MAPS FROM FILTER PARAMETERS TO FILTER VALUES
 
@@ -558,15 +559,18 @@ $("#test").on("click", function(){
 	document.write("<%=request.getParameterValues("demerges")%>");
 });
 
+
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS 
 
 $("document").ready(function(){
-	$("tr td:not(:last-child)").on("click", function(){
+	$("tr td:not(:nth-last-child(2)):not(:last-child)").on("click", function(){
 		$(this).parent().toggleClass("success");
 		var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
 		$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
 	});
 });
+
+
 
 </script>
 </body>

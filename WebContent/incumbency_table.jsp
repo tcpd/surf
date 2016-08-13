@@ -120,7 +120,8 @@ function commentHandler(commentId){
    
 	//SETTING UP THE VARIABLES which can be used in the whole session
 	
-	String userName, email, algorithm, dataset, filterParam, filterValue;
+	String userName, email, algorithm, dataset, filterParam, filterValue, filterParamNav, filterValueNav;
+   
    
 	if(request.getParameter("userName")!= null){
 		userName = request.getParameter("userName").toString();
@@ -185,12 +186,23 @@ function commentHandler(commentId){
 	   
 	   if(request.getParameter("filterValue")!= null){
 			filterValue = request.getParameter("filterValue").toString();
-			session.setAttribute("filterValue", filterValue);	
+			session.setAttribute("filterValue", filterValue);
 		}
 	   
 	   else{
 			filterValue = session.getAttribute("filterValue").toString();
+	
 		}
+	   
+	   //HARDCODED STUFF HERE
+	   	
+	   if(filterParam.equals("PC_name")){
+		   filterParamNav = "Constituency";
+	   }
+	   else{
+		   filterParamNav = filterParam;
+	   }
+	   filterValueNav = Arrays.toString(request.getParameterValues("filterValue"));
 	}
 	
 	else{
@@ -200,6 +212,8 @@ function commentHandler(commentId){
 		   dataset = "ge";
 		   filterParam = "State";
 		   filterValue = "All Records";
+		   filterParamNav = filterParam;
+		   filterValueNav = filterValue;
 	}
    
 	   
@@ -298,7 +312,6 @@ function commentHandler(commentId){
 		
 			if(!filterValue.equals("All Records") && request.getParameterValues("filterValue")!= null){
 				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
-				//int[] progressData = mergeManager.getListCount(incumbentsList);
 			}
 			else if(!request.getParameter("state").toString().equals("")){
 				incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString()});
@@ -381,6 +394,8 @@ function commentHandler(commentId){
 				</button>
 				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
+						<li><div class="navbar-text">Filter Parameter: <%= filterParamNav %></div></li>
+						<li><div class="navbar-text">Filter Value : <%= filterValueNav %></div></li>
 						<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
 						<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
@@ -576,6 +591,8 @@ $("document").ready(function(){
 	});
 });
 
+
+//LOADING SCRIPT
 $(window).on("load",function(){
     $('#loading').fadeOut();
 });

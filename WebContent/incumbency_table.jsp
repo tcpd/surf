@@ -113,7 +113,7 @@ function commentHandler(commentId){
    -->
    
 <div id="loading">
-  <img id="loading-image" src="https://s-media-cache-ak0.pinimg.com/564x/a3/ed/70/a3ed7024b3aeda6ca80c2c820e7636c4.jpg" alt="LOADING.."/>
+	<img id="loading-image" src="https://s-media-cache-ak0.pinimg.com/564x/a3/ed/70/a3ed7024b3aeda6ca80c2c820e7636c4.jpg" alt="LOADING.."/>
 </div>
 
    <%
@@ -127,19 +127,25 @@ function commentHandler(commentId){
 		session.setAttribute("userName", userName);	
 			
 	}
-	   
-	else{
+	
+	else if(session.getAttribute("userName") != null){
 		userName = session.getAttribute("userName").toString();
 	}
+	else{
+		userName = "User Unknown";
+	}
+   
 	
 	if(request.getParameter("email")!= null){
 		email = request.getParameter("email").toString();
 		session.setAttribute("email", email);	
 			
-	}
-	   
-	else{
+	}  
+	else if(session.getAttribute("email") != null){
 		email = session.getAttribute("email").toString();
+	}
+	else{
+		email = "Not Specified";
 	}
    
    //Check if the user is entering for the first time. 
@@ -294,6 +300,10 @@ function commentHandler(commentId){
 				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
 				//int[] progressData = mergeManager.getListCount(incumbentsList);
 			}
+			else if(!request.getParameter("state").toString().equals("")){
+				incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString()});
+			}
+		
 			else{
 				incumbentsList = mergeManager.getIncumbents();
 			}   
@@ -487,9 +497,7 @@ function commentHandler(commentId){
 </form>
 <script type="text/javascript">
 
- $(window).load(function() {
-    $('#loading').hide();
- });
+
 
 //CONSTRUCTS MAPS FROM FILTER PARAMETERS TO FILTER VALUES
 
@@ -566,6 +574,10 @@ $("document").ready(function(){
 		var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
 		$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
 	});
+});
+
+$(window).on("load",function(){
+    $('#loading').fadeOut();
 });
 
 

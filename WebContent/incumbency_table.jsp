@@ -44,7 +44,7 @@ function commentHandler(commentId){
 	var id = stripId(commentId)
 	
 	var child = commentNode.childNodes[0];
-	if(child.tagName=="input"){
+	if(child.tagName=="textarea"){
 		child.focus();
 		return;
 	}
@@ -52,16 +52,36 @@ function commentHandler(commentId){
 	var text = commentNode.innerText;
 	if(text==null)
 		text="";
-	var inputNode = document.createElement("input");
+	var inputNode = document.createElement("textarea");
 	inputNode.setAttribute("name", "commentParam"+id);
 	inputNode.setAttribute("id","input"+commentId);
 	inputNode.setAttribute("value",text);
+	inputNode.setAttribute("class", "form-control");
+	inputNode.setAttribute("rows", "3");
 	inputNode.setAttribute("onclick","");
+
 	commentNode.replaceChild(inputNode, commentNode.childNodes[0]);
 
 	var node = commentNode.childNodes[0];
 	node.focus();	
 };
+
+// //SETS VALUES FOR DROPDOWNS IN MODALS ON THE BASIS OF PREVIOUS SUBMISSION
+
+// function SelectElement(id, valueToSelect){
+// 	var element = document.getElementById(id);
+// 	element.value = valueToSelect;
+// }
+
+// $("document").ready(function(algorithm, dataset, filterPar, filterVal){
+<%-- 	<% if(request.getParameter("algorithm") != null && request.getParameter("dataset") != null && request.getParameter("filterParam") != null --%>
+// 			&& request.getParameter("filterValue") != null){
+<%-- 			%> SelectElement("algorithm", <%=request.getParameter("algorithm")%>); --%>
+<%-- 			SelectElement("dataset", <%=request.getParameter("dataset")%>); --%>
+<%-- 			SelectElement("filterParam", <%=request.getParameter("filterParam")%>); --%>
+<%-- 			SelectElement("filterValue", <%=request.getParameter("filterValue")%>); <% --%>
+// 		}
+<%-- 	%> }); --%>
 
 
 </script>

@@ -158,6 +158,20 @@ public abstract class MergeManager {
 		}
 	}
 	
+	
+	final public ArrayList<Multimap<String,Row>> getIncumbents(){
+		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
+		for(Collection<Row> similarRows:listOfSimilarCandidates){
+			Multimap<String, Row> mp = LinkedHashMultimap.create();
+			for(Row row:similarRows){
+				mp.put(rowToId.get(row), row);
+			}
+			listOfSet.add(mp);
+		}
+		sortAlphabetically(listOfSet);
+		return listOfSet;
+	}
+	
 	//returns a list of group of similar named incumbents
 	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values){
 		
@@ -181,19 +195,7 @@ public abstract class MergeManager {
 		sortAlphabetically(listOfSet);
 		return listOfSet;
 	}
-	
-	final public ArrayList<Multimap<String,Row>> getIncumbents(){
-		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:listOfSimilarCandidates){
-			Multimap<String, Row> mp = LinkedHashMultimap.create();
-			for(Row row:similarRows){
-				mp.put(rowToId.get(row), row);
-			}
-			listOfSet.add(mp);
-		}
-		sortAlphabetically(listOfSet);
-		return listOfSet;
-	}
+
 	
 	final public void sortAlphabetically(ArrayList<Multimap<String,Row>> listOfSet){
 		//Queue<String> pq = new PriorityQueue<>();

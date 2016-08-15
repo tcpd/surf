@@ -41,28 +41,34 @@ function stripId(commentId){
 //script function to handle comments
 function commentHandler(commentId){
     var commentNode = document.getElementById(commentId);
-	var id = stripId(commentId)
+	var id = stripId(commentId);
 	
 	var child = commentNode.childNodes[0];
-	if(child.tagName=="textarea"){
-		child.focus();
-		return;
-	}
+	//The following snippet doesn't work.
+	//if(child == text){
+	//	child.focus();
+	//	return;
+	//}
 	
 	var text = commentNode.innerText;
 	if(text==null){
 		text="";
 	}
+	else{
+		var inputNode = document.createElement("textarea");
+		inputNode.setAttribute("name", "commentParam"+id);
+		inputNode.setAttribute("id","input"+commentId);
+		inputNode.setAttribute("value", text);
+		inputNode.setAttribute("textContent", text);
+		inputNode.setAttribute("class", "form-control");
+		inputNode.setAttribute("rows", "3");
+		inputNode.setAttribute("cols", "20");
+		inputNode.setAttribute("wrap", "hard");
+		inputNode.setAttribute("onclick","");
+		inputNode.setAttribute("placeholder", text)
+		inputNode.innerText = text;
+	}
 	
-	var inputNode = document.createElement("textarea");
-	inputNode.setAttribute("name", "commentParam"+id);
-	inputNode.setAttribute("id","input"+commentId);
-	inputNode.setAttribute("value",text);
-	inputNode.setAttribute("class", "form-control");
-	inputNode.setAttribute("rows", "3");
-	inputNode.setAttribute("cols", "20");
-	inputNode.setAttribute("wrap", "hard");
-	inputNode.setAttribute("onclick","");
 
 	commentNode.replaceChild(inputNode, commentNode.childNodes[0]);
 

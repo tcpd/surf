@@ -311,6 +311,7 @@ public class Bihar extends Object {
 	        
 	        //remove nota
 	        resultMap.asMap().remove("ab he ne no of ove");
+	        resultMap.asMap().remove("AB HE NE NO OF OVE");
 	        
 	        //remove groups where position is below 5==== EXPERIMENTAL
 	        

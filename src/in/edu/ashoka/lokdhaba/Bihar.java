@@ -359,7 +359,6 @@ public class Bihar extends Object {
     }
     
     
-    
     /* what the jsp has to do:
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
         Dataset d = new Dataset(file);

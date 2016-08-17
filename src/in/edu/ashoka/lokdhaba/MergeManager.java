@@ -24,6 +24,7 @@ public abstract class MergeManager {
     static ExactSameNameMergeManager exactSameNameMergeManager;
     static SimilarNameMergeManager similarNameMergeManagerED1;
     static SimilarNameMergeManager similarNameMergeManagerED2;
+    static DummyMergeManager dummyMergeManager;
     
     static Map<String,Set<String>> attributesDataSet;
     ArrayList<Collection<Row>> listOfSimilarCandidates; 
@@ -53,6 +54,12 @@ public abstract class MergeManager {
     			similarNameMergeManagerED2 = new SimilarNameMergeManager(d, 2);
     		}
     			return similarNameMergeManagerED2;
+    	}
+    	else if(algo.equals("dummyAllName")){
+    		if(dummyMergeManager==null){
+    			dummyMergeManager = new DummyMergeManager(d);
+    		}
+    		return dummyMergeManager;
     	}
 		return null;
     }

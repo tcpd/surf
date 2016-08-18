@@ -41,18 +41,17 @@ function stripId(commentId){
 function commentHandler(commentId){
     var commentNode = document.getElementById(commentId);
 	var id = stripId(commentId);
-	
 	var child = commentNode.childNodes[0];
+	var text = commentNode.childNodes[1].innerText;
+	commentNode.removeChild(commentNode.childNodes[1]);
 	//The following snippet doesn't work.
 	//if(child == text){
 	//	child.focus();
 	//	return;
 	//}
-	
-	var text = commentNode.innerText;
 
 	if(text==null){
-		text="";
+		commentNode.appendChild(child);
 	}
 	else{
 		var inputNode = document.createElement("textarea");
@@ -609,12 +608,13 @@ cookieName="page_scroll"
 				<td class="cell-table">
 					<%=row.get("mapped_ID")%>
 				</td>
-				<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')" onmouseover="commentDisplayer('comment-<%=row.get("ID")%>')">
+				<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
+<%-- 				 onmouseover="commentDisplayer('comment-<%=row.get("ID")%>')" --%>
 					<%-- <div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')"> --%>
-					<%=row.get("comments")%>
+					<div class="comment-box"><div style="padding:0.3em"><%=row.get("comments")%></div></div>
 					<!-- </div> -->
 				</td>
-				<td class="cell-table unMergeCol"><%=unMerge %></td>
+				<td class="cell-table unMergeCol"><%=unMerge%></td>
 			</tr>
 			
 			<%

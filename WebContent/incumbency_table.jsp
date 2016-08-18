@@ -23,7 +23,6 @@ import="com.google.common.collect.Multimap"
 <!-- 	<script src="//code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script> -->
 <!-- 	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script> -->
 <!-- 	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script> -->
-	<script src="https://use.fontawesome.com/437c97c8c3.js"></script>
 	<script>
 	
 //SCRIPTS TO HANDLE COMMENTS
@@ -51,6 +50,7 @@ function commentHandler(commentId){
 	//}
 	
 	var text = commentNode.innerText;
+
 	if(text==null){
 		text="";
 	}
@@ -65,7 +65,6 @@ function commentHandler(commentId){
 		inputNode.setAttribute("cols", "20");
 		inputNode.setAttribute("wrap", "hard");
 		inputNode.setAttribute("onclick","");
-		inputNode.setAttribute("placeholder", text)
 		inputNode.innerText = text;
 	}
 	
@@ -75,6 +74,24 @@ function commentHandler(commentId){
 	var node = commentNode.childNodes[0];
 	node.focus();	
 };
+
+//script to display the full comment
+
+// function commentDisplayer(commentId){
+//     var commentNode = document.getElementById(commentId);
+//     var text = commentNode.innerText;
+//     if(text.length>1){
+//     	var commentBox = document.getElementById(commentId);
+//     	var showMoreButton = document.createElement("button");
+//     	showMoreButton.innerText ="Hello";
+//     	showMoreButton.className += "btn btn-default"
+//     	commentBox.appendChild(showMoreButton);
+// 		var test = document.getElementById("test");
+// 		test.style.color = "red";
+//     }
+// };
+
+
 
 // //SETS VALUES FOR DROPDOWNS IN MODALS ON THE BASIS OF PREVIOUS SUBMISSION
 
@@ -307,7 +324,7 @@ cookieName="page_scroll"
 		   filterParamNav = filterParam;
 		   filterValueNav = filterValue;
 			if(request.getParameter("state") != null){
-				filterValueNav = request.getParameter("state").toString();
+				filterValueNav = request.getParameter("state").toString().toUpperCase();
 			}
 	}
 	
@@ -410,8 +427,13 @@ cookieName="page_scroll"
 			if(!filterValue.equals("All Records") && request.getParameterValues("filterValue")!= null){
 				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
 			}
-			else if(!request.getParameter("state").toString().equals("")){
-				incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString()});
+			else if(request.getParameter("state") != null){
+				if(!request.getParameter("state").toString().equals("All Records")){
+					incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString().toUpperCase()});
+				}
+				else{
+					incumbentsList = mergeManager.getIncumbents();
+				}
 			}
 		
 			else{
@@ -587,7 +609,7 @@ cookieName="page_scroll"
 				<td class="cell-table">
 					<%=row.get("mapped_ID")%>
 				</td>
-				<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
+				<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')" onmouseover="commentDisplayer('comment-<%=row.get("ID")%>')">
 					<%-- <div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')"> --%>
 					<%=row.get("comments")%>
 					<!-- </div> -->
@@ -673,9 +695,9 @@ function populateDropdown() {
 
 
 //TESTING SCRIPT 
-$("#test").on("click", function(){
-	document.write("<%=request.getParameterValues("demerges")%>");
-});
+//$("#test").on("click", function(){
+<%-- //	document.write("<%=request.getParameterValues("demerges")%>"); --%>
+//});
 
 
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS 

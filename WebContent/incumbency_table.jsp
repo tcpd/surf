@@ -526,7 +526,7 @@ cookieName="page_scroll"
 				<!-- /.navbar-collapse -->
 			</div><!-- /.container-fluid -->
 		</nav>
-		<div class="table-div">
+		<div class="table-div table-responsive">
 			<table class="table table-hover">
 				<tbody class="inside-table">
 					<tr class="table-row">

@@ -465,8 +465,8 @@ cookieName="page_scroll"
 					<div class="form-group">
 							<select class="form-control" name="dataset">
 								<option value="ge">General Election Candidate</option>
-								<option value="bihar">Bihar Election Candidate</option>
-								<option value="rajasthan">Rajasthan Election Candidate</option>
+<!-- 								<option value="bihar">Bihar Election Candidate</option> -->
+<!-- 								<option value="rajasthan">Rajasthan Election Candidate</option> -->
 							</select>
 					</div>
 					<div class="form-group">

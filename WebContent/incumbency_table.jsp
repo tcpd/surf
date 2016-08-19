@@ -327,6 +327,12 @@ cookieName="page_scroll"
 			}
 	}
 	
+	if(filterValueNav != null){
+		if(filterValueNav.toString().equals("null")){
+			filterValueNav = "All Records";
+		}
+	}
+	
 
    
 	   
@@ -427,7 +433,7 @@ cookieName="page_scroll"
 				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
 			}
 			else if(request.getParameter("state") != null){
-				if(!request.getParameter("state").toString().equals("All Records")){
+				if(!request.getParameter("state").toString().equals("All Records") && !request.getParameter("state").toString().equals("")){
 					incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString().toUpperCase()});
 				}
 				else{
@@ -705,12 +711,13 @@ function populateDropdown() {
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS 
 
 $("document").ready(function(){
-	$("tr td:not(:nth-last-child(2)):not(:last-child)").on("click", function(){
+	$("tr td:not(:nth-last-child(2)):not(:last-child):not(first-child)").on("click", function(){
 		$(this).parent().toggleClass("success");
 		var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
 		$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
 	});
 });
+
 
 
 //LOADING SCRIPT

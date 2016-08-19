@@ -565,11 +565,11 @@ cookieName="page_scroll"
 				String unMerge;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
 					tableData = "<mapped dummy tag>";
-					unMerge = "<input type=\"checkbox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 				} 
 				else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
-					unMerge = "<input type=\"checkbox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 				}
 				if(newGroup==true){
 					newGroup=false;
@@ -711,10 +711,16 @@ function populateDropdown() {
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS 
 
 $("document").ready(function(){
-	$("tr td:not(:nth-last-child(2)):not(:last-child):not(first-child)").on("click", function(){
-		$(this).parent().toggleClass("success");
-		var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
-		$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
+	$("tr td:not(:nth-last-child(2)):not(:last-child)").on("click", function(e){
+		if($(e.target).closest('input[type="checkbox"]').length > 0){
+			$(this).parent().toggleClass("success");
+        }
+		else{
+			$(this).parent().toggleClass("success");
+			var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
+			$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
+		}
+
 	});
 });
 

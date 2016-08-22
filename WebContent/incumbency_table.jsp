@@ -447,6 +447,7 @@ cookieName="page_scroll"
 								<option value="exactSameName">Exact Same Name</option>
 								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
 								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
+								<option value="dummyAllName">All names</option>
 						</select>
 					</div>
 					<div class="form-group">

@@ -23,7 +23,6 @@ import="com.google.common.collect.Multimap"
 <!-- 	<script src="//code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script> -->
 <!-- 	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script> -->
 <!-- 	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script> -->
-	<script src="https://use.fontawesome.com/437c97c8c3.js"></script>
 	<script>
 	
 //SCRIPTS TO HANDLE COMMENTS
@@ -42,17 +41,17 @@ function stripId(commentId){
 function commentHandler(commentId){
     var commentNode = document.getElementById(commentId);
 	var id = stripId(commentId);
-	
 	var child = commentNode.childNodes[0];
+	var text = commentNode.childNodes[1].innerText;
+	commentNode.removeChild(commentNode.childNodes[1]);
 	//The following snippet doesn't work.
 	//if(child == text){
 	//	child.focus();
 	//	return;
 	//}
-	
-	var text = commentNode.innerText;
+
 	if(text==null){
-		text="";
+		commentNode.appendChild(child);
 	}
 	else{
 		var inputNode = document.createElement("textarea");
@@ -65,7 +64,6 @@ function commentHandler(commentId){
 		inputNode.setAttribute("cols", "20");
 		inputNode.setAttribute("wrap", "hard");
 		inputNode.setAttribute("onclick","");
-		inputNode.setAttribute("placeholder", text)
 		inputNode.innerText = text;
 	}
 	
@@ -75,6 +73,24 @@ function commentHandler(commentId){
 	var node = commentNode.childNodes[0];
 	node.focus();	
 };
+
+//script to display the full comment
+
+// function commentDisplayer(commentId){
+//     var commentNode = document.getElementById(commentId);
+//     var text = commentNode.innerText;
+//     if(text.length>1){
+//     	var commentBox = document.getElementById(commentId);
+//     	var showMoreButton = document.createElement("button");
+//     	showMoreButton.innerText ="Hello";
+//     	showMoreButton.className += "btn btn-default"
+//     	commentBox.appendChild(showMoreButton);
+// 		var test = document.getElementById("test");
+// 		test.style.color = "red";
+//     }
+// };
+
+
 
 // //SETS VALUES FOR DROPDOWNS IN MODALS ON THE BASIS OF PREVIOUS SUBMISSION
 
@@ -307,8 +323,14 @@ cookieName="page_scroll"
 		   filterParamNav = filterParam;
 		   filterValueNav = filterValue;
 			if(request.getParameter("state") != null){
-				filterValueNav = request.getParameter("state").toString();
+				filterValueNav = request.getParameter("state").toString().toUpperCase();
 			}
+	}
+	
+	if(filterValueNav != null){
+		if(filterValueNav.toString().equals("null")){
+			filterValueNav = "All Records";
+		}
 	}
 	
 
@@ -410,8 +432,13 @@ cookieName="page_scroll"
 			if(!filterValue.equals("All Records") && request.getParameterValues("filterValue")!= null){
 				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
 			}
-			else if(!request.getParameter("state").toString().equals("")){
-				incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString()});
+			else if(request.getParameter("state") != null){
+				if(!request.getParameter("state").toString().equals("All Records") && !request.getParameter("state").toString().equals("")){
+					incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString().toUpperCase()});
+				}
+				else{
+					incumbentsList = mergeManager.getIncumbents();
+				}
 			}
 		
 			else{
@@ -438,8 +465,8 @@ cookieName="page_scroll"
 					<div class="form-group">
 							<select class="form-control" name="dataset">
 								<option value="ge">General Election Candidate</option>
-								<option value="bihar">Bihar Election Candidate</option>
-								<option value="rajasthan">Rajasthan Election Candidate</option>
+<!-- 								<option value="bihar">Bihar Election Candidate</option> -->
+<!-- 								<option value="rajasthan">Rajasthan Election Candidate</option> -->
 							</select>
 					</div>
 					<div class="form-group">
@@ -492,8 +519,10 @@ cookieName="page_scroll"
 				</button>
 				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
-						<li><div class="navbar-text">Filter Parameter: <%= filterParamNav %></div></li>
-						<li><div class="navbar-text">Filter Value : <%= filterValueNav %></div></li>
+						<ol class="breadcrumb">
+						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterParamNav %></a></li>
+						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterValueNav %></a></li>
+						</ol>
 						<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
 						<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
@@ -504,7 +533,7 @@ cookieName="page_scroll"
 				<!-- /.navbar-collapse -->
 			</div><!-- /.container-fluid -->
 		</nav>
-		<div class="table-div">
+		<div class="table-div table-responsive">
 			<table class="table table-hover">
 				<tbody class="inside-table">
 					<tr class="table-row">
@@ -537,11 +566,11 @@ cookieName="page_scroll"
 				String unMerge;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
 					tableData = "<mapped dummy tag>";
-					unMerge = "<input type=\"checkbox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 				} 
 				else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
-					unMerge = "<input type=\"checkbox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 				}
 				if(newGroup==true){
 					newGroup=false;
@@ -589,11 +618,12 @@ cookieName="page_scroll"
 					<%=row.get("mapped_ID")%>
 				</td>
 				<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
+<%-- 				 onmouseover="commentDisplayer('comment-<%=row.get("ID")%>')" --%>
 					<%-- <div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')"> --%>
-					<%=row.get("comments")%>
+					<div class="comment-box"><div style="padding:0.3em"><%=row.get("comments")%></div></div>
 					<!-- </div> -->
 				</td>
-				<td class="cell-table unMergeCol"><%=unMerge %></td>
+				<td class="cell-table unMergeCol"><%=unMerge%></td>
 			</tr>
 			
 			<%
@@ -674,20 +704,27 @@ function populateDropdown() {
 
 
 //TESTING SCRIPT 
-$("#test").on("click", function(){
-	document.write("<%=request.getParameterValues("demerges")%>");
-});
+//$("#test").on("click", function(){
+<%-- //	document.write("<%=request.getParameterValues("demerges")%>"); --%>
+//});
 
 
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS 
 
 $("document").ready(function(){
-	$("tr td:not(:nth-last-child(2)):not(:last-child)").on("click", function(){
-		$(this).parent().toggleClass("success");
-		var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
-		$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
+	$("tr td:not(:nth-last-child(2)):not(:last-child)").on("click", function(e){
+		if($(e.target).closest('input[type="checkbox"]').length > 0){
+			$(this).parent().toggleClass("success");
+        }
+		else{
+			$(this).parent().toggleClass("success");
+			var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
+			$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
+		}
+
 	});
 });
+
 
 
 //LOADING SCRIPT

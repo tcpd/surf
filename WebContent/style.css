@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 body{
-	font-family: avenir;
+	font-family: Helvetica;
 	background-color: #E9EFF3;
 	padding-top: 70px;
 }
@@ -78,4 +78,27 @@ body{
   margin: 0 auto;
   display: table;
 }
+
+.comment-box{
+	background-color:white;
+	border: 0.5px solid #EFF0F1;
+	border-radius: 4%;
+	min-height: 2em;
+	min-width:10em;
+}
+
+.nav .breadcrumb a {
+    margin: 0 7px;
+    text-transform:capitalize;
+}
+@media (min-width: 768px) {
+    .nav .breadcrumb {
+        float: left;
+        margin: 7px 10px;
+    }
+}
+
+/* .modal{ */
+/* 	text-tranform:capitalize; */
+/* } */
 

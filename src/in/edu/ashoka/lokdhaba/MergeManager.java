@@ -75,6 +75,7 @@ public abstract class MergeManager {
 		d.addToActualColumnName("comments");
 		d.addToActualColumnName("user_name");
 		d.addToActualColumnName("email");
+		d.addToActualColumnName("is_done");
 		//d.addToActualColumnName("is_processed");
     }
     
@@ -281,6 +282,14 @@ public abstract class MergeManager {
 		for(String key:map.keySet()){
 			idToRow.get(key).set("comments", map.get(key));
 			//System.out.println(idToRow.get(key).get("comments"));
+		}
+	}
+	
+	//method that updates the drop down information
+	public void updateIsDone(Map<String, String> map){
+		for(String key:map.keySet()){
+			idToRow.get(key).set("is_done", map.get(key));
+			//System.out.println(idToRow.get(key).get("is_done"));
 		}
 	}
 	

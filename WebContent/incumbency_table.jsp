@@ -9,6 +9,7 @@ import="java.util.*"
 import="in.edu.ashoka.lokdhaba.Bihar"
 import="com.google.common.collect.Multimap"
 %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -73,6 +74,12 @@ function commentHandler(commentId){
 	var node = commentNode.childNodes[0];
 	node.focus();	
 };
+
+//name attribute gets created only when the dropdown is clicked; this is for efficiency
+function createNameParameter(id){
+	var node=document.getElementById("isDone-"+id);
+	node.setAttribute("name", "isDone-"+id);
+}
 
 //script to display the full comment
 
@@ -390,18 +397,27 @@ cookieName="page_scroll"
 	
 			String [] userRows = request.getParameterValues("row");
 			
-			//Collect comment related information
+			//Collect comment related information & Collect completion related information
 			
 			Map<String,String[]> parameterMap = request.getParameterMap();
 			
-			Map<String,String> map = new HashMap<String,String>();
+			Map<String,String> commentMap = new HashMap<String,String>();
+			Map<String,String> isDoneMap = new HashMap<String,String>();
 			for(String name:parameterMap.keySet()){
 			if(name.contains("commentParam")){
-					map.put(name.substring(12),parameterMap.get(name)[0]);	//strip the key value before storing
+					commentMap.put(name.substring(12),parameterMap.get(name)[0]);	//strip the key value before storing
 				}
+			
+			if(name.contains("isDone")){
+				isDoneMap.put(name.substring(7),parameterMap.get(name)[0]);	//strip the key value before storing
+			}
 				
 			}
-			System.out.println(map);
+			
+			
+			
+			
+			
 			boolean shouldSave = false;	//change to true in your code block if you want to update the csv
 			if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
@@ -409,10 +425,15 @@ cookieName="page_scroll"
 			mergeManager.updateUserIds(userRows,userName,email);
 			shouldSave = true;
 		}
-		if(!map.isEmpty()){
-		mergeManager.updateComments(map);
+		if(!commentMap.isEmpty()){
+		mergeManager.updateComments(commentMap);
 		shouldSave = true;
 		}
+		
+		if(!isDoneMap.isEmpty()){
+			mergeManager.updateIsDone(isDoneMap);
+			shouldSave = true;
+			}
 		
 		//check whether rows have been marked for demerge; if yes,call the demerge method
 		String [] rowsToBeDemerged = request.getParameterValues("demerges");
@@ -550,6 +571,7 @@ cookieName="page_scroll"
 						<th>Person ID</th>
 						<th>Comments</th>
 						<th class="cell-table">Unmerge</th>
+						<th class="cell-table">Done</th>
 					</tr>
 <%
 							
@@ -567,10 +589,13 @@ cookieName="page_scroll"
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
 					tableData = "<mapped dummy tag>";
 					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+					pageContext.setAttribute("tableData","<mapped dummy tag>");	//attribute is used by jstl; couldnt find a better way to do this
+					
 				} 
 				else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
 					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+					pageContext.setAttribute("tableData","");	//same as above; used ny jstl
 				}
 				if(newGroup==true){
 					newGroup=false;
@@ -624,6 +649,32 @@ cookieName="page_scroll"
 					<!-- </div> -->
 				</td>
 				<td class="cell-table unMergeCol"><%=unMerge%></td>
+				<td class="cell-table">
+				<%-- <c:set var="tableData" scope="page" value="lolo"></c:set> --%>
+				<c:choose>
+					<c:when test="${tableData eq '<mapped dummy tag>' }">
+					</c:when>
+					<c:otherwise>
+						<c:out value="${tableData}"></c:out>
+						<select id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')">
+							<%
+							String selected = row.get("is_done");
+							String selectedNo,selectedYes;
+							if(selected==null||selected.equals("no")){
+								selectedNo="selected";
+								selectedYes="";
+							}
+							else{
+								selectedNo="";
+								selectedYes="selected";
+							}
+							%>
+							<option value="no" <%=selectedNo %>>no</option>
+							<option value="yes"<%=selectedYes %>>yes</option>
+						</select>
+					</c:otherwise>
+				</c:choose>
+				</td>
 			</tr>
 			
 			<%

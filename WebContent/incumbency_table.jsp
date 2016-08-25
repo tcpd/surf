@@ -423,6 +423,10 @@ cookieName="page_scroll"
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.updateUserIds(userRows,userName,email);
+			//dropdown needs to be updated too on merge
+			for(String row:userRows){
+				isDoneMap.put(row, "yes");
+			}
 			shouldSave = true;
 		}
 		if(!commentMap.isEmpty()){
@@ -664,9 +668,13 @@ cookieName="page_scroll"
 								selectedNo="selected";
 								selectedYes="";
 							}
-							else{
+							else if(selected.equals("yes")){
 								selectedNo="";
 								selectedYes="selected";
+							}
+							else{
+								selectedNo="selected";
+								selectedYes="";
 							}
 							%>
 							<option value="no" <%=selectedNo %>>no</option>

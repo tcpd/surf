@@ -11,7 +11,7 @@
 <title>Candidate Mapper</title>
 	<base href="${pageContext.request.contextPath}">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style.css">
 </head>
 <body>
 <h1 class="text-center" style="padding-top:20px;">Candidate Mapper</h1>

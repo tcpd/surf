@@ -116,7 +116,7 @@ function createNameParameter(id){
 // 		}
 <%-- 	%> }); --%>
 
-cookieName="page_scroll"
+	cookieName="page_scroll"
 	expdays=365
 
 	// An adaptation of Dorcht's cookie functions.
@@ -187,9 +187,9 @@ cookieName="page_scroll"
 	<%!
    //SETTING UP RREQUIRED VARIABLES
 
-	boolean isFirst;
-	Dataset d;
-	MergeManager mergeManager;
+	//boolean isFirst;
+	//Dataset d;
+	//MergeManager mergeManager;
 
 	
 
@@ -201,13 +201,7 @@ cookieName="page_scroll"
 
 
 
-	<%!
-	public void jspInit() {
-	isFirst=true;
-       //writer.println("let's see where we are");
-
-   }
-   %>
+	
    
    <!--
    
@@ -235,240 +229,45 @@ cookieName="page_scroll"
    
 	//SETTING UP THE VARIABLES which can be used in the whole session
 	
-	String userName, email, algorithm, dataset, filterParam, filterValue, filterParamNav, filterValueNav;
+	String userName, email, algorithm, dataset, filterParam, filterParamNav, filterValueNav;
+   	String [] filterValue;
    
-   
-	if(request.getParameter("userName")!= null){
-		userName = request.getParameter("userName").toString();
-		session.setAttribute("userName", userName);	
-			
-	}
+   userName = session.getAttribute("userName").toString();
+   email = session.getAttribute("email").toString();
+   filterParam = session.getAttribute("filterParam").toString();
+   filterValue = (String [])session.getAttribute("filterValue");
 	
-	else if(session.getAttribute("userName") != null){
-		userName = session.getAttribute("userName").toString();
-	}
-	else{
-		userName = "User Unknown";
-	}
-   
-	
-	if(request.getParameter("email")!= null){
-		email = request.getParameter("email").toString();
-		session.setAttribute("email", email);	
-			
-	}  
-	else if(session.getAttribute("email") != null){
-		email = session.getAttribute("email").toString();
-	}
-	else{
-		email = "Not Specified";
-	}
-   
-   //Check if the user is entering for the first time. 
-   
-	String checkVar = "algorithm";
-   
-	if(session.getAttribute(checkVar) != null || request.getParameter(checkVar) != null){
-	
-	   if(request.getParameter("algorithm")!= null){
-			algorithm = request.getParameter("algorithm").toString();
-			session.setAttribute("algorithm", algorithm);	
-			
-	   }
-	   
-	   else{
-			algorithm = session.getAttribute("algorithm").toString();
-		}
-	   
-	   if(request.getParameter("dataset")!= null){
-			dataset = request.getParameter("dataset").toString();
-			session.setAttribute("dataset", dataset);	
-			
-	   }
-	   
-	   else{
-			dataset = session.getAttribute("dataset").toString();
-		}
-	   
-	   if(request.getParameter("filterParam")!= null){
-			filterParam = request.getParameter("filterParam").toString();
-			session.setAttribute("filterParam", filterParam);	
-		}
-	   
-	   else{
-			filterParam = session.getAttribute("filterParam").toString();
-		}
-	   
-	   if(request.getParameter("filterValue")!= null){
-			filterValue = request.getParameter("filterValue").toString();
-			session.setAttribute("filterValue", filterValue);
-		}
-	   
-	   else{
-			filterValue = session.getAttribute("filterValue").toString();
-	
-		}
-	   
-	   //HARDCODED STUFF HERE
-	   	
-	   if(filterParam.equals("PC_name")){
-		   filterParamNav = "Constituency";
-	   }
-	   else{
-		   filterParamNav = filterParam;
-	   }
-	   filterValueNav = Arrays.toString(request.getParameterValues("filterValue"));
-	}
-	
-	else{
-		   //SET DEFAULTS FOR THE VARIABLE
-		   
-		   algorithm = "exactSameName";
-		   dataset = "ge";
-		   filterParam = "State";
-		   filterValue = "All Records";
-		   filterParamNav = filterParam;
-		   filterValueNav = filterValue;
-			if(request.getParameter("state") != null){
-				filterValueNav = request.getParameter("state").toString().toUpperCase();
-			}
-	}
-	
-	if(filterValueNav != null){
-		if(filterValueNav.toString().equals("null")){
-			filterValueNav = "All Records";
-		}
-	}
-	
+ //HARDCODED STUFF HERE
+   if(filterParam.equals("PC_name")){
+	   filterParamNav = "Constituency";
+   }
+   else{
+	   filterParamNav = filterParam;
+   }
+   filterValueNav = session.getAttribute("filterValueNav").toString();
 
-   
-	   
-	//SETTING UP THE DATASET FOR MERGEMANAGER
-	
-	//paths go here
-    String ge = pageContext.getServletConfig().getInitParameter("gePath").toString();
-   
-	if(isFirst){
-		String file="";
-		if(dataset.equals("ge")){
-			file = ge;
-		}
-	
-		try {
-			d = new Dataset(file);
-			Bihar.initRowFormat(d.getRows(), d);
-		
-		}
-		
-		catch(IOException ioex){
-			ioex.printStackTrace();
-		}
-		
-		isFirst = false;
-	}
-
-
-	//SETs UP mergeManager
-	mergeManager = MergeManager.getManager(algorithm, d);
-
-	
-	//Initial Mapping by mergeManager
-	if(mergeManager.isFirstReading()){
-		mergeManager.initializeIds();
-		mergeManager.performInitialMapping();
-	}
-	else{
-	    mergeManager.load();
-	}
-	
-	mergeManager.addSimilarCandidates();
-
-
-	//response.setContentType("text/html");
-	//PrintWriter writer = response.getWriter();
 
 	ArrayList<Multimap<String, Row>> incumbentsList;
-	
-	//SAVES MERGES AND COMMENTS 
-	
-	if(request.getParameter("submit")!=null && request.getParameter("submit").equals("Save")) {
-			//String checkedRows = request.getParameter("row");
-			//System.out.println(checkedRows);
-	
-			String [] userRows = request.getParameterValues("row");
-			
-			//Collect comment related information & Collect completion related information
-			
-			Map<String,String[]> parameterMap = request.getParameterMap();
-			
-			Map<String,String> commentMap = new HashMap<String,String>();
-			Map<String,String> isDoneMap = new HashMap<String,String>();
-			for(String name:parameterMap.keySet()){
-			if(name.contains("commentParam")){
-					commentMap.put(name.substring(12),parameterMap.get(name)[0]);	//strip the key value before storing
-				}
-			
-			if(name.contains("isDone")){
-				isDoneMap.put(name.substring(7),parameterMap.get(name)[0]);	//strip the key value before storing
-			}
-				
-			}
-			
-			
-			
-			
-			
-			boolean shouldSave = false;	//change to true in your code block if you want to update the csv
-			if(userRows!=null && userRows.length>0){
-			mergeManager.merge(userRows);
-			mergeManager.updateMappedIds();
-			mergeManager.updateUserIds(userRows,userName,email);
-			//dropdown needs to be updated too on merge
-			for(String row:userRows){
-				isDoneMap.put(row, "yes");
-			}
-			shouldSave = true;
-		}
-		if(!commentMap.isEmpty()){
-		mergeManager.updateComments(commentMap);
-		shouldSave = true;
-		}
-		
-		if(!isDoneMap.isEmpty()){
-			mergeManager.updateIsDone(isDoneMap);
-			shouldSave = true;
-			}
-		
-		//check whether rows have been marked for demerge; if yes,call the demerge method
-		String [] rowsToBeDemerged = request.getParameterValues("demerges");
-		//testing deMerge; Remove later
-		//rowsToBeDemerged = new String[]{"26827","31908", "63686", "70245", "8576", "31906", "26815"};
-		if(rowsToBeDemerged!=null){
-			mergeManager.deMerge(rowsToBeDemerged);
-			shouldSave = true;
-		}
-		
-		if(shouldSave)
-			mergeManager.save(ge);
-		}
+	MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
 	
 		//WORKING WITH FILTER PARAMETERS
 		
-			if(!filterValue.equals("All Records") && request.getParameterValues("filterValue")!= null){
-				incumbentsList = mergeManager.getIncumbents(filterParam, request.getParameterValues("filterValue"));
-			}
-			else if(request.getParameter("state") != null){
-				if(!request.getParameter("state").toString().equals("All Records") && !request.getParameter("state").toString().equals("")){
-					incumbentsList = mergeManager.getIncumbents("State", new String[] {request.getParameter("state").toString().toUpperCase()});
+			if(filterValue!= null && filterParam!=null){
+				boolean isAllRecords=false;
+				for(String value:filterValue){
+					if(value.equals("All Records")){
+						isAllRecords=true;
+					}
 				}
-				else{
+				if(isAllRecords)
 					incumbentsList = mergeManager.getIncumbents();
+				else{
+					incumbentsList = mergeManager.getIncumbents(filterParam,filterValue);
 				}
-			}
-		
-			else{
+				
+			}else{
 				incumbentsList = mergeManager.getIncumbents();
-			}   
+			}
 					
 		int[] progressData = mergeManager.getListCount(incumbentsList);	
 
@@ -486,7 +285,7 @@ cookieName="page_scroll"
 	      </div>
 	      <div class="modal-body">
 	       	<div class="filterForm">
-				<form class="form" role="filter" method="get" action="incumbency_table.jsp" onsubmit="incumbency_table.jsp">
+				<form class="form" role="filter" method="get" action="${pageContext.request.contextPath}/IncumbencyServlet" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">
 					<div class="form-group">
 							<select class="form-control" name="dataset">
 								<option value="ge">General Election Candidate</option>

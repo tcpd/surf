@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
   <display-name>incumbency</display-name>
-  
   <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
-  
   <servlet>
-  	<servlet-name>IncumbencyTable</servlet-name>
-  	<jsp-file>/incumbency_table.jsp</jsp-file>
-  	<init-param>
-  		<param-name>gePath</param-name>
-  		<param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv</param-value>
-  	</init-param>
+    <servlet-name>IncumbencyTable</servlet-name>
+    <jsp-file>/incumbency_table.jsp</jsp-file>
   </servlet>
   <servlet-mapping>
-  	<servlet-name>IncumbencyTable</servlet-name>
-  	<url-pattern>/incumbency_table.jsp</url-pattern>
+    <servlet-name>IncumbencyTable</servlet-name>
+    <url-pattern>/incumbency_table.jsp</url-pattern>
   </servlet-mapping>
+  <context-param>
+  	<param-name>gePath</param-name>
+    <param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv</param-value>
+  </context-param>
 </web-app>

@@ -1,6 +1,7 @@
 package in.edu.ashoka.lokdhaba;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -12,6 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.google.common.collect.Multimap;
 
 /**
  * Servlet implementation class IncumbencyServlet
@@ -39,21 +42,30 @@ public class IncumbencyServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
+		HttpSession session = request.getSession();
+		
 		//SETTING UP THE DATASET FOR MERGEMANAGER
 		setUpDataset();
-		checkFilterParameters(request);
+		
+		//set up important parameters
+		assignAttributes(request, session, "userName", "Name Not Specified",false);
+		assignAttributes(request, session, "email", "email Not Specified",false);
+		assignAttributes(request, session, "algorithm", "exactSameName",false);
+	
+		
 		setUpMergeManager(request.getSession().getAttribute("algorithm").toString());
 		mergeManager.addSimilarCandidates();
-		
-	    if(saveButtonPressed(request)){
+		if(saveButtonPressed(request)){
 	    	boolean shouldSave = updateTable(request);
 	    	if(shouldSave){
 	    		mergeManager.save(currentFile);
 	    	}
-	    	
 	    }
-	    
-	    
+		
+		checkFilterParameters(request);
+		generateIncumbents(request.getSession());
+		generateIncumbentsView(request);
+		
 	    request.getSession().setAttribute("mergeManager", mergeManager);
 	    request.getRequestDispatcher("/incumbency_table.jsp").forward(request, response);
 	}
@@ -234,19 +246,37 @@ public class IncumbencyServlet extends HttpServlet {
 			}
 		}*/
 		
-		assignAttributes(request, session, "userName", "Name Not Specified",false);
-		assignAttributes(request, session, "email", "email Not Specified",false);
-		assignAttributes(request, session, "algorithm", "exactSameName",false);
+		
 		assignAttributes(request, session, "filterParam", "State",false);
 		assignAttributes(request, session, "filterValue", new String[]{"All Records"},true);
 		session.setAttribute("filterValueNav", Arrays.toString((String[]) session.getAttribute("filterValue")));
 		if(request.getParameter("state") != null){
+			//if no state parameter specified, use all records by default
 			if(request.getParameter("state").equals(""))
 				session.setAttribute("filterValue", new String []{"All Records"});
 			else
 				session.setAttribute("filterValue", new String []{request.getParameter("state").toString().toUpperCase()});
 			session.setAttribute("filterValueNav", Arrays.toString((String[]) session.getAttribute("filterValue"))); 
 		}
+		
+		//Setting up nav bar attribute
+		String filterParam, filterParamNav, filterValueNav;
+	   	
+	    filterParam = session.getAttribute("filterParam").toString();
+	 	
+	    //HARDCODED STUFF HERE
+	    if(filterParam.equals("PC_name")){
+	 	   filterParamNav = "Constituency";
+	    }
+	    else{
+	 	   filterParamNav = filterParam;
+	    }
+	    filterValueNav = session.getAttribute("filterValueNav").toString();
+		
+		//SETTING UP REMAINING ATTRIBUTES
+		session.setAttribute("filterParamNav", filterParamNav);
+		session.setAttribute("filterValueNav", filterValueNav);
+		
 		
 	}
 	
@@ -262,6 +292,74 @@ public class IncumbencyServlet extends HttpServlet {
 				session.setAttribute(attributeName, request.getParameter(attributeName));
 		}
 			
+	}
+	
+	private void generateIncumbents(HttpSession session){
+		ArrayList<Multimap<String, Row>> incumbentsList;
+		String filterParam = session.getAttribute("filterParam").toString();
+	    String [] filterValue = (String [])session.getAttribute("filterValue");
+	    
+	    //WORKING WITH FILTER PARAMETERS & GENERATING INCUMBENTS LIST
+		
+  		if(filterValue!= null && filterParam!=null){
+  			boolean isAllRecords=false;
+  			for(String value:filterValue){
+  				if(value.equals("All Records")){
+  					isAllRecords=true;
+  				}
+  			}
+  			if(isAllRecords)
+  				incumbentsList = mergeManager.getIncumbents();
+  			else{
+  				incumbentsList = mergeManager.getIncumbents(filterParam,filterValue);
+  			}
+  			
+  		}else{
+  			incumbentsList = mergeManager.getIncumbents();
+  		}
+  				
+  		int[] progressData = mergeManager.getListCount(incumbentsList);
+  		
+  		//Setting up Incumbents list and progress related data
+  		session.setAttribute("progressData", progressData);
+		session.setAttribute("incumbentsList", incumbentsList);
+		
+	}
+	
+	public void generateIncumbentsView(HttpServletRequest request){
+		
+		HttpSession session = request.getSession();
+		//set defaults
+		int page=1;
+		int recordsPerPage = 500;
+		
+		if(request.getParameter("page")!=null){
+			page = Integer.parseInt(request.getParameter("page"));
+		}
+		
+		
+		ArrayList<Multimap<String, Row>> incumbentsList = (ArrayList<Multimap<String, Row>>) session.getAttribute("incumbentsList");
+		ArrayList<Multimap<String, Row>> subList;
+		if(incumbentsList.size()>recordsPerPage){
+			int high = page*recordsPerPage;
+			if(incumbentsList.size()<high){
+				high=incumbentsList.size();
+			}
+			subList = new ArrayList<>(incumbentsList.subList((page-1)*recordsPerPage, high));
+		}
+		else{
+			subList = incumbentsList;
+		}
+		
+		
+		int noOfRecords = incumbentsList.size();
+				
+		int noOfPages = (int) Math.ceil(noOfRecords*1.0/recordsPerPage);
+		session.setAttribute("subList", subList);
+		session.setAttribute("noOfPages", noOfPages);
+		session.setAttribute("currentPage", page);
+		
+		
 	}
 
 }

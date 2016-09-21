@@ -14,7 +14,7 @@
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style.css">
 </head>
 <body>
-<h1 class="text-center" style="padding-top:20px;">Candidate Mapper</h1>
+<h1 class="text-center" style="padding-top:20px;">Neta Analytics - Candidate Mapper</h1>
 
 <div class="user-input">
 <form action="${pageContext.request.contextPath}/IncumbencyServlet" method="get" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">

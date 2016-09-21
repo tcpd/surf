@@ -227,49 +227,19 @@ function createNameParameter(id){
 
    <%
    
-	//SETTING UP THE VARIABLES which can be used in the whole session
-	
-	String userName, email, algorithm, dataset, filterParam, filterParamNav, filterValueNav;
-   	String [] filterValue;
-   
-   userName = session.getAttribute("userName").toString();
-   email = session.getAttribute("email").toString();
-   filterParam = session.getAttribute("filterParam").toString();
-   filterValue = (String [])session.getAttribute("filterValue");
-	
- //HARDCODED STUFF HERE
-   if(filterParam.equals("PC_name")){
-	   filterParamNav = "Constituency";
-   }
-   else{
-	   filterParamNav = filterParam;
-   }
-   filterValueNav = session.getAttribute("filterValueNav").toString();
+	   	String userName, email, algorithm, dataset, filterParam, filterParamNav, filterValueNav;
+	  	String [] filterValue;
+	  	
+	  	userName = session.getAttribute("userName").toString();
+	   	email = session.getAttribute("email").toString();
+	   	filterParam = session.getAttribute("filterParam").toString();
+	   	filterValue = (String [])session.getAttribute("filterValue");
+	   	filterParamNav = session.getAttribute("filterParamNav").toString();
+	   	filterValueNav = session.getAttribute("filterValueNav").toString();
 
-
-	ArrayList<Multimap<String, Row>> incumbentsList;
-	MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
-	
-		//WORKING WITH FILTER PARAMETERS
-		
-			if(filterValue!= null && filterParam!=null){
-				boolean isAllRecords=false;
-				for(String value:filterValue){
-					if(value.equals("All Records")){
-						isAllRecords=true;
-					}
-				}
-				if(isAllRecords)
-					incumbentsList = mergeManager.getIncumbents();
-				else{
-					incumbentsList = mergeManager.getIncumbents(filterParam,filterValue);
-				}
-				
-			}else{
-				incumbentsList = mergeManager.getIncumbents();
-			}
-					
-		int[] progressData = mergeManager.getListCount(incumbentsList);	
+		ArrayList<Multimap<String, Row>> incumbentsList = (ArrayList<Multimap<String, Row>>)session.getAttribute("subList");			
+		int[] progressData = (int[])session.getAttribute("progressData");	
+		MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
 
 	%>
 	
@@ -334,7 +304,7 @@ function createNameParameter(id){
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">Candidate Mapper</a>
+					<a class="navbar-brand" href="#">Neta Analytics - Candidate Mapper</a>
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
@@ -496,6 +466,53 @@ function createNameParameter(id){
 </tbody>
 </table>
 </form>
+
+<div id="page-block">
+	
+	<!-- Page Navigation bar here -->
+	<nav aria-label="Page navigation">
+  	<ul class="pagination pre-margin">
+  	
+  	<!-- Listing previous page url here-->
+  	<c:if test="${currentPage != 1}">
+	    <li class="page-item">
+		<a class="page-link" href="IncumbencyServlet?page=${currentPage - 1}" aria-label="Previous">
+		<span aria-hidden="true">&laquo;</span>
+		<span class="sr-only">Previous</span>
+	 	</a>
+	    </li>
+    </c:if>
+    
+    <!-- Listing page numbers here -->
+    <c:forEach begin="1" end="${noOfPages}" var="i">
+				<c:choose>
+					<c:when test="${currentPage eq i}">
+						<c:set var="pageIsActive" value="page-item active"></c:set>
+					</c:when>
+					<c:otherwise>
+						<c:set var="pageIsActive" value="page-item"></c:set>
+					</c:otherwise>
+				</c:choose>
+				<li class="${pageIsActive}"><a class="page-link" href="IncumbencyServlet?page=${i}">${i}</a></li>
+	</c:forEach>
+    
+    <!-- Listing next page url here -->
+    
+    <c:if test="${currentPage lt noOfPages}">
+				<li class="page-item">
+      			<a class="page-link" href="IncumbencyServlet?page=${currentPage + 1}" aria-label="Next">
+        		<span aria-hidden="true">&raquo;</span>
+        		<span class="sr-only">Next</span>
+      			</a>
+    			</li>
+	</c:if>
+    
+    
+  </ul>
+</nav>
+
+</div>
+
 <script type="text/javascript">
 
 

@@ -87,6 +87,10 @@ body{
 	min-width:10em;
 }
 
+.pre-margin{
+	margin: 5% 10%;
+}
+
 .nav .breadcrumb a {
     margin: 0 7px;
     text-transform:capitalize;

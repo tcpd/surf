@@ -343,7 +343,7 @@ function createNameParameter(id){
 						<th class="cell-table">ID</th>
 						<th>Person ID</th>
 						<th>Comments</th>
-						<th class="cell-table">Unmerge</th>
+						<th class="cell-table">Un- merge</th>
 						<th class="cell-table">Done</th>
 					</tr>
 <%

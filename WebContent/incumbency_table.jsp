@@ -258,9 +258,11 @@ function createNameParameter(id){
 				<form class="form" role="filter" method="get" action="${pageContext.request.contextPath}/IncumbencyServlet" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">
 					<div class="form-group">
 							<select class="form-control" name="dataset">
-								<option value="ge">General Election Candidate</option>
-<!-- 								<option value="bihar">Bihar Election Candidate</option> -->
-<!-- 								<option value="rajasthan">Rajasthan Election Candidate</option> -->
+							<!--MODIFY HERE -->
+							
+							<c:forEach var="name" items="${datasetName}">
+								<option value="${name}"><c:out value="${datasetDescription.get(name)}"></c:out></option>
+							</c:forEach>
 							</select>
 					</div>
 					<div class="form-group">

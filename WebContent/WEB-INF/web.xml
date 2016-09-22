@@ -13,7 +13,21 @@
     <url-pattern>/incumbency_table.jsp</url-pattern>
   </servlet-mapping>
   <context-param>
+  	<param-name>upPath</param-name>
+    <param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/dummy_yolo.csv</param-value>
+  </context-param>
+  <context-param>
   	<param-name>gePath</param-name>
     <param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv</param-value>
+  </context-param>
+  <context-param>
+  	<description></description>
+  	<param-name>geDescription</param-name>
+    <param-value>General Election Candidate</param-value>
+  </context-param>
+  <context-param>
+  	<description></description>
+  	<param-name>upDescription</param-name>
+    <param-value>YOLO Candidate</param-value>
   </context-param>
 </web-app>

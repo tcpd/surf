@@ -28,6 +28,8 @@ public class IncumbencyServlet extends HttpServlet {
 	MergeManager mergeManager;
 	//filepaths
 	String currentFile;
+	Map<String, String> pathMap;
+	Map<String, String> descriptionMap;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -45,7 +47,7 @@ public class IncumbencyServlet extends HttpServlet {
 		HttpSession session = request.getSession();
 		
 		//SETTING UP THE DATASET FOR MERGEMANAGER
-		setUpDataset();
+		setUpDataset(request);
 		
 		//set up important parameters
 		assignAttributes(request, session, "userName", "Name Not Specified",false);
@@ -53,7 +55,7 @@ public class IncumbencyServlet extends HttpServlet {
 		assignAttributes(request, session, "algorithm", "exactSameName",false);
 	
 		
-		setUpMergeManager(request.getSession().getAttribute("algorithm").toString());
+		setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
 		mergeManager.addSimilarCandidates();
 		if(saveButtonPressed(request)){
 	    	boolean shouldSave = updateTable(request);
@@ -83,6 +85,18 @@ public class IncumbencyServlet extends HttpServlet {
 	public void init() throws ServletException{
 		isFirst=true;
 		
+		//paths added here
+		
+		Enumeration parameterNames = getServletContext().getInitParameterNames();
+		pathMap = new HashMap<>();
+		descriptionMap = new HashMap<>();
+		while(parameterNames.hasMoreElements()){
+			String name = parameterNames.nextElement().toString();
+			if(name.contains("Path"))
+				pathMap.put(name.replace("Path", ""), getServletContext().getInitParameter(name));
+			if(name.contains("Description"))
+				descriptionMap.put(name.replace("Description", ""), getServletContext().getInitParameter(name));
+		}
 	}
 	
 	private boolean saveButtonPressed(HttpServletRequest request){
@@ -143,32 +157,57 @@ public class IncumbencyServlet extends HttpServlet {
 		return shouldSave;
 	}
 	
-	private void setUpDataset(){
-		//paths go here
-	    String ge = getServletContext().getInitParameter("gePath").toString();
-	    
+	private void setUpDataset(HttpServletRequest request){
+		
 	    //this code mwill need changes
-	    currentFile = ge;
-	    
-	    
+		
+		//set defaults
 		if(isFirst){
+			String key = pathMap.keySet().iterator().next();
+			currentFile = pathMap.get(key);
+			request.getSession().setAttribute("dataset", key);
+		}
+	    
+		if(isFirst||request.getParameter("dataset")!=null){
 			
+			if(request.getParameter("dataset")!=null){
+				
+				//This must be done before setting the dataset attribute
+				if(!request.getParameter("dataset").equals(request.getSession().getAttribute("dataset")))
+					request.getSession().setAttribute("datasetChanged", true);
+				else
+					request.getSession().setAttribute("datasetChanged", false);
+				
+				currentFile = pathMap.get(request.getParameter("dataset"));
+				request.getSession().setAttribute("dataset", request.getParameter("dataset"));
+				
+			}
 			try {
-				d = new Dataset(ge);
+				d = new Dataset(currentFile);
 				Bihar.initRowFormat(d.getRows(), d);
-			
 			}
 			
 			catch(IOException ioex){
 				ioex.printStackTrace();
 			}
 			isFirst = false;
+			
+			request.getSession().setAttribute("datasetName", pathMap.keySet());
+			request.getSession().setAttribute("datasetDescription", descriptionMap);
+			request.getSession().setAttribute("datasetPath", pathMap);
+			
+			//if dataset changed flag is still null
+			if(request.getSession().getAttribute("datasetChanged")==null){
+				request.getSession().setAttribute("datasetChanged", false);
+			}
 		}
 	}
 	
-	private void setUpMergeManager(String algorithm){
+	private void setUpMergeManager(HttpServletRequest request, String algorithm){
 		//SETs UP mergeManager
-		mergeManager = MergeManager.getManager(algorithm, d);
+		
+		//if the dataset is same, no need to refresh merge manager; refresh otherwise
+		mergeManager = MergeManager.getManager(algorithm, d, (Boolean)request.getSession().getAttribute("datasetChanged"));
 
 		
 		//Initial Mapping by mergeManager

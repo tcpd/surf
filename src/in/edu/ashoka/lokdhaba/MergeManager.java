@@ -33,30 +33,30 @@ public abstract class MergeManager {
     
     //this is a factory method which generates the right manager
     // these methods are singleton
-    //for new algorithms these need to be updated
+    //for any new algorithms, these need to be updated
     
     
-    public static MergeManager getManager(String algo, Dataset d){
+    public static MergeManager getManager(String algo, Dataset d, boolean forceRefresh){
     	if(algo.equals("exactSameName")){
-    		if(exactSameNameMergeManager==null){
+    		if(exactSameNameMergeManager==null||forceRefresh){
     			exactSameNameMergeManager= new ExactSameNameMergeManager(d);
     		}
     			return exactSameNameMergeManager;
     	}	
     	else if(algo.equals("editDistance1")){
-    		if(similarNameMergeManagerED1==null){
+    		if(similarNameMergeManagerED1==null||forceRefresh){
     			similarNameMergeManagerED1 = new SimilarNameMergeManager(d, 1);
     		}
     			return similarNameMergeManagerED1;
     	}
     	else if(algo.equals("editDistance2")){
-    		if(similarNameMergeManagerED2==null){
+    		if(similarNameMergeManagerED2==null||forceRefresh){
     			similarNameMergeManagerED2 = new SimilarNameMergeManager(d, 2);
     		}
     			return similarNameMergeManagerED2;
     	}
     	else if(algo.equals("dummyAllName")){
-    		if(dummyMergeManager==null){
+    		if(dummyMergeManager==null||forceRefresh){
     			dummyMergeManager = new DummyMergeManager(d);
     		}
     		return dummyMergeManager;

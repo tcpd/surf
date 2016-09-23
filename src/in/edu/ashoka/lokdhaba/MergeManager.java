@@ -6,10 +6,13 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+
+import javax.servlet.http.HttpSession;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -21,10 +24,10 @@ public abstract class MergeManager {
     HashMap<String, Row> idToRow;
     
     //future algorithms will need references here; this is to keep objects in memory for faster reloading of page
-    static ExactSameNameMergeManager exactSameNameMergeManager;
-    static SimilarNameMergeManager similarNameMergeManagerED1;
-    static SimilarNameMergeManager similarNameMergeManagerED2;
-    static DummyMergeManager dummyMergeManager;
+    static Map<HttpSession,ExactSameNameMergeManager> exactSameNameMergeManagerMaps = new HashMap<>();
+    static Map<HttpSession,SimilarNameMergeManager> similarNameMergeManagerED1Maps = new HashMap<>();
+    static Map<HttpSession,SimilarNameMergeManager> similarNameMergeManagerED2Maps = new HashMap<>();
+    static Map<HttpSession,DummyMergeManager> dummyMergeManagerMaps = new HashMap<>();
     
     static Map<String,Set<String>> attributesDataSet;
     ArrayList<Collection<Row>> listOfSimilarCandidates; 
@@ -36,30 +39,31 @@ public abstract class MergeManager {
     //for any new algorithms, these need to be updated
     
     
-    public static MergeManager getManager(String algo, Dataset d, boolean forceRefresh){
+    public static MergeManager getManager(HttpSession session, String algo, Dataset d, boolean forceRefresh){
+    	//System.out.println("I am in MergeManager");
     	if(algo.equals("exactSameName")){
-    		if(exactSameNameMergeManager==null||forceRefresh){
-    			exactSameNameMergeManager= new ExactSameNameMergeManager(d);
+    		if(exactSameNameMergeManagerMaps.get(session)==null||forceRefresh){
+    			exactSameNameMergeManagerMaps.put(session, new ExactSameNameMergeManager(d));
     		}
-    			return exactSameNameMergeManager;
+    			return exactSameNameMergeManagerMaps.get(session);
     	}	
     	else if(algo.equals("editDistance1")){
-    		if(similarNameMergeManagerED1==null||forceRefresh){
-    			similarNameMergeManagerED1 = new SimilarNameMergeManager(d, 1);
+    		if(similarNameMergeManagerED1Maps.get(session)==null||forceRefresh){
+    			similarNameMergeManagerED1Maps.put(session, new SimilarNameMergeManager(d, 1));
     		}
-    			return similarNameMergeManagerED1;
+    			return similarNameMergeManagerED1Maps.get(session);
     	}
     	else if(algo.equals("editDistance2")){
-    		if(similarNameMergeManagerED2==null||forceRefresh){
-    			similarNameMergeManagerED2 = new SimilarNameMergeManager(d, 2);
+    		if(similarNameMergeManagerED2Maps.get(session)==null||forceRefresh){
+    			similarNameMergeManagerED2Maps.put(session, new SimilarNameMergeManager(d, 2));
     		}
-    			return similarNameMergeManagerED2;
+    			return similarNameMergeManagerED2Maps.get(session);
     	}
     	else if(algo.equals("dummyAllName")){
-    		if(dummyMergeManager==null||forceRefresh){
-    			dummyMergeManager = new DummyMergeManager(d);
+    		if(dummyMergeManagerMaps.get(session)==null||forceRefresh){
+    			dummyMergeManagerMaps.put(session, new DummyMergeManager(d));
     		}
-    		return dummyMergeManager;
+    		return dummyMergeManagerMaps.get(session);
     	}
 		return null;
     }

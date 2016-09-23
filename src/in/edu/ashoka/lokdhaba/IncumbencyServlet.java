@@ -23,13 +23,13 @@ import com.google.common.collect.Multimap;
 public class IncumbencyServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-	boolean isFirst;
-	Dataset d;
-	MergeManager mergeManager;
+	//static boolean isFirst;
+	//Dataset d;
+	//MergeManager mergeManager;
 	//filepaths
-	String currentFile;
-	Map<String, String> pathMap;
-	Map<String, String> descriptionMap;
+	//String currentFile;
+	static Map<String, String> pathMap;
+	static Map<String, String> descriptionMap;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -56,6 +56,10 @@ public class IncumbencyServlet extends HttpServlet {
 	
 		
 		setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
+		
+		MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
+		String currentFile = session.getAttribute("currentFile").toString();
+		
 		mergeManager.addSimilarCandidates();
 		if(saveButtonPressed(request)){
 	    	boolean shouldSave = updateTable(request);
@@ -83,7 +87,7 @@ public class IncumbencyServlet extends HttpServlet {
 	}
 	
 	public void init() throws ServletException{
-		isFirst=true;
+		//isFirst=true;
 		
 		//paths added here
 		
@@ -122,6 +126,8 @@ public class IncumbencyServlet extends HttpServlet {
 				isDoneMap.put(name.substring(7),parameterMap.get(name)[0]);	//strip the key value before storing
 			}
 		}
+		
+		MergeManager mergeManager = (MergeManager)request.getSession().getAttribute("mergeManager");
 		
 		if(userRows!=null && userRows.length>0){
 			mergeManager.merge(userRows);
@@ -162,13 +168,13 @@ public class IncumbencyServlet extends HttpServlet {
 	    //this code mwill need changes
 		
 		//set defaults
-		if(isFirst){
+		if(request.getSession().getAttribute("d")==null){
 			String key = pathMap.keySet().iterator().next();
-			currentFile = pathMap.get(key);
+			request.getSession().setAttribute("currentFile", pathMap.get(key));
 			request.getSession().setAttribute("dataset", key);
 		}
 	    
-		if(isFirst||request.getParameter("dataset")!=null){
+		if(request.getSession().getAttribute("d")==null||request.getParameter("dataset")!=null){
 			
 			if(request.getParameter("dataset")!=null){
 				
@@ -178,28 +184,30 @@ public class IncumbencyServlet extends HttpServlet {
 				else
 					request.getSession().setAttribute("datasetChanged", false);
 				
-				currentFile = pathMap.get(request.getParameter("dataset"));
+				request.getSession().setAttribute("currentFile",pathMap.get(request.getParameter("dataset")));
 				request.getSession().setAttribute("dataset", request.getParameter("dataset"));
 				
 			}
 			try {
-				d = new Dataset(currentFile);
+				Dataset d = new Dataset(request.getSession().getAttribute("currentFile").toString());
+				request.getSession().setAttribute("d", d);
 				Bihar.initRowFormat(d.getRows(), d);
 			}
 			
 			catch(IOException ioex){
 				ioex.printStackTrace();
 			}
-			isFirst = false;
+			//isFirst = false;
 			
 			request.getSession().setAttribute("datasetName", pathMap.keySet());
 			request.getSession().setAttribute("datasetDescription", descriptionMap);
 			request.getSession().setAttribute("datasetPath", pathMap);
 			
-			//if dataset changed flag is still null
-			if(request.getSession().getAttribute("datasetChanged")==null){
-				request.getSession().setAttribute("datasetChanged", false);
-			}
+			
+		}
+		//if dataset changed flag is still null
+		if(request.getSession().getAttribute("datasetChanged")==null){
+			request.getSession().setAttribute("datasetChanged", false);
 		}
 	}
 	
@@ -207,8 +215,12 @@ public class IncumbencyServlet extends HttpServlet {
 		//SETs UP mergeManager
 		
 		//if the dataset is same, no need to refresh merge manager; refresh otherwise
-		mergeManager = MergeManager.getManager(algorithm, d, (Boolean)request.getSession().getAttribute("datasetChanged"));
-
+		
+		MergeManager mergeManager = MergeManager.getManager(
+				request.getSession(), 
+				algorithm,
+				(Dataset)request.getSession().getAttribute("d"), 
+				(Boolean)request.getSession().getAttribute("datasetChanged"));
 		
 		//Initial Mapping by mergeManager
 		if(mergeManager.isFirstReading()){
@@ -218,6 +230,8 @@ public class IncumbencyServlet extends HttpServlet {
 		else{
 		    mergeManager.load();
 		}
+		
+		request.getSession().setAttribute("mergeManager", mergeManager);
 	}
 	
 	private void checkFilterParameters(HttpServletRequest request){
@@ -337,6 +351,7 @@ public class IncumbencyServlet extends HttpServlet {
 		ArrayList<Multimap<String, Row>> incumbentsList;
 		String filterParam = session.getAttribute("filterParam").toString();
 	    String [] filterValue = (String [])session.getAttribute("filterValue");
+	    MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
 	    
 	    //WORKING WITH FILTER PARAMETERS & GENERATING INCUMBENTS LIST
 		

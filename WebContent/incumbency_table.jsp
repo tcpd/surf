@@ -363,15 +363,20 @@ function createNameParameter(id){
 				String unMerge;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
 					tableData = "<mapped dummy tag>";
-					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 					pageContext.setAttribute("tableData","<mapped dummy tag>");	//attribute is used by jstl; couldnt find a better way to do this
 					
 				} 
 				else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
-					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 					pageContext.setAttribute("tableData","");	//same as above; used ny jstl
 				}
+				
+				if(incumbentsGroup.get(key).size()>1){
+					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+				}else{
+					unMerge = "";
+				}
+				
 				if(newGroup==true){
 					newGroup=false;
 					newPerson=false;
@@ -417,20 +422,24 @@ function createNameParameter(id){
 				<td class="cell-table">
 					<%=row.get("mapped_ID")%>
 				</td>
-				<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
-<%-- 				 onmouseover="commentDisplayer('comment-<%=row.get("ID")%>')" --%>
-					<%-- <div id=comment-<%=row.get("ID")%> onclick="commentHandler('comment-<%=row.get("ID")%>')"> --%>
-					<div class="comment-box"><div style="padding:0.3em"><%=row.get("comments")%></div></div>
-					<!-- </div> -->
-				</td>
-				<td class="cell-table unMergeCol"><%=unMerge%></td>
-				<td class="cell-table">
+				
+				
+				
 				<%-- <c:set var="tableData" scope="page" value="lolo"></c:set> --%>
 				<c:choose>
 					<c:when test="${tableData eq '<mapped dummy tag>' }">
+						<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
+						</td>
+						<td class="cell-table unMergeCol"><%=unMerge%></td>
+						<td class="cell-table"></td>
 					</c:when>
 					<c:otherwise>
+						<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
+							<div class="comment-box"><div style="padding:0.3em"><%=row.get("comments")%></div></div>
+						</td>
+						<td class="cell-table unMergeCol"><%=unMerge%></td>
 						<c:out value="${tableData}"></c:out>
+						<td class="cell-table">
 						<select id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')">
 							<%
 							String selected = row.get("is_done");
@@ -448,12 +457,13 @@ function createNameParameter(id){
 								selectedYes="";
 							}
 							%>
+							
 							<option value="no" <%=selectedNo %>>no</option>
 							<option value="yes"<%=selectedYes %>>yes</option>
 						</select>
+						</td>
 					</c:otherwise>
 				</c:choose>
-				</td>
 			</tr>
 			
 			<%

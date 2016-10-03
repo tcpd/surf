@@ -342,8 +342,8 @@ function createNameParameter(id){
 						<th class="cell-table">State</th>
 						<th class="cell-table">Position</th>
 						<th class="cell-table">Votes</th>
-						<th class="cell-table">ID</th>
-						<th>Person ID</th>
+						<!-- <th class="cell-table">ID</th>
+						<th>Person ID</th> -->
 						<th>Comments</th>
 						<th class="cell-table">Un- merge</th>
 						<th class="cell-table">Done</th>
@@ -390,7 +390,7 @@ function createNameParameter(id){
 			
 			
 %>
-			<tr <%=rowStyleData %>>
+			<tr <%=rowStyleData %> data-toggle="popover" title="ID- <%=row.get("ID")%>" data-trigger="hover" data-content="Person ID- <%=row.get("mapped_ID")%>" data-placement="bottom">
 				<td class="cell-table mergeCol"><%=tableData %></td>
 				<td class="cell-table">
 					<%=row.get("Name")%>
@@ -416,12 +416,14 @@ function createNameParameter(id){
 				<td class="cell-table">
 					<%=row.get("Votes1")%>
 				</td>
-				<td class="cell-table">
+				
+				
+				<%-- <td class="cell-table">
 					<%=row.get("ID")%>
 				</td>
 				<td class="cell-table">
 					<%=row.get("mapped_ID")%>
-				</td>
+				</td> --%>
 				
 				
 				
@@ -621,6 +623,12 @@ $(window).on("load",function(){
 
 
 
+</script>
+//SCRIPT FOR HOVER POP OVER
+<script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();   
+});
 </script>
 </body>
 </html>

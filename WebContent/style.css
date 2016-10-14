@@ -57,6 +57,13 @@ body{
 	font-weight: bold;
 }
 
+.row-done{
+	background-color: #cc9494;
+}
+
+.row-not-done{
+}
+
 .filterForm{
 }
 

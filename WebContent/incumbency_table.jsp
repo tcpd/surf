@@ -361,6 +361,7 @@ function createNameParameter(id){
 				String tableData;
 				String rowStyleData;
 				String unMerge;
+				String rowCompletionColor;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
 					tableData = "<mapped dummy tag>";
 					pageContext.setAttribute("tableData","<mapped dummy tag>");	//attribute is used by jstl; couldnt find a better way to do this
@@ -377,20 +378,26 @@ function createNameParameter(id){
 					unMerge = "";
 				}
 				
+				if(row.get("is_done").toString().equals("yes")){
+					rowCompletionColor = "row-done";
+				}else{
+					rowCompletionColor = "row-not-done";
+				}
+				
 				if(newGroup==true){
 					newGroup=false;
 					newPerson=false;
-					rowStyleData = "class=\"table-row-new-person trow\"";
+					rowStyleData = "class=\"table-row-new-person trow "+rowCompletionColor+" \"";
 				}
 				else if(newPerson==true){
 					newPerson=false;
-					rowStyleData = "class=\"table-row-same-person trow\"";
+					rowStyleData = "class=\"table-row-same-person trow "+rowCompletionColor+" \"";
 				}
-				else{rowStyleData = "";}
+				else{rowStyleData = "class=\""+rowCompletionColor+" \"";}
 			
 			
 %>
-			<tr <%=rowStyleData %> data-toggle="popover" title="ID- <%=row.get("ID")%>" data-trigger="hover" data-content="Person ID- <%=row.get("mapped_ID")%>" data-placement="bottom">
+			<tr <%=rowStyleData %> title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>">
 				<td class="cell-table mergeCol"><%=tableData %></td>
 				<td class="cell-table">
 					<%=row.get("Name")%>
@@ -624,11 +631,13 @@ $(window).on("load",function(){
 
 
 </script>
-//SCRIPT FOR HOVER POP OVER
+
+<!-- //SCRIPT FOR HOVER POP OVER
 <script>
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover();   
 });
-</script>
+</script> -->
+
 </body>
 </html>

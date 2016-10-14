@@ -311,7 +311,8 @@ function createNameParameter(id){
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
 				<button type="button" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
-						<span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+						<!-- <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> -->
+						Settings
 				</button>
 				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">

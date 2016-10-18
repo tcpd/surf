@@ -213,6 +213,7 @@ function createNameParameter(id){
 			session.setAttribute(param, param);
 			return param;
 		}
+	   p
 	   
 	   else{
 			param = session.getAttribute(param);
@@ -331,24 +332,26 @@ function createNameParameter(id){
 			</div><!-- /.container-fluid -->
 		</nav>
 		<div class="table-div table-responsive">
-			<table class="table table-hover">
-				<tbody class="inside-table">
+			<table class="table table-hover header-fixed">
+				<thead>
 					<tr class="table-row">
-						<th class="cell-table">Merge</th>
-						<th class="cell-table">Name</th>
-						<th class="cell-table">Sex</th>
-						<th class="cell-table">Year</th>
-						<th class="cell-table">Constituency</th>
-						<th class="cell-table">Party</th>
-						<th class="cell-table">State</th>
-						<th class="cell-table">Position</th>
-						<th class="cell-table">Votes</th>
+						<th class="cell-table table-cell-merge">Merge</th>
+						<th class="cell-table table-cell-name">Name</th>
+						<th class="cell-table table-cell-sex">Sex</th>
+						<th class="cell-table table-cell-year">Year</th>
+						<th class="cell-table table-cell-constituency">Constituency</th>
+						<th class="cell-table table-cell-party">Party</th>
+						<th class="cell-table table-cell-state">State</th>
+						<th class="cell-table table-cell-position">Position</th>
+						<th class="cell-table table-cell-votes">Votes</th>
 						<!-- <th class="cell-table">ID</th>
 						<th>Person ID</th> -->
-						<th>Comments</th>
-						<th class="cell-table">Un- merge</th>
-						<th class="cell-table">Done</th>
+						<th class="cell-table table-cell-comments">Comments</th>
+						<th class="cell-table table-cell-unmerge">UnMerge</th>
+						<th class="cell-table table-cell-done">Done</th>
 					</tr>
+				</thead>
+				<tbody class="inside-table">
 <%
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
@@ -399,29 +402,29 @@ function createNameParameter(id){
 			
 %>
 			<tr <%=rowStyleData %> title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>">
-				<td class="cell-table mergeCol"><%=tableData %></td>
-				<td class="cell-table">
+				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
+				<td class="cell-table table-cell-name">
 					<%=row.get("Name")%>
 				</td>
-				<td class="cell-table">
+				<td class="cell-table table-cell-sex">
 					<%=row.get("Sex")%>
 				</td>
-				<td class="cell-table">
+				<td class="cell-table table-cell-year">
 					<%=row.get("Year")%>
 				</td>
-				<td class="cell-table">
+				<td class="cell-table table-cell-constituency">
 					<%=row.get("PC_name")%>
 				</td>
-				<td class="cell-table">
+				<td class="cell-table table-cell-party">
 					<%=row.get("Party")%>
 				</td>
-				<td class="cell-table">
+				<td class="cell-table table-cell-state">
 					<%=row.get("State")%>
 				</td>
-				<td class="cell-table">
+				<td class="cell-table table-cell-position">
 					<%=row.get("Position")%>
 				</td>
-				<td class="cell-table">
+				<td class="cell-table table-cell-votes">
 					<%=row.get("Votes1")%>
 				</td>
 				
@@ -438,18 +441,18 @@ function createNameParameter(id){
 				<%-- <c:set var="tableData" scope="page" value="lolo"></c:set> --%>
 				<c:choose>
 					<c:when test="${tableData eq '<mapped dummy tag>' }">
-						<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
+						<td class="cell-table table-cell-comments" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
 						</td>
-						<td class="cell-table unMergeCol"><%=unMerge%></td>
-						<td class="cell-table"></td>
+						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
+						<td class="cell-table table-cell-done"></td>
 					</c:when>
 					<c:otherwise>
-						<td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
+						<td class="cell-table table-cell-comments" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
 							<div class="comment-box"><div style="padding:0.3em"><%=row.get("comments")%></div></div>
 						</td>
-						<td class="cell-table unMergeCol"><%=unMerge%></td>
+						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
 						<c:out value="${tableData}"></c:out>
-						<td class="cell-table">
+						<td class="cell-table table-cell-done">
 						<select id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')">
 							<%
 							String selected = row.get("is_done");

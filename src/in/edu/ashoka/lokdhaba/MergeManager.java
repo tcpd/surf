@@ -171,8 +171,25 @@ public abstract class MergeManager {
 		}
 	}
 	
+	final public void onlyKeepWinners(ArrayList<Multimap<String,Row>> listOfSet){
+		for(int i=0; i<listOfSet.size();i++){
+			Multimap<String, Row> group = listOfSet.get(i);
+			boolean isWinner = false;
+			for(Row row:group.values()){
+				if(row.get("Position").equals("1")){
+					isWinner = true;
+					break;
+				}
+			}
+			if(!isWinner){
+				listOfSet.remove(i);
+				i--;
+			}
+		}
+	}
 	
-	final public ArrayList<Multimap<String,Row>> getIncumbents(){
+	
+	final public ArrayList<Multimap<String,Row>> getIncumbents(boolean onlyWinners){
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
 		for(Collection<Row> similarRows:listOfSimilarCandidates){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
@@ -181,12 +198,13 @@ public abstract class MergeManager {
 			}
 			listOfSet.add(mp);
 		}
+		if(onlyWinners)onlyKeepWinners(listOfSet);
 		sortAlphabetically(listOfSet);
 		return listOfSet;
 	}
 	
 	//returns a list of group of similar named incumbents
-	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values){
+	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values, boolean onlyWinners){
 		
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
 		for(Collection<Row> similarRows:listOfSimilarCandidates){
@@ -204,7 +222,7 @@ public abstract class MergeManager {
 				listOfSet.add(mp);
 		}
 		
-		
+		if(onlyWinners)onlyKeepWinners(listOfSet);
 		sortAlphabetically(listOfSet);
 		return listOfSet;
 	}

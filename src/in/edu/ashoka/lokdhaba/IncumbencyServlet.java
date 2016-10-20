@@ -53,7 +53,7 @@ public class IncumbencyServlet extends HttpServlet {
 		assignAttributes(request, session, "userName", "Name Not Specified",false);
 		assignAttributes(request, session, "email", "email Not Specified",false);
 		assignAttributes(request, session, "algorithm", "exactSameName",false);
-	
+		assignAttributes(request, session, "onlyWinners", "false", false);
 		
 		setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
 		
@@ -351,6 +351,8 @@ public class IncumbencyServlet extends HttpServlet {
 		ArrayList<Multimap<String, Row>> incumbentsList;
 		String filterParam = session.getAttribute("filterParam").toString();
 	    String [] filterValue = (String [])session.getAttribute("filterValue");
+	    boolean onlyWinners = session.getAttribute("onlyWinners").toString().equals("true");
+	    
 	    MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
 	    
 	    //WORKING WITH FILTER PARAMETERS & GENERATING INCUMBENTS LIST
@@ -363,13 +365,13 @@ public class IncumbencyServlet extends HttpServlet {
   				}
   			}
   			if(isAllRecords)
-  				incumbentsList = mergeManager.getIncumbents();
+  				incumbentsList = mergeManager.getIncumbents(onlyWinners);
   			else{
-  				incumbentsList = mergeManager.getIncumbents(filterParam,filterValue);
+  				incumbentsList = mergeManager.getIncumbents(filterParam,filterValue, onlyWinners);
   			}
   			
   		}else{
-  			incumbentsList = mergeManager.getIncumbents();
+  			incumbentsList = mergeManager.getIncumbents(onlyWinners);
   		}
   				
   		int[] progressData = mergeManager.getListCount(incumbentsList);

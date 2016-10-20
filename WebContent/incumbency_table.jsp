@@ -178,6 +178,23 @@ function createNameParameter(id){
 	        window.scrollTo(parseInt(ar[0]), parseInt(ar[1]))
 	    }
 	}
+	
+	function saveFilterSettings(){
+		var expdate = new Date ()
+	    expdate.setTime (expdate.getTime() + (expdays*24*60*60*1000)); // expiry date
+	    setCookie("algorithm",document.getElementById("algorithm").value,expdate);
+	    setCookie("dataset",document.getElementById("dataset").value,expdate);
+	    setCookie("onlyWinners",document.getElementById("onlyWinners").value,expdate);
+	}
+	
+	function loadFilterSettings(){
+		if(getCookie("algorithm")!="")
+			document.getElementById("algorithm").value = getCookie("algorithm");
+		if(getCookie("dataset")!="")
+			document.getElementById("dataset").value = getCookie("dataset");
+		if(getCookie("onlyWinners")!="")
+			document.getElementById("onlyWinners").value = getCookie("onlyWinners");
+	}
 
 </script>
 <title>Candidate Mapper</title>
@@ -258,7 +275,8 @@ function createNameParameter(id){
 	       	<div class="filterForm">
 				<form class="form" role="filter" method="get" action="${pageContext.request.contextPath}/IncumbencyServlet" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">
 					<div class="form-group">
-							<select class="form-control" name="dataset">
+							Dataset:
+							<select class="form-control" name="dataset" id="dataset">
 							<!--MODIFY HERE -->
 							
 							<c:forEach var="name" items="${datasetName}">
@@ -267,7 +285,8 @@ function createNameParameter(id){
 							</select>
 					</div>
 					<div class="form-group">
-						<select class="form-control" name="algorithm">
+						Algorithm:
+						<select class="form-control" name="algorithm" id="algorithm">
 								<option value="exactSameName">Exact Same Name</option>
 								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
 								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
@@ -275,26 +294,34 @@ function createNameParameter(id){
 						</select>
 					</div>
 					<div class="form-group">
+						Filter:
 						<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
 							<option value="State" id="Primary">State</option>
 							<option value="Party" >Party</option>
 							<option value="PC_name" >Constituencies</option>
 						</select>
 					</div>
+					<div class="form-group">
 						<select multiple class="form-control" id="filterValue" name="filterValue">
 							<option value="All Records">All Records</option>
 						</select>
 					</div>
-				</div>
+					<div class=form-group>
+						Choose only Winners:
+						<select id="onlyWinners" class="form-control" name="onlyWinners">
+							<option value="false">No</option>
+							<option value="true">Yes</option>
+						</select>
+					</div>
 				<div class="modal-footer">
-					<button type="submit" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
+					<button type="submit" onclick="saveFilterSettings()" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
 	      		</div>
-			</div>
    		</form>
     </div>
   </div>
 </div>
-	
+</div>
+</div>
 
 	<form method="post">
 		<nav class="navbar navbar-default navbar-fixed-top">
@@ -311,7 +338,7 @@ function createNameParameter(id){
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
-				<button type="button" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
+				<button type="button" onclick="loadFilterSettings()" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
 						<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
 						Settings
 				</button>

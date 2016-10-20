@@ -81,6 +81,7 @@ public abstract class MergeManager {
 		d.addToActualColumnName("email");
 		d.addToActualColumnName("is_done");
 		//d.addToActualColumnName("is_processed");
+		
     }
     
 	//initialize the id's for each row

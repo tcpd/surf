@@ -276,10 +276,20 @@ public class Bihar extends Object {
 		Row.setToStringFields("Name-Sex-Year-PC_name-Party-State-Position-Votes1-ID");
 		
 		//creates aliases for column name
+		//file specific aliases
+		d.registerColumnAlias("Cand1", "Candidate_name");
+		d.registerColumnAlias("AC_name", "PC_Name");
+		d.registerColumnAlias("Sex1", "Candidate_sex");
+		d.registerColumnAlias("Party1", "Party_abbreviation");
+		d.registerColumnAlias("AC_No", "PC_number");
+		d.registerColumnAlias("AC_Type", "PC_type");
+		
 		d.registerColumnAlias("Candidate_name", "Name");
 		d.registerColumnAlias("Candidate_sex", "Sex");
 		d.registerColumnAlias("Party_abbreviation", "Party");
 		d.registerColumnAlias("State_name", "State");
+		
+		
 		
 		//creates canonical tokens; adds them to the row
 		Tokenizer.setupDesiVersions(allRows, "PC_name");

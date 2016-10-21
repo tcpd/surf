@@ -387,7 +387,7 @@ public class IncumbencyServlet extends HttpServlet {
 		HttpSession session = request.getSession();
 		//set defaults
 		int page=1;
-		int recordsPerPage = 500;
+		int recordsPerPage = 100;
 		
 		if(request.getParameter("page")!=null){
 			page = Integer.parseInt(request.getParameter("page"));

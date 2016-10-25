@@ -45,7 +45,7 @@ public class SimilarNameMergeManager extends MergeManager {
 	}
 	
 	public void display2(){
-		ArrayList<Multimap<String, Row>> similarIncumbents = getIncumbents();
+		ArrayList<Multimap<String, Row>> similarIncumbents = getIncumbents(false);
 		int i=0;
 		for(Multimap<String,Row> mp:similarIncumbents) {
 			System.out.println("Group "+i+"================================================");

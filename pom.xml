@@ -12,6 +12,13 @@
 	<name>ER</name>
 	<url>http://maven.apache.org</url>
 
+	<repositories>
+		<repository>
+			<id>nuxeo</id>
+			<url>https://maven-eu.nuxeo.org/nexus/content/repositories/public-releases/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
     		<groupId>org.apache.commons</groupId>
@@ -58,6 +65,14 @@
 		    <artifactId>jstl</artifactId>
 		    <version>1.2</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+
 
 	</dependencies>
 

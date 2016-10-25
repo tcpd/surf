@@ -193,7 +193,7 @@ function createNameParameter(id){
 		if(getCookie("dataset")!="")
 			document.getElementById("dataset").value = getCookie("dataset");
 		if(getCookie("onlyWinners")!="")
-			document.getElementById("onlyWinners").value = getCookie("onlyWinners");
+		document.getElementById("onlyWinners").value = getCookie("onlyWinners");
 	}
 
 </script>
@@ -386,7 +386,22 @@ function createNameParameter(id){
 	boolean newGroup=false, newPerson=false;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
 		newGroup=true;
-		for(String key:incumbentsGroup.keySet()){
+		//TRYING NEW STUFF HERE
+		final Multimap<String, Row> incumbentsGroupFinal = incumbentsGroup;
+		List<String> keyList = new ArrayList<String>(incumbentsGroup.keySet());
+
+		keyList.sort(new Comparator<String>() {
+			@Override
+			public int compare(String s1, String s2) {
+				int result = incumbentsGroupFinal.get(s1).iterator().next().get("PC_name").toLowerCase().compareTo(
+						incumbentsGroupFinal.get(s2).iterator().next().get("PC_name").toLowerCase());
+				return result==0 ? (incumbentsGroupFinal.get(s1).iterator().next().get("Year").toLowerCase().compareTo(
+						incumbentsGroupFinal.get(s2).iterator().next().get("Year").toLowerCase())):result;
+			}
+		});
+
+		//TILL HERE
+		for(String key:keyList){
 			newPerson=true;
 			for(Row row:incumbentsGroup.get(key)){
 				String tableData;

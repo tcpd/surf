@@ -141,17 +141,18 @@ public abstract class MergeManager {
 			}
 		}
 	}
-	final public void save(String filePath){
+	final public void save(String filePath) throws IOException{
 		Collection<Row> rows = d.getRows();
 		for(Row row:rows){
 			row.set("mapped_ID", rowToId.get(row));
 		}
-		try {
+		/*try {
 			d.save(filePath);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
+		d.save(filePath);
 	}
 	final public void load(){
 		rowToId = new HashMap<>();

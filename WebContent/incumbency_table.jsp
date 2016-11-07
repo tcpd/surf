@@ -181,7 +181,15 @@ function createNameParameter(id){
 	        //bodyElement.scrollTo(parseInt(ar[0]), parseInt(ar[1]))
 			bodyElement.scrollLeft = ar[0]
 			bodyElement.scrollTop = ar[1]
-	    }
+	    } else {
+			resetScroll()
+		}
+	}
+
+	function resetScroll(){
+		var bodyElement = document.getElementById("table-body")
+		bodyElement.scrollLeft = 0
+		bodyElement.scrollTop = 0
 	}
 	
 	function saveFilterSettings(){
@@ -548,7 +556,7 @@ function createNameParameter(id){
   	
   	<!-- Listing previous page url here-->
   	<c:if test="${currentPage != 1}">
-	    <li class="page-item">
+	    <li class="page-item" onclick="resetScroll()">
 		<a class="page-link" href="IncumbencyServlet?page=${currentPage - 1}" aria-label="Previous">
 		<span aria-hidden="true">&laquo;</span>
 		<span class="sr-only">Previous</span>
@@ -566,13 +574,15 @@ function createNameParameter(id){
 						<c:set var="pageIsActive" value="page-item"></c:set>
 					</c:otherwise>
 				</c:choose>
-				<li class="${pageIsActive}"><a class="page-link" href="IncumbencyServlet?page=${i}">${i}</a></li>
+				<li class="${pageIsActive}" onclick="resetScroll()">
+					<a class="page-link" href="IncumbencyServlet?page=${i}">${i}</a>
+				</li>
 	</c:forEach>
     
     <!-- Listing next page url here -->
     
     <c:if test="${currentPage lt noOfPages}">
-				<li class="page-item">
+				<li class="page-item" onclick="resetScroll()">
       			<a class="page-link" href="IncumbencyServlet?page=${currentPage + 1}" aria-label="Next">
         		<span aria-hidden="true">&raquo;</span>
         		<span class="sr-only">Next</span>

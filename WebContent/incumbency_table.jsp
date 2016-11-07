@@ -252,8 +252,8 @@ function createNameParameter(id){
     }
    -->
    
-<div id="loading">
-	<img id="loading-image" src="https://s-media-cache-ak0.pinimg.com/564x/a3/ed/70/a3ed7024b3aeda6ca80c2c820e7636c4.jpg" alt="LOADING.."/>
+<div id="loading" style="padding-top: 20%">
+	<img id="loading-image" src="loading.gif" alt="LOADING.."/>
 </div>
 
    <%

@@ -163,19 +163,24 @@ function createNameParameter(id){
 	function saveScroll(){ // added function
 	    var expdate = new Date ()
 	    expdate.setTime (expdate.getTime() + (expdays*24*60*60*1000)); // expiry date
-
-	    var x = (document.pageXOffset?document.pageXOffset:document.body.scrollLeft)
-	    var y = (document.pageYOffset?document.pageYOffset:document.body.scrollTop)
+		var bodyElement = document.getElementById("table-body")
+	    //var x = (bodyElement.pageXOffset?bodyElement.pageXOffset:bodyElement.scrollLeft)
+	    //var y = (bodyElement.pageYOffset?bodyElement.pageYOffset:bodyElement.scrollTop)
+		var x = bodyElement.scrollLeft
+		var y = bodyElement.scrollTop
 	    Data=x + "_" + y
 	    setCookie(cookieName,Data,expdate)
 	}
 
 	function loadScroll(){ // added function
 	    inf=getCookie(cookieName)
+		var bodyElement = document.getElementById("table-body")
 	    if(!inf){return}
 	    var ar = inf.split("_")
 	    if(ar.length == 2){
-	        window.scrollTo(parseInt(ar[0]), parseInt(ar[1]))
+	        //bodyElement.scrollTo(parseInt(ar[0]), parseInt(ar[1]))
+			bodyElement.scrollLeft = ar[0]
+			bodyElement.scrollTop = ar[1]
 	    }
 	}
 	
@@ -378,7 +383,7 @@ function createNameParameter(id){
 						<th class="cell-table table-cell-done">Done</th>
 					</tr>
 				</thead>
-				<tbody class="inside-table">
+				<tbody class="inside-table" id="table-body">
 <%
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
@@ -532,6 +537,7 @@ function createNameParameter(id){
 
 </tbody>
 </table>
+</div>
 </form>
 
 <div id="page-block">

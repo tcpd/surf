@@ -209,6 +209,35 @@ function createNameParameter(id){
 		document.getElementById("onlyWinners").value = getCookie("onlyWinners");
 	}
 
+	//THESE FUNCTIONS USE HARD CODE TAGNAMES & VALUES;CHANGES MIGHT BE REQUIRED HERE IF THE TABLE CHANGES
+	function selectAllRowsInGroupForMerge(groupID) {
+		rowList = document.getElementsByName(groupID)
+		for(var i=0; i<rowList.length; i++){
+			var row = rowList[i]
+			if(row.childNodes.length>1 && row.childNodes[1].childNodes.length>0){
+				var checkBoxElement = row.childNodes[1].childNodes[0]
+				if(checkBoxElement.tagName == "INPUT" && checkBoxElement.type == "checkbox"){
+					if(!checkBoxElement.checked)
+						checkBoxElement.click()
+				}
+			}
+		}
+	}
+
+	function selectAllRowsInGroupForDone(groupID){
+		rowList = document.getElementsByName(groupID)
+		for(var i=0; i<rowList.length; i++){
+			var row = rowList[i]
+			if(row.childNodes.length>23 && row.childNodes[23].childNodes.length>1){
+				var selectElement = row.childNodes[23].childNodes[1]
+				if(selectElement.tagName == "SELECT"){
+					selectElement.click()
+					selectElement.value = "yes"
+				}
+			}
+		}
+	}
+
 </script>
 <title>Candidate Mapper</title>
 </head>
@@ -397,9 +426,10 @@ function createNameParameter(id){
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 							
 	boolean newGroup=false, newPerson=false;
+	int gid = 0;
 	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
 		newGroup=true;
-		//TRYING NEW STUFF HERE
+		//TRYING TO SORT data based on constituency and then year
 		final Multimap<String, Row> incumbentsGroupFinal = incumbentsGroup;
 		List<String> keyList = new ArrayList<String>(incumbentsGroup.keySet());
 
@@ -444,9 +474,26 @@ function createNameParameter(id){
 				}
 				
 				if(newGroup==true){
+					gid++;
+					String groupId = "name=\"g"+gid+"\"";
+					String groupValue = "g"+gid;
 					newGroup=false;
 					newPerson=false;
-					rowStyleData = "class=\"table-row-new-person trow "+rowCompletionColor+" \"";
+					rowStyleData = "class=\"table-row-new-person trow\"";
+					pageContext.setAttribute("groupId",groupId);
+					pageContext.setAttribute("groupValue",groupValue);
+					//IF NEW GROUP, CREATE A HEADER FOR THE ROWS
+					%>
+						<tr <%=rowStyleData %>>
+							<td class="cell-table" style="float: left">
+								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select all for Merging</button>
+							</td>
+							<td class="cell-table" style="float: right">
+								<button type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Select all as Done</button>
+							</td>
+						</tr>
+					<%
+					rowStyleData = "class=\"table-row-same-person trow " + rowCompletionColor + " \"";
 				}
 				else if(newPerson==true){
 					newPerson=false;
@@ -456,7 +503,7 @@ function createNameParameter(id){
 			
 			
 %>
-			<tr <%=rowStyleData %> title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>">
+			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>">
 				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
 				<td class="cell-table table-cell-name">
 					<%=row.get("Name")%>

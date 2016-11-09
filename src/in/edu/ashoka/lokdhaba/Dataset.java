@@ -1,10 +1,8 @@
 package in.edu.ashoka.lokdhaba;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -98,6 +96,7 @@ public class Dataset implements Serializable{
     }
 
     public Dataset (String filename) throws IOException {
+        checkFilesForFailure(filename);
         this.name = filename;
 
         Set<Row> allRows = new LinkedHashSet<>();
@@ -123,6 +122,27 @@ public class Dataset implements Serializable{
         this.rows = allRows;
     }
 
+    private void checkFilesForFailure(String filename) throws IOException{
+        String fileWithSuffixNew = filename + ".new";
+        String fileWithSuffixOld = filename + ".old";
+        if(new File(filename).exists()){
+            File newFile = new File(fileWithSuffixNew);
+            if(newFile.exists())
+                newFile.delete();
+        }else{
+            File newFile = new File(fileWithSuffixNew);
+            if(newFile.exists())
+                newFile.renameTo(new File(filename));
+            else{
+                File oldFile = new File(fileWithSuffixOld);
+                if(oldFile.exists())
+                    oldFile.renameTo(new File(filename));
+                else
+                    throw new FileNotFoundException("file not found");
+            }
+        }
+    }
+
     boolean hasColumnName(String col) {
         String ccol = canonicalizeCol(col);
         return cColumnAliases.keySet().contains(ccol) || cColumns.contains(ccol);
@@ -135,12 +155,14 @@ public class Dataset implements Serializable{
     public void save(String file) throws IOException {
     	
     	CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
-        FileWriter fileWriter = new FileWriter(file);
+        //File csvFile = new File(file);
+
+        //FIRST WRITE TO A NEW FILE
+        String fileWithSuffixNew = file + ".new";
+        Writer fileWriter = new FileWriter(fileWithSuffixNew);
         CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat);
         List<String> columnList = new ArrayList<>(actualColumnName);
-        
-        //columnList.add("ID");
-        //columnList.add("mapped_ID");
+
         csvFilePrinter.printRecord(columnList);
         
         for(Row row:rows){
@@ -154,6 +176,19 @@ public class Dataset implements Serializable{
         fileWriter.flush();
         fileWriter.close();
         csvFilePrinter.close();
+
+        //NOW RENAME THE EXISTING FILE TO OLD FILE
+        String fileWithSuffixOld = file + ".old";
+        File existingFile = new File(file);
+        File suffixFile = new File(fileWithSuffixOld);
+        if(!existingFile.canWrite() || !existingFile.renameTo(suffixFile))
+            throw new IOException("failed to rename file");
+
+        //RENAME THE NEW FILE TO EXISTING FILE
+        suffixFile = new File(fileWithSuffixNew);
+        suffixFile.renameTo(new File(file));
+
+        //CREATE CHECKSUM OF THE EXISTING FILE
     }
 
 }

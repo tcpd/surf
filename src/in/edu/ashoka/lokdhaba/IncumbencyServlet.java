@@ -43,37 +43,43 @@ public class IncumbencyServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		HttpSession session = request.getSession();
-		
-		//SETTING UP THE DATASET FOR MERGEMANAGER
-		setUpDataset(request);
-		
-		//set up important parameters
-		assignAttributes(request, session, "userName", "Name Not Specified",false);
-		assignAttributes(request, session, "email", "email Not Specified",false);
-		assignAttributes(request, session, "algorithm", "exactSameName",false);
-		assignAttributes(request, session, "onlyWinners", "false", false);
-		
-		setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
-		
-		MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
-		String currentFile = session.getAttribute("currentFile").toString();
-		
-		mergeManager.addSimilarCandidates();
-		if(saveButtonPressed(request)){
-	    	boolean shouldSave = updateTable(request);
-	    	if(shouldSave){
-	    		mergeManager.save(currentFile);
-	    	}
-	    }
-		
-		checkFilterParameters(request);
-		generateIncumbents(request.getSession());
-		generateIncumbentsView(request);
-		
-	    request.getSession().setAttribute("mergeManager", mergeManager);
-	    request.getRequestDispatcher("/incumbency_table.jsp").forward(request, response);
+
+        try{
+            HttpSession session = request.getSession();
+            session.setMaxInactiveInterval(60*60);
+            //SETTING UP THE DATASET FOR MERGEMANAGER
+            setUpDataset(request);
+
+            //set up important parameters
+            assignAttributes(request, session, "userName", "Name Not Specified",false);
+            assignAttributes(request, session, "email", "email Not Specified",false);
+            assignAttributes(request, session, "algorithm", "exactSameName",false);
+            assignAttributes(request, session, "onlyWinners", "false", false);
+
+            setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
+
+            MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
+            String currentFile = session.getAttribute("currentFile").toString();
+
+            mergeManager.addSimilarCandidates();
+            if(saveButtonPressed(request)){
+                boolean shouldSave = updateTable(request);
+                if(shouldSave){
+                    mergeManager.save(currentFile);
+                }
+            }
+
+            checkFilterParameters(request);
+            generateIncumbents(request.getSession());
+            generateIncumbentsView(request);
+
+            request.getSession().setAttribute("mergeManager", mergeManager);
+            request.getRequestDispatcher("/incumbency_table.jsp").forward(request, response);
+        } catch (IOException e){
+            request.getSession().invalidate();
+            throw e;
+        }
+
 	}
 	
 	

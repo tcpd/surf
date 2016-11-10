@@ -169,7 +169,7 @@ public class IncumbencyServlet extends HttpServlet {
 		return shouldSave;
 	}
 	
-	private void setUpDataset(HttpServletRequest request){
+	private void setUpDataset(HttpServletRequest request) throws IOException{
 		
 	    //this code mwill need changes
 		
@@ -194,16 +194,10 @@ public class IncumbencyServlet extends HttpServlet {
 				request.getSession().setAttribute("dataset", request.getParameter("dataset"));
 				
 			}
-			try {
-				Dataset d = new Dataset(request.getSession().getAttribute("currentFile").toString());
-				request.getSession().setAttribute("d", d);
-				Bihar.initRowFormat(d.getRows(), d);
-			}
-			
-			catch(IOException ioex){
-				ioex.printStackTrace();
-			}
-			//isFirst = false;
+
+			Dataset d = new Dataset(request.getSession().getAttribute("currentFile").toString());
+			request.getSession().setAttribute("d", d);
+			Bihar.initRowFormat(d.getRows(), d);
 			
 			request.getSession().setAttribute("datasetName", pathMap.keySet());
 			request.getSession().setAttribute("datasetDescription", descriptionMap);
@@ -242,69 +236,6 @@ public class IncumbencyServlet extends HttpServlet {
 	
 	private void checkFilterParameters(HttpServletRequest request){
 		HttpSession session = request.getSession();
-		/*//assign username
-		if(request.getParameter("userName")!= null){
-			session.setAttribute("userName", request.getParameter("userName").toString());	
-		}
-	   
-		
-		if(request.getParameter("email")!= null){
-			session.setAttribute("email", request.getParameter("email").toString());	
-		}  
-	   
-	   //Check if the user is entering for the first time. 
-	   
-		String checkVar = "algorithm";
-	   
-		if(session.getAttribute(checkVar) != null || request.getParameter(checkVar) != null){
-		
-		   if(request.getParameter("algorithm")!= null){
-				session.setAttribute("algorithm", request.getParameter("algorithm").toString());	
-		   }
-		   
-		   
-		   if(request.getParameter("dataset")!= null){
-				session.setAttribute("dataset", request.getParameter("dataset").toString());	
-		   }
-		   
-		   
-		   if(request.getParameter("filterParam")!= null){
-				
-				session.setAttribute("filterParam", request.getParameter("filterParam").toString());	
-			}
-		   
-		   if(request.getParameter("filterValue")!= null){
-				
-				session.setAttribute("filterValue", request.getParameter("filterValue").toString());
-			}
-		   
-		   
-		   	
-		   session.setAttribute("filterValueNav", Arrays.toString(request.getParameterValues("filterValue")));
-		}
-		
-		else{
-			   //SET DEFAULTS FOR THE VARIABLE
-			   
-				session.setAttribute("algorithm", "exactSameName");
-				session.setAttribute("dataset", "ge");
-				session.setAttribute("filterParam", "State");
-				session.setAttribute("filterValue", "All Records");
-				session.setAttribute("filterParamNav", session.getAttribute("filterParam"));
-				session.setAttribute("filterValueNav", session.getAttribute("filterValue"));
-			
-				if(request.getParameter("state") != null){
-					session.setAttribute("filterValueNav", request.getParameter("state").toString().toUpperCase()); 
-				}
-		}
-		
-		String filterValueNav = session.getAttribute("filterValueNav").toString();
-		if(filterValueNav != null){
-			if(filterValueNav.toString().equals("null")){
-				filterValueNav = "All Records";
-			}
-		}*/
-		
 		
 		assignAttributes(request, session, "filterParam", "State",false);
 		assignAttributes(request, session, "filterValue", new String[]{"All Records"},true);
@@ -420,7 +351,6 @@ public class IncumbencyServlet extends HttpServlet {
 		session.setAttribute("subList", subList);
 		session.setAttribute("noOfPages", noOfPages);
 		session.setAttribute("currentPage", page);
-		
 		
 	}
 

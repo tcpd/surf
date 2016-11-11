@@ -260,7 +260,7 @@ public class Shell {
 
                 if ("read".equals(cmd)) {
                     String filename = args.get(0);
-                    d = new Dataset(filename);
+                    d = Dataset.getDataset(filename);
                     Collection<Row> allRows = d.rows;
 
                     vars.put("allrows", allRows);

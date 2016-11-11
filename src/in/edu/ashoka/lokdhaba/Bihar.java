@@ -38,7 +38,7 @@ public class Bihar extends Object {
         */
 
 //        Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba/AE/State_Mastersheets/Bihar/Bihar_Mastersheet.csv");
-         Dataset d = new Dataset("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+         Dataset d = Dataset.getDataset("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
         Collection<Row> allRows = d.rows;
 
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
@@ -213,7 +213,7 @@ public class Bihar extends Object {
      * @throws IOException
      */
     public static Multimap<String, Multimap<String, Row>> getSimilarPairs (String file) throws IOException {
-        Dataset d = new Dataset(file);
+        Dataset d = Dataset.getDataset(file);
         Collection<Row> allRows = d.rows;
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
 //        d.registerColumnAlias("Cand1", "Name");
@@ -266,7 +266,7 @@ public class Bihar extends Object {
 
     /** return canonical name -> {ids that map to that canonical name) */
     public static Multimap<String, Row> getExactSamePairs (String file) throws IOException {
-    	Dataset d = new Dataset(file);
+    	Dataset d = Dataset.getDataset(file);
         return getExactSamePairs(d.rows,d);
         
     }

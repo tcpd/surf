@@ -13,7 +13,7 @@ import com.google.common.collect.Multimap;
 public class Test2 {
 
 	public static void main(String[] args) throws IOException {
-		Dataset d = new Dataset("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+		Dataset d = Dataset.getDataset("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
 		Collection<Row> rows = d.rows;
 		
 		//set ups what toString() of Row needs to print

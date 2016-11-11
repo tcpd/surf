@@ -1,15 +1,13 @@
 package in.edu.ashoka.lokdhaba;
 
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -20,6 +18,10 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 public class Dataset implements Serializable{
+    static Map<String, Dataset> datasetMap= new HashMap<>();
+    static final long TIME_INTERVAL_BETWEEN_BACKUPS = 1000*60*60*4;
+    long saveTimeOfBackedUpFile = 0;
+    long saveTime = 0;
 	public static String NEW_LINE_SEPARATOR = "\n";
     Collection<Row> rows;
     Collection<String> actualColumnName;
@@ -95,7 +97,34 @@ public class Dataset implements Serializable{
         cColumnAliases.put(canonicalizeCol(newCol), canonicalizeCol(oldCol));
     }
 
-    public Dataset (String filename) throws IOException {
+    public static Dataset getDataset(String filename) throws IOException{
+        if(!datasetMap.containsKey(filename)){
+            synchronized (Dataset.class){
+                if(!datasetMap.containsKey(filename)){
+                    datasetMap.put(filename, new Dataset(filename));
+                }
+            }
+        }
+        return datasetMap.get(filename);
+    }
+
+    private Dataset (String filename) throws IOException {
+
+        //TRY Backing up data
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try{
+                    if((saveTime>saveTimeOfBackedUpFile))
+                        performBackup(new File(filename));
+                }catch (IOException e){
+                    System.err.println("file backup failed");
+                }
+
+            }
+        }, 0, TIME_INTERVAL_BETWEEN_BACKUPS);
+
         checkFilesForFailure(filename);
         this.name = filename;
 
@@ -152,7 +181,8 @@ public class Dataset implements Serializable{
 
     /** saves this dataset as a CSV  in the given file 
      * @throws IOException */
-    public void save(String file) throws IOException {
+    synchronized public void save(String file) throws IOException {
+        saveTime = System.currentTimeMillis();
     	
     	CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
         //File csvFile = new File(file);
@@ -188,7 +218,44 @@ public class Dataset implements Serializable{
         suffixFile = new File(fileWithSuffixNew);
         suffixFile.renameTo(new File(file));
 
-        //CREATE CHECKSUM OF THE EXISTING FILE
+        //PERFORM BACKUP
+        //performBackup(new File(file));
     }
 
+    /*
+    * long upTime = System.currentTimeMillis() - IncumbencyServlet.START_TIME;
+        if(force || upTime-lastBackUpTime > TIME_INTERVAL_BETWEEN_BACKUPS ||lastBackUpTime==0){
+        lastBackUpTime = System.currentTimeMillis();
+    * */
+
+    synchronized private void performBackup(File file) throws IOException{
+        saveTimeOfBackedUpFile = saveTime;
+        //CREATE BACKUP FILE
+        //first check for directory; if doesn't exist create
+        if(!new File(file.getParent()+"/backups").exists()){
+            new File(file.getParent()+"/backups").mkdir();
+        }
+        String backupPath = file.getParent()+"/backups";
+        DateFormat df = new SimpleDateFormat("dd.MM.yy.HH:mm:ss");
+        Date dateobj = new Date();
+        String timestamp = "."+df.format(dateobj);
+        String backupFilePath = backupPath+"/"+file.getName()+timestamp;
+        File backupFile = new File(backupFilePath);
+
+        InputStream inputStream = new FileInputStream(file);
+        OutputStream outputStream = new FileOutputStream(backupFile);
+
+        byte[] buffer = new byte[1024];
+
+        int length;
+        //copy the file content in bytes
+        while ((length = inputStream.read(buffer)) > 0){
+            outputStream.write(buffer, 0, length);
+        }
+        inputStream.close();
+        outputStream.close();
+
+        //delete old backups here if needed in future
+
+    }
 }

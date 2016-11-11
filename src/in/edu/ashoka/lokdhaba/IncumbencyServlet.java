@@ -30,6 +30,7 @@ public class IncumbencyServlet extends HttpServlet {
 	//String currentFile;
 	static Map<String, String> pathMap;
 	static Map<String, String> descriptionMap;
+	public final static long START_TIME = System.currentTimeMillis();
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -195,7 +196,7 @@ public class IncumbencyServlet extends HttpServlet {
 				
 			}
 
-			Dataset d = new Dataset(request.getSession().getAttribute("currentFile").toString());
+			Dataset d = Dataset.getDataset(request.getSession().getAttribute("currentFile").toString());
 			request.getSession().setAttribute("d", d);
 			Bihar.initRowFormat(d.getRows(), d);
 			

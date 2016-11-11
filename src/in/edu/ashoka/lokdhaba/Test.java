@@ -62,7 +62,7 @@ public class Test {
 		String ID_PREFIX = "ID";
 		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
 		
-	    Dataset d = new Dataset(file);
+	    Dataset d = Dataset.getDataset(file);
 	    MergeManager mergeManager = new SimilarNameMergeManager(d,1);
 	    mergeManager.initializeIds();
 	    mergeManager.performInitialMapping();
@@ -76,7 +76,7 @@ public class Test {
 		String ID_PREFIX = "ID";
 		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
 		
-	    Dataset d = new Dataset(file);
+	    Dataset d = Dataset.getDataset(file);
 	    MergeManager mergeManager = new ExactSameNameMergeManager(d);
 	    mergeManager.initializeIds();
 	    mergeManager.performInitialMapping();
@@ -89,7 +89,7 @@ public class Test {
 		String ID_PREFIX = "ID";
 		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
 		
-	    Dataset d = new Dataset(file);
+	    Dataset d = Dataset.getDataset(file);
 	    SurfExcel.assignUnassignedIds(d.getRows(), "ID");
 	    
 	    HashMap<Row, String> rowToId = new HashMap<>();

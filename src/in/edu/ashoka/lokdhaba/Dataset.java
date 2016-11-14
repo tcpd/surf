@@ -1,10 +1,7 @@
 package in.edu.ashoka.lokdhaba;
 
 import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,6 +13,8 @@ import org.apache.commons.csv.CSVRecord;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+
+
 
 public class Dataset implements Serializable{
     static Map<String, Dataset> datasetMap= new HashMap<>();
@@ -192,7 +191,6 @@ public class Dataset implements Serializable{
         Writer fileWriter = new FileWriter(fileWithSuffixNew);
         CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat);
         List<String> columnList = new ArrayList<>(actualColumnName);
-
         csvFilePrinter.printRecord(columnList);
         
         for(Row row:rows){
@@ -228,7 +226,7 @@ public class Dataset implements Serializable{
         lastBackUpTime = System.currentTimeMillis();
     * */
 
-    synchronized private void performBackup(File file) throws IOException{
+    synchronized public void performBackup(File file) throws IOException{
         saveTimeOfBackedUpFile = saveTime;
         //CREATE BACKUP FILE
         //first check for directory; if doesn't exist create

@@ -65,13 +65,18 @@ public abstract class MergeManager {
 	
     public MergeManager(Dataset d){
     	this.d=d;
-		d.addToActualColumnName("ID");
-		d.addToActualColumnName("mapped_ID");
-		d.addToActualColumnName("comments");
-		d.addToActualColumnName("user_name");
-		d.addToActualColumnName("email");
-		d.addToActualColumnName("is_done");
-		//d.addToActualColumnName("is_processed");
+        if(!d.hasColumnName("ID"))
+            d.addToActualColumnName("ID");
+        if(!d.hasColumnName("mapped_ID"))
+            d.addToActualColumnName("mapped_ID");
+        if(!d.hasColumnName("comments"))
+		    d.addToActualColumnName("comments");
+        if(!d.hasColumnName("user_name"))
+		    d.addToActualColumnName("user_name");
+        if(!d.hasColumnName("email"))
+		    d.addToActualColumnName("email");
+        if(!d.hasColumnName("is_done"))
+		    d.addToActualColumnName("is_done");
 		
     }
     

@@ -109,7 +109,7 @@ public class Dataset implements Serializable{
 
     private Dataset (String filename) throws IOException {
 
-        //TRY Backing up data
+        //TRY Backing up data after given interwell, this is a task which will continue running as a seperate thread
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override

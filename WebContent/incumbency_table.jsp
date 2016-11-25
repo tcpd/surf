@@ -151,7 +151,7 @@ import="com.google.common.collect.Multimap"
 </div>
 </div>
 </div>
-
+<div>
 	<form method="post">
 		<nav class="navbar navbar-default navbar-fixed-top">
 			<div class="container-fluid">
@@ -183,13 +183,9 @@ import="com.google.common.collect.Multimap"
 <!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
 					</ul>
 				</div>
-
-				<!-- /.navbar-collapse -->
-			</div><!-- /.container-fluid -->
-		</nav>
-		<div class="table-div table-responsive">
-			<table class="table table-hover header-fixed">
-				<thead>
+				<div style="width: 100%; height: 100%">
+				<table class="nav nav-pills nav-stacked table-header">
+					<thead>
 					<tr class="table-row">
 						<th class="cell-table table-cell-merge">Merge</th>
 						<th class="cell-table table-cell-name">Name</th>
@@ -201,13 +197,23 @@ import="com.google.common.collect.Multimap"
 						<th class="cell-table table-cell-position">Position</th>
 						<th class="cell-table table-cell-votes">Votes</th>
 						<!-- <th class="cell-table">ID</th>
-						<th>Person ID</th> -->
+                        <th>Person ID</th> -->
 						<th class="cell-table table-cell-comments">Comments</th>
 						<th class="cell-table table-cell-unmerge">UnMerge</th>
 						<th class="cell-table table-cell-done">Done</th>
 					</tr>
-				</thead>
-				<tbody class="inside-table" id="table-body">
+					</thead>
+				</table>
+				</div>
+				<!-- /.navbar-collapse -->
+			</div><!-- /.container-fluid -->
+		</nav>
+
+
+		<div>
+			<div class="table-div table-responsive">
+				<table class="table table-hover header-fixed">
+					<tbody class="inside-table" id="table-body">
 <%
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
@@ -382,6 +388,7 @@ import="com.google.common.collect.Multimap"
 </tbody>
 </table>
 </div>
+</div>
 </form>
 
 <div id="page-block">
@@ -430,6 +437,7 @@ import="com.google.common.collect.Multimap"
   </ul>
 </nav>
 
+</div>
 </div>
 
 <script type="text/javascript">

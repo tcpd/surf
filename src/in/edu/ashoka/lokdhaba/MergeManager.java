@@ -275,18 +275,23 @@ public abstract class MergeManager {
 	}
 	
 	public int [] getListCount(ArrayList<Multimap<String,Row>> groupLists){
-		int [] statusCount = new int[3];
+		int [] statusCount = new int[5];
 		if(listOfSimilarCandidates==null){
 			System.out.println("0");
 			return null;
 		}
 		int i=0;
 		int j=0;
+		int k=0;
 		System.out.println("total number of groups:" + groupLists.size());
 		for(Multimap mp:groupLists){
 			//System.out.println("Unique person identified: "+mp.keySet().size());
 			i+=mp.keySet().size();
 			j+=mp.values().size();
+			for (Row row:(Collection<Row>)mp.values()){
+				if(row.get("is_done").equals("yes"))
+					k++;
+			}
 		}
 		//System.out.println("Unique person identified: " + i);
 		//System.out.println("Unique rows identified: " + j);
@@ -294,6 +299,8 @@ public abstract class MergeManager {
 		statusCount[0] = i;
 		statusCount[1] = j;
 		statusCount[2] = j-i;
+		statusCount[3] = groupLists.size();
+		statusCount[4] = k;	//rows reviewed
 		return statusCount;
 		
 	}

@@ -177,8 +177,10 @@ import="com.google.common.collect.Multimap"
 						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterParamNav %></a></li>
 						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterValueNav %></a></li>
 						</ol>
+						<li><div class="navbar-text"><%= progressData[3] %> Total Groups</div></li>
 						<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
 						<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
+						<li><div class="navbar-text"><%= progressData[4] %> Records Reviewed</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
 <!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
 					</ul>

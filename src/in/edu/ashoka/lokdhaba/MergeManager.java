@@ -29,8 +29,8 @@ public abstract class MergeManager {
     // these methods are singleton
     //for any new algorithms, these need to be updated
     
-    
-    public static MergeManager getManager(HttpSession session, String algo, Dataset d, boolean forceRefresh){
+    //DEPRECIATED CODE
+    /*public static MergeManager getManager(HttpSession session, String algo, Dataset d, boolean forceRefresh){
     	//System.out.println("I am in MergeManager");
     	if(algo.equals("exactSameName")){
     		if(exactSameNameMergeManagerMaps.get(session)==null||forceRefresh){
@@ -57,13 +57,29 @@ public abstract class MergeManager {
     		return dummyMergeManagerMaps.get(session);
     	}
 		return null;
-    }
+    }*/
     
-    
+    public static MergeManager getManager(String algo, Dataset d){
+		MergeManager mergeManager = null;
+		if(algo.equals("exactSameName")){
+			mergeManager = new ExactSameNameMergeManager(d);
+		}
+		else if(algo.equals("editDistance1")){
+			mergeManager = new SimilarNameMergeManager(d, 1);
+		}
+		else if(algo.equals("editDistance2")){
+			mergeManager = new SimilarNameMergeManager(d, 2);
+		}
+		else if(algo.equals("dummyAllName")){
+			mergeManager = new DummyMergeManager(d);
+		}
+		else{}
+		return mergeManager;
+	}
     
     
 	
-    public MergeManager(Dataset d){
+    protected MergeManager(Dataset d){
     	this.d=d;
         if(!d.hasColumnName("ID"))
             d.addToActualColumnName("ID");

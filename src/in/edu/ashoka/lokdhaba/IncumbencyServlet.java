@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.common.collect.Multimap;
+import com.sun.scenario.effect.Merge;
 
 /**
  * Servlet implementation class IncumbencyServlet
@@ -91,6 +92,11 @@ public class IncumbencyServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		doGet(request, response);
+	}
+
+	public void destroy() {
+		// Finalization code...
+		Dataset.destroyTimer();
 	}
 	
 	public void init() throws ServletException{
@@ -214,14 +220,15 @@ public class IncumbencyServlet extends HttpServlet {
 	
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
 		//SETs UP mergeManager
-		
+		MergeManager mergeManager;
 		//if the dataset is same, no need to refresh merge manager; refresh otherwise
-		
-		MergeManager mergeManager = MergeManager.getManager(
-				request.getSession(), 
-				algorithm,
-				(Dataset)request.getSession().getAttribute("d"), 
-				(Boolean)request.getSession().getAttribute("datasetChanged"));
+		if(request.getSession().getAttribute("mergeManager")==null || (Boolean)request.getSession().getAttribute("datasetChanged")){
+			mergeManager = MergeManager.getManager(algorithm, (Dataset)request.getSession().getAttribute("d"));
+		}
+		else
+		{
+			mergeManager = (MergeManager)request.getSession().getAttribute("mergeManager");
+		}
 		
 		//Initial Mapping by mergeManager
 		if(mergeManager.isFirstReading()){

@@ -28,6 +28,7 @@ public class Dataset implements Serializable{
     Set<String> cColumns = new LinkedHashSet<>(); // this is the real list of col names (canonical) available (no aliases) for each row in this dataset.
     Multimap<String, String> cColumnToDisplayName = LinkedHashMultimap.create(); // display col names (both real and aliases)
     Map<String, String> cColumnAliases = new LinkedHashMap<>(); // cCol -> cCol as aliases.
+    Timer timer;
     
     public void addToActualColumnName(String col){
     	if(actualColumnName.contains(col))
@@ -110,7 +111,7 @@ public class Dataset implements Serializable{
     private Dataset (String filename) throws IOException {
 
         //TRY Backing up data after given interwell, this is a task which will continue running as a seperate thread
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -255,5 +256,11 @@ public class Dataset implements Serializable{
 
         //delete old backups here if needed in future
 
+    }
+
+    public static void destroyTimer(){
+        for(Dataset d:datasetMap.values()){
+            d.timer.cancel();
+        }
     }
 }

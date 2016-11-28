@@ -139,40 +139,56 @@ function saveScroll(){ // added function
     var expdate = new Date ()
     expdate.setTime (expdate.getTime() + (expdays*24*60*60*1000)); // expiry date
     //var bodyElement = document.getElementById("table-body")
-    var bodyElement = document.body
     //var x = (bodyElement.pageXOffset?bodyElement.pageXOffset:bodyElement.scrollLeft)
     //var y = (bodyElement.pageYOffset?bodyElement.pageYOffset:bodyElement.scrollTop)
-    var x = bodyElement.scrollLeft
-    var y = bodyElement.scrollTop
-    Data=x + "_" + y
-    setCookie(cookieName,Data,expdate)
-    //setCookie("browserScrollX", document.body.scrollLeft, expdate)
-    //setCookie("browserScrollY", document.body.scrollTop, expdate)
+    var y = (parseInt(window.pageYOffset) || document.documentElement.scrollTop || document.body.scrollTop || 0)
+    var x = (parseInt(window.pageXOffset) || document.documentElement.scrollLeft || document.body.scrollLeft || 0)
+    //Data=x + "_" + y
+    //setCookie(cookieName,Data,expdate)
+    setCookie("window.pageYOffset", window.pageYOffset, expdate)
+    setCookie("window.pageXOffset", window.pageXOffset, expdate)
+
+    setCookie("document.documentElement.scrollTop", document.documentElement.scrollTop, expdate);
+    setCookie("document.documentElement.scrollLeft", document.documentElement.scrollLeft, expdate);
+
+    setCookie("document.body.scrollTop", document.body.scrollTop, expdate);
+    setCookie("document.body.scrollLeft", document.body.scrollLeft, expdate);
+
 }
 
 function loadScroll(){ // added function
-    inf=getCookie(cookieName)
+    //inf=getCookie(cookieName)
     //var bodyElement = document.getElementById("table-body")
-    var bodyElement = document.body
-    if(!inf){return}
-    var ar = inf.split("_")
-    if(ar.length == 2){
-        //bodyElement.scrollTo(parseInt(ar[0]), parseInt(ar[1]))
-        bodyElement.scrollLeft = ar[0]
-        bodyElement.scrollTop = ar[1]
-        //document.body.scrollLeft = getCookie("browserScrollX")
-        //document.body.scrollTop = getCookie("browserScrollY")
-    } else {
-        resetScroll()
-    }
+    //var bodyElement = document.body
+    if(getCookie("window.pageYOffset")!=null)
+        window.pageYOffset = getCookie("window.pageYOffset").toString()
+    if(getCookie("window.pageXOffset")!=null)
+        window.pageXOffset = getCookie("window.pageXOffset").toString()
+    if(getCookie("document.documentElement.scrollTop")!=null)
+        document.documentElement.scrollTop = getCookie("document.documentElement.scrollTop")
+    if(getCookie("document.documentElement.scrollLeft")!=null)
+        document.documentElement.scrollLeft = getCookie("document.documentElement.scrollLeft")
+    if(getCookie("document.body.scrollTop")!=null)
+        document.body.scrollTop = getCookie("document.body.scrollTop")
+    if(getCookie("document.body.scrollLeft")!=null)
+        document.body.scrollLeft = getCookie("document.body.scrollLeft")
+
 }
 
 function resetScroll(){
     var bodyElement = document.getElementById("table-body")
     bodyElement.scrollLeft = 0
     bodyElement.scrollTop = 0
-    document.body.scrollLeft = 0
+
+    window.pageYOffset = 0
+    document.documentElement.scrollTop = 0
     document.body.scrollTop = 0
+    bodyElement.scrollTop = 0
+
+    window.pageXOffset = 0
+    document.documentElement.scrollLeft = 0
+    document.body.scrollLeft = 0
+    bodyElement.scrollLeft = 0
 }
 
 function saveFilterSettings(){

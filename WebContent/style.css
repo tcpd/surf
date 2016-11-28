@@ -70,7 +70,6 @@ body{
 }
 
 .unmerge-col{
-	float:right
 }
 
 .filterForm{
@@ -166,6 +165,7 @@ body{
     margin-left: 1.5em;
     margin-right: 2em;
 }
+
 
 /* ALL COLUMNS WIDTH GOES HERE; TOTAL SHOULDN'T EXCEED 100% */
 .table-cell-merge,

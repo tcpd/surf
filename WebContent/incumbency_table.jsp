@@ -214,7 +214,7 @@ import="com.google.common.collect.Multimap"
 
 		<div>
 			<div class="table-div table-responsive">
-				<table class="table table-hover header-fixed">
+				<table class="table table-hover">
 					<tbody class="inside-table" id="table-body">
 <%
 							
@@ -280,11 +280,11 @@ import="com.google.common.collect.Multimap"
 					//IF NEW GROUP, CREATE A HEADER FOR THE ROWS
 					%>
 						<tr <%=rowStyleData %>>
-							<td class="cell-table" style="float: left">
+							<td colspan="9">
 								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select all for Merging</button>
 							</td>
-							<td class="cell-table" style="float: right">
-								<button type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Select all as Done</button>
+							<td colspan="3">
+								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Select all as Done</button>
 							</td>
 						</tr>
 					<%

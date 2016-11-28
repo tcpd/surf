@@ -296,10 +296,10 @@ import="com.google.common.collect.Multimap"
 			
 			
 %>
-			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>">
+			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>" id=<%=row.get("ID")%>>
 				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
 				<td class="cell-table table-cell-name">
-					<a style="color:#333" href="http://www.google.com/search?q=<%=row.get("Name").replace(" ","+")+"+"+row.get("PC_name").replace(" ","+")+"+"+row.get("Year")%>" target="_blank" onclick="this.click()">
+					<a href="http://www.google.com/search?q=<%=row.get("Name").replace(" ","+")+"+"+row.get("PC_name").replace(" ","+")+"+"+row.get("Year")%>" target="_blank" onclick="document.getElementById(<%=row.get("ID")%>).childNodes[1].click()">
 						<%=row.get("Name")%>
 					</a>
 				</td>
@@ -310,7 +310,9 @@ import="com.google.common.collect.Multimap"
 					<%=row.get("Year")%>
 				</td>
 				<td class="cell-table table-cell-constituency">
-					<%=row.get("PC_name")%>
+					<a href="https://www.google.co.in/maps/place/<%=row.get("PC_name").replace(" ","+")+","+row.get("State").replace("_","+")%>" target="_blank" onclick="document.getElementById(<%=row.get("ID")%>).childNodes[1].click()">
+						<%=row.get("PC_name")%>
+					</a>
 				</td>
 				<td class="cell-table table-cell-party">
 					<%=row.get("Party")%>

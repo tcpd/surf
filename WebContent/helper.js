@@ -85,6 +85,14 @@ function createNameParameter(id){
 cookieName="page_scroll"
 expdays=365
 
+window.onload = function () {
+    loadScroll()
+}
+
+window.onunload = function () {
+    saveScroll()
+}
+
 // An adaptation of Dorcht's cookie functions.
 
 function setCookie(name, value, expires, path, domain, secure){
@@ -127,26 +135,33 @@ function deleteCookie(name,path,domain){
 }
 
 function saveScroll(){ // added function
+    //alert("saving")
     var expdate = new Date ()
     expdate.setTime (expdate.getTime() + (expdays*24*60*60*1000)); // expiry date
-    var bodyElement = document.getElementById("table-body")
+    //var bodyElement = document.getElementById("table-body")
+    var bodyElement = document.body
     //var x = (bodyElement.pageXOffset?bodyElement.pageXOffset:bodyElement.scrollLeft)
     //var y = (bodyElement.pageYOffset?bodyElement.pageYOffset:bodyElement.scrollTop)
     var x = bodyElement.scrollLeft
     var y = bodyElement.scrollTop
     Data=x + "_" + y
     setCookie(cookieName,Data,expdate)
+    //setCookie("browserScrollX", document.body.scrollLeft, expdate)
+    //setCookie("browserScrollY", document.body.scrollTop, expdate)
 }
 
 function loadScroll(){ // added function
     inf=getCookie(cookieName)
-    var bodyElement = document.getElementById("table-body")
+    //var bodyElement = document.getElementById("table-body")
+    var bodyElement = document.body
     if(!inf){return}
     var ar = inf.split("_")
     if(ar.length == 2){
         //bodyElement.scrollTo(parseInt(ar[0]), parseInt(ar[1]))
         bodyElement.scrollLeft = ar[0]
         bodyElement.scrollTop = ar[1]
+        //document.body.scrollLeft = getCookie("browserScrollX")
+        //document.body.scrollTop = getCookie("browserScrollY")
     } else {
         resetScroll()
     }
@@ -156,6 +171,8 @@ function resetScroll(){
     var bodyElement = document.getElementById("table-body")
     bodyElement.scrollLeft = 0
     bodyElement.scrollTop = 0
+    document.body.scrollLeft = 0
+    document.body.scrollTop = 0
 }
 
 function saveFilterSettings(){

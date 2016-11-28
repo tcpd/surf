@@ -28,7 +28,7 @@ import="com.google.common.collect.Multimap"
 
 <title>Candidate Mapper</title>
 </head>
-<body onload="loadScroll()" onunload="saveScroll()">
+<body>
 
 	<%!
    //SETTING UP RREQUIRED VARIABLES

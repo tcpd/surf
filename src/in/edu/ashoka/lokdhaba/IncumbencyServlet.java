@@ -51,11 +51,11 @@ public class IncumbencyServlet extends HttpServlet {
             session.setMaxInactiveInterval(60*60);
             //SETTING UP THE DATASET FOR MERGEMANAGER
             setUpDataset(request);
+			setUpAlgorithm(request);
 
             //set up important parameters
             assignAttributes(request, session, "userName", "Name Not Specified",false);
             assignAttributes(request, session, "email", "email Not Specified",false);
-            assignAttributes(request, session, "algorithm", "exactSameName",false);
             assignAttributes(request, session, "onlyWinners", "false", false);
 
             setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
@@ -217,12 +217,29 @@ public class IncumbencyServlet extends HttpServlet {
 			request.getSession().setAttribute("datasetChanged", false);
 		}
 	}
+
+	private void setUpAlgorithm(HttpServletRequest request){
+		//Check whether algo changed
+		if(request.getParameter("algorithm")!= null){
+			if(request.getParameter("algorithm").equals(request.getSession().getAttribute("algorithm").toString())){
+				request.getSession().setAttribute("algorithmChanged",false);
+			}else{
+				request.getSession().setAttribute("algorithmChanged",true);
+			}
+		}
+
+		if(request.getSession().getAttribute("algorithmChanged")==null)
+			request.getSession().setAttribute("algorithmChanged",false);
+
+		assignAttributes(request, request.getSession(), "algorithm", "exactSameName",false);
+	}
 	
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
+
 		//SETs UP mergeManager
 		MergeManager mergeManager;
 		//if the dataset is same, no need to refresh merge manager; refresh otherwise
-		if(request.getSession().getAttribute("mergeManager")==null || (Boolean)request.getSession().getAttribute("datasetChanged")){
+		if(request.getSession().getAttribute("mergeManager")==null || (Boolean)request.getSession().getAttribute("datasetChanged") || (Boolean)request.getSession().getAttribute("algorithmChanged")){
 			mergeManager = MergeManager.getManager(algorithm, (Dataset)request.getSession().getAttribute("d"));
 		}
 		else

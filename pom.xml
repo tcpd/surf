@@ -56,7 +56,7 @@
             <artifactId>..</artifactId>
             <groupId>..</groupId>
             <scope>system</scope>
-            <systemPath>/home/sudx/lokdhaba.incumbency/er/lib/muse-1.0.0-SNAPSHOT-classes.jar</systemPath>
+            <systemPath>${basedir}/lib/muse-1.0.0-SNAPSHOT-classes.jar</systemPath>
             <version>1.0.0</version>
         </dependency>
         
@@ -90,7 +90,6 @@
 					<encoding>UTF-8</encoding>
 					<verbose>true</verbose>
           			<fork>true</fork>
-          			<executable>/home/sudx/Downloads/jdk1.8.0_92/bin/javac</executable>
           			<compilerVersion>1.8</compilerVersion>
 					<source>1.8</source>
 					<target>1.8</target>

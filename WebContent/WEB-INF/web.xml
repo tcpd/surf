@@ -17,13 +17,13 @@
     <param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/dummy_yolo.csv</param-value>
   </context-param> -->
   <context-param>
-  	<param-name>gePath</param-name>
-    <param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info_updated.csv</param-value>
+  	<param-name>UP_Path</param-name>
+    <param-value>/Users/hangal/tmp/file.backups/mastersheet_UP_UK.csv</param-value>
   </context-param>
   <context-param>
   	<description></description>
-  	<param-name>geDescription</param-name>
-    <param-value>General Election Candidate</param-value>
+  	<param-name>UP_Description</param-name>
+    <param-value>UP Election Candidates</param-value>
   </context-param>
   <!-- <context-param>
   	<description></description>

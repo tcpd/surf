@@ -129,9 +129,28 @@ public abstract class MergeManager {
 				Row tempRow = idToRow.get(innerIds.get(i));
 				rowToId.put(tempRow, defaultId);
 			}
-			
+		}
+
+		//setting mapped id here instead of inside save
+		Collection<Row> rows = d.getRows();
+		for(Row row:rows){
+			row.set("mapped_ID", rowToId.get(row));
 		}
 	}
+
+	final public void forceMerge(String [] ids){
+		String defaultId = getRootId(ids[0]);
+        for(int i = 1; i<ids.length; i++){
+			Row tempRow = idToRow.get(ids[i]);
+			rowToId.put(tempRow, defaultId);
+		}
+
+		Collection<Row> rows = d.getRows();
+		for(Row row:rows){
+			row.set("mapped_ID", rowToId.get(row));
+		}
+    }
+
 	//basic version; might need improvements
 	final public void deMerge(String [] ids){
 		//First take care of rows with different id and mapped id
@@ -163,10 +182,7 @@ public abstract class MergeManager {
 		}
 	}
 	final public void save(String filePath) throws IOException{
-		Collection<Row> rows = d.getRows();
-		for(Row row:rows){
-			row.set("mapped_ID", rowToId.get(row));
-		}
+
 		/*try {
 			d.save(filePath);
 		} catch (IOException e) {
@@ -212,7 +228,7 @@ public abstract class MergeManager {
 			listOfSet.add(mp);
 		}
 		if(onlyWinners)onlyKeepWinners(listOfSet);
-		sortAlphabetically(listOfSet);
+		//sortAlphabetically(listOfSet);
 		return listOfSet;
 	}
 	
@@ -236,11 +252,11 @@ public abstract class MergeManager {
 		}
 		
 		if(onlyWinners)onlyKeepWinners(listOfSet);
-		sortAlphabetically(listOfSet);
+		//sortAlphabetically(listOfSet);	Tesing the correct place to put this
 		return listOfSet;
 	}
 
-	
+	/*
 	final public void sortAlphabetically(ArrayList<Multimap<String,Row>> listOfSet){
 		//Queue<String> pq = new PriorityQueue<>();
 		listOfSet.sort(new Comparator<Multimap<String,Row>>(){
@@ -253,6 +269,19 @@ public abstract class MergeManager {
 			
 		});
 		
+	}*/
+
+	final public void sortAlphabetically(ArrayList<Collection<Row>> listOfSet){
+		listOfSet.sort(new Comparator<Collection<Row>>(){
+
+			@Override
+			public int compare(Collection<Row> o1, Collection<Row> o2) {
+
+				return o1.iterator().next().get("Name").compareTo(o2.iterator().next().get("Name"));
+			}
+
+		});
+
 	}
 	
 	

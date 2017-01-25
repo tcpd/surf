@@ -64,12 +64,7 @@ public class IncumbencyServlet extends HttpServlet {
             String currentFile = session.getAttribute("currentFile").toString();
 
             mergeManager.addSimilarCandidates();
-            if(saveButtonPressed(request)){
-                boolean shouldSave = updateTable(request);
-                if(shouldSave){
-                    mergeManager.save(currentFile);
-                }
-            }
+
 
             checkFilterParameters(request);
             generateIncumbents(request.getSession());
@@ -77,6 +72,12 @@ public class IncumbencyServlet extends HttpServlet {
 
             request.getSession().setAttribute("mergeManager", mergeManager);
             request.getRequestDispatcher("/incumbency_table.jsp").forward(request, response);
+			if(saveButtonPressed(request)){
+				boolean shouldSave = updateTable(request);
+				if(shouldSave){
+					mergeManager.save(currentFile);
+				}
+			}
         } catch (IOException e){
             request.getSession().invalidate();
             throw e;
@@ -143,6 +144,10 @@ public class IncumbencyServlet extends HttpServlet {
 		MergeManager mergeManager = (MergeManager)request.getSession().getAttribute("mergeManager");
 		
 		if(userRows!=null && userRows.length>0){
+            //TESTING STUFF: REMOVE WHEN DONE
+            //mergeManager.forceMerge(new String [] {"18284","8661"});
+            //shouldSave = true;
+            //TILL HERE
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.updateUserIds(userRows,request.getSession().getAttribute("userName").toString(),request.getSession().getAttribute("email").toString());
@@ -152,7 +157,7 @@ public class IncumbencyServlet extends HttpServlet {
 			}
 			shouldSave = true;
 		}
-		
+
 		if(!commentMap.isEmpty()){
 			mergeManager.updateComments(commentMap);
 			shouldSave = true;

@@ -65,6 +65,10 @@ public class IncumbencyServlet extends HttpServlet {
 
             mergeManager.addSimilarCandidates();
 
+            boolean shouldSave=false;
+			if(saveButtonPressed(request)){
+				shouldSave = updateTable(request);
+			}
 
             checkFilterParameters(request);
             generateIncumbents(request.getSession());
@@ -72,12 +76,12 @@ public class IncumbencyServlet extends HttpServlet {
 
             request.getSession().setAttribute("mergeManager", mergeManager);
             request.getRequestDispatcher("/incumbency_table.jsp").forward(request, response);
-			if(saveButtonPressed(request)){
-				boolean shouldSave = updateTable(request);
-				if(shouldSave){
-					mergeManager.save(currentFile);
-				}
+
+            //Handle csv write after the page has been redirected to save waiting time
+			if(shouldSave){
+				mergeManager.save(currentFile);
 			}
+
         } catch (IOException e){
             request.getSession().invalidate();
             throw e;
@@ -226,7 +230,7 @@ public class IncumbencyServlet extends HttpServlet {
 	private void setUpAlgorithm(HttpServletRequest request){
 		//Check whether algo changed
 		if(request.getParameter("algorithm")!= null){
-			if(request.getParameter("algorithm").equals(request.getSession().getAttribute("algorithm").toString())){
+			if(request.getSession().getAttribute("algorithm")!=null && request.getParameter("algorithm").equals(request.getSession().getAttribute("algorithm").toString())){
 				request.getSession().setAttribute("algorithmChanged",false);
 			}else{
 				request.getSession().setAttribute("algorithmChanged",true);
@@ -240,6 +244,11 @@ public class IncumbencyServlet extends HttpServlet {
 	}
 	
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
+
+		//IF algorithm's argument changes. Algo needs to be reloaded
+		if(request.getParameter("algo-arg")!=null){
+			request.getSession().setAttribute("algorithmChanged",true);
+		}
 
 		//SETs UP mergeManager
 		MergeManager mergeManager;
@@ -260,7 +269,16 @@ public class IncumbencyServlet extends HttpServlet {
 		else{
 		    mergeManager.load();
 		}
-		
+
+		//LOAD LATEST ARGUMENTS
+		if(request.getParameter("algo-arg")!=null){
+			mergeManager.setArguments(request.getParameter("algo-arg"));
+		}
+
+		//change back the status of datasetChanged & algorithmChanged
+		request.getSession().setAttribute("datasetChanged", false);
+		request.getSession().setAttribute("algorithmChanged", false);
+
 		request.getSession().setAttribute("mergeManager", mergeManager);
 	}
 	

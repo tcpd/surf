@@ -31,6 +31,21 @@
 		<input type="state" class="form-control" id="state" name="state">
 		</label>
 	</div>
+	<div class="form-group">
+		<label for="algorithm">Algorithm:</label>
+		<select class="form-control" id="algorithm" name="algorithm">
+			<option value="exactSameName">Exact Same Name</option>
+			<option value="exactSameNameWithConstituency">Exact Same Name with Constituency</option>
+			<option value="editDistance1">Approximate Name with Edit Distance 1</option>
+			<option value="editDistance2">Approximate Name with Edit Distance 2</option>
+			<option value="dummyAllName">All names</option>
+		</select>
+		</label>
+	</div>
+	<div class="form-group">
+		<label for="algo-arg">Arguments for Algorithm:</label>
+		<input type="text" class="form-control" id="algo-arg" name="algo-arg">
+	</div>
 	<div class="submit-button">
   <button type="submit" class="btn btn-default">Submit</button>
 </div>

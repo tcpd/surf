@@ -9,10 +9,12 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 public abstract class MergeManager {
-	
+
+	static final String SEPERATOR = "-";
 	Dataset d;
 	HashMap<Row, String> rowToId;
     HashMap<String, Row> idToRow;
+    String [] arguments;
     
     //future algorithms will need references here; this is to keep objects in memory for faster reloading of page
     static Map<HttpSession,ExactSameNameMergeManager> exactSameNameMergeManagerMaps = new HashMap<>();
@@ -72,6 +74,9 @@ public abstract class MergeManager {
 		}
 		else if(algo.equals("dummyAllName")){
 			mergeManager = new DummyMergeManager(d);
+		}
+		else if(algo.equals("exactSameNameWithConstituency")){
+			mergeManager = new ExactSameNameWithConstituencyMergeManager(d);
 		}
 		else{}
 		return mergeManager;
@@ -385,4 +390,8 @@ public abstract class MergeManager {
 				idToRow.get(id).set("email", email);
 			}
 		}
+
+	public final void setArguments(String arguments){
+		this.arguments = arguments.split(SEPERATOR);
+	}
 }

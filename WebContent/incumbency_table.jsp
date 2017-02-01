@@ -359,27 +359,21 @@ import="com.google.common.collect.Multimap"
 						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
 						<c:out value="${tableData}"></c:out>
 						<td class="cell-table table-cell-done">
-						<select id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')">
 							<%
-							String selected = row.get("is_done");
-							String selectedNo,selectedYes;
-							if(selected==null||selected.equals("no")){
-								selectedNo="selected";
-								selectedYes="";
-							}
-							else if(selected.equals("yes")){
-								selectedNo="";
-								selectedYes="selected";
-							}
-							else{
-								selectedNo="selected";
-								selectedYes="";
-							}
+								String selected = row.get("is_done");
+								String selectedHTML;
+								if(selected==null||selected.equals("no")){
+									selectedHTML="";
+								}
+								else if(selected.equals("yes")){
+									selectedHTML="checked";
+								}
+								else{
+									selectedHTML="";
+								}
 							%>
-							
-							<option value="no" <%=selectedNo %>>no</option>
-							<option value="yes"<%=selectedYes %>>yes</option>
-						</select>
+							<input type="checkbox" id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')" <%=selectedHTML%>>
+						</input>
 						</td>
 					</c:otherwise>
 				</c:choose>

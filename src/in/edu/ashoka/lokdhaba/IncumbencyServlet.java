@@ -155,9 +155,9 @@ public class IncumbencyServlet extends HttpServlet {
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.updateUserIds(userRows,request.getSession().getAttribute("userName").toString(),request.getSession().getAttribute("email").toString());
-			//dropdown needs to be updated too on merge
+			//isdone needs to be updated too on merge
 			for(String row:userRows){
-				isDoneMap.put(row, "yes");
+				isDoneMap.put(row, "on");
 			}
 			shouldSave = true;
 		}

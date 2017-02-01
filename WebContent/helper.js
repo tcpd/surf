@@ -50,7 +50,7 @@ function commentHandler(commentId){
     node.focus();
 };
 
-//name attribute gets created only when the dropdown is clicked; this is for efficiency
+//name attribute gets created only when the checkbox is clicked; this is for efficiency; these are sent to servlet
 function createNameParameter(id){
     var node=document.getElementById("isDone-"+id);
     node.setAttribute("name", "isDone-"+id);
@@ -229,9 +229,9 @@ function selectAllRowsInGroupForDone(groupID){
         var row = rowList[i]
         if(row.childNodes.length>23 && row.childNodes[23].childNodes.length>1){
             var selectElement = row.childNodes[23].childNodes[1]
-            if(selectElement.tagName == "SELECT"){
+            if(selectElement.tagName == "INPUT" && selectElement.type == "checkbox"){
                 selectElement.click()
-                selectElement.value = "yes"
+                selectElement.checked = "true"
             }
         }
     }

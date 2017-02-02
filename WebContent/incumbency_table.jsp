@@ -403,7 +403,7 @@ import="com.google.common.collect.Multimap"
   	
   	<!-- Listing previous page url here-->
   	<c:if test="${currentPage != 1}">
-	    <li class="page-item" onclick="resetScroll()">
+	    <li class="page-item" onclick="resetScroll(); $('#loading').fadeIn();">
 		<a class="page-link" href="IncumbencyServlet?page=${currentPage - 1}" aria-label="Previous">
 		<span aria-hidden="true">&laquo;</span>
 		<span class="sr-only">Previous</span>
@@ -421,7 +421,7 @@ import="com.google.common.collect.Multimap"
 						<c:set var="pageIsActive" value="page-item"></c:set>
 					</c:otherwise>
 				</c:choose>
-				<li class="${pageIsActive}" onclick="resetScroll()">
+				<li class="${pageIsActive}" onclick="resetScroll(); $('#loading').fadeIn();">
 					<a class="page-link" href="IncumbencyServlet?page=${i}">${i}</a>
 				</li>
 	</c:forEach>
@@ -429,7 +429,7 @@ import="com.google.common.collect.Multimap"
     <!-- Listing next page url here -->
     
     <c:if test="${currentPage lt noOfPages}">
-				<li class="page-item" onclick="resetScroll()">
+				<li class="page-item" onclick="resetScroll(); $('#loading').fadeIn()">
       			<a class="page-link" href="IncumbencyServlet?page=${currentPage + 1}" aria-label="Next">
         		<span aria-hidden="true">&raquo;</span>
         		<span class="sr-only">Next</span>

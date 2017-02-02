@@ -285,11 +285,12 @@ import="com.google.common.collect.Multimap"
 					//IF NEW GROUP, CREATE A HEADER FOR THE ROWS
 					%>
 						<tr <%=rowStyleData %>>
-							<td colspan="9">
+							<td colspan="7">
 								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select all for Merging</button>
 							</td>
-							<td colspan="3">
+							<td colspan="5">
 								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Select all as Done</button>
+								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Select Up till here as Done</button>
 							</td>
 						</tr>
 					<%

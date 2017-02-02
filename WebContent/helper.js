@@ -237,6 +237,16 @@ function selectAllRowsInGroupForDone(groupID){
     }
 }
 
+function selectUpTillHereForDone(groupID){
+    userConsent = confirm("This will mark all rows from the top to up till previous group as Done. Proceed?")
+    if(userConsent){
+        nGroupID = parseInt(groupID.substring(1))
+        for(var i=0; i<nGroupID; i++){
+            selectAllRowsInGroupForDone('g'+i)
+        }
+    }
+}
+
 //POPULATES DROPDOWN FOR FILTER VALUES
 
 function populateDropdown() {

@@ -176,6 +176,7 @@ import="com.google.common.collect.Multimap"
 						<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
 						Settings
 				</button>
+				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Reset" id="resetButton" onclick="return resetButtonPressed()"/>
 				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
 						<ol class="breadcrumb">

@@ -369,6 +369,13 @@ public abstract class MergeManager {
 			//System.out.println(idToRow.get(key).get("is_done"));
 		}
 	}
+
+	public void resetIsDone(){
+		for(Row row:d.getRows()){
+			if(row.get("is_done").equals("yes"))
+				row.set("is_done", "no");
+		}
+	}
 	
 	public Map<String,Set<String>> getAttributesDataSet(String [] attributes){
 		Map<String,Set<String>> attributeMap = new HashMap<>();

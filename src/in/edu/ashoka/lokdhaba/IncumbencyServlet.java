@@ -69,6 +69,13 @@ public class IncumbencyServlet extends HttpServlet {
 			if(saveButtonPressed(request)){
 				shouldSave = updateTable(request);
 			}
+			else if (resetButtonPressed(request)){
+				mergeManager.resetIsDone();
+				shouldSave = true;
+			}
+			else{
+				shouldSave = false;
+			}
 
             checkFilterParameters(request);
             generateIncumbents(request.getSession());
@@ -123,6 +130,10 @@ public class IncumbencyServlet extends HttpServlet {
 	
 	private boolean saveButtonPressed(HttpServletRequest request){
 		return (request.getParameter("submit")!=null && request.getParameter("submit").equals("Save"));
+	}
+
+	private boolean resetButtonPressed(HttpServletRequest request){
+		return (request.getParameter("submit")!=null && request.getParameter("submit").equals("Reset"));
 	}
 	
 	private boolean updateTable(HttpServletRequest request){

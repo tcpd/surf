@@ -252,6 +252,14 @@ function selectUpTillHereForDone(groupID){
     }
 }
 
+function resetButtonPressed(){
+    userConsent = confirm("Warning: All the Rows in the Dataset will be marked as not Done. Only do this if you have switched to new algorithm and want to re-evaluate the mappings.");
+    if(userConsent){
+        return true;
+    }
+    return false;
+}
+
 //POPULATES DROPDOWN FOR FILTER VALUES
 
 function populateDropdown() {

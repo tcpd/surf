@@ -272,6 +272,7 @@ public class IncumbencyServlet extends HttpServlet {
 
 		//LOAD LATEST ARGUMENTS
 		if(request.getParameter("algo-arg")!=null){
+			request.getSession().setAttribute("algo-arg", request.getParameter("algo-arg"));
 			mergeManager.setArguments(request.getParameter("algo-arg"));
 		}
 

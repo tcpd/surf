@@ -124,7 +124,7 @@ import="com.google.common.collect.Multimap"
 						</select>
 					</div>
 					<div class="form-group">
-						<label for="algo-arg">Arguments for Algorithm:</label>
+						Arguments for Algorithm:
 						<input type="text" class="form-control" id="algo-arg" name="algo-arg">
 					</div>
 					<div class="form-group">
@@ -486,7 +486,15 @@ for(var i = 0; i < values.length; i++) {
 	filterValue.appendChild(el);
 };
 
+</script>
 
+<script type="application/javascript">
+//CREATE VARIABLES TO BE USED AS LOADING VARIABLES
+var filterVariables = new Array();
+filterVariables[0]=('${algorithm}')
+filterVariables[1]=('${dataset}')
+filterVariables[2]=('${onlyWinners}')
+filterVariables[3]= <%=session.getAttribute("algo-arg")%>
 
 </script>
 

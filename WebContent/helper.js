@@ -200,12 +200,17 @@ function saveFilterSettings(){
 }
 
 function loadFilterSettings(){
-    if(getCookie("algorithm")!="")
+    /*if(getCookie("algorithm")!="")
         document.getElementById("algorithm").value = getCookie("algorithm");
     if(getCookie("dataset")!="")
         document.getElementById("dataset").value = getCookie("dataset");
     if(getCookie("onlyWinners")!="")
-        document.getElementById("onlyWinners").value = getCookie("onlyWinners");
+        document.getElementById("onlyWinners").value = getCookie("onlyWinners");*/
+    //CHECK incumbency_table.jsp FOR filterVariables value.
+    document.getElementById("algorithm").value = filterVariables[0]
+    document.getElementById("dataset").value = filterVariables[1]
+    document.getElementById("onlyWinners").value = filterVariables[2]
+    document.getElementById("algo-arg").value = filterVariables[3]
 }
 
 //THESE FUNCTIONS USE HARD CODE TAGNAMES & VALUES;CHANGES MIGHT BE REQUIRED HERE IF THE TABLE CHANGES

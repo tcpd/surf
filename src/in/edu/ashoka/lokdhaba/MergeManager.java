@@ -119,9 +119,12 @@ public abstract class MergeManager {
 		//First take care of rows with different id and mapped id
 		for(String id:ids){
 			Row row = idToRow.get(id);
+			//marked rows also needs to be reviewed again
+			row.set("is_done", "no");
 			if(row.get("ID").equals(row.get("mapped_ID")))
 				continue;
 			rowToId.put(row, row.get("ID"));
+			row.set("mapped_ID", row.get("ID"));
 			//System.out.println();
 		}
 		
@@ -131,7 +134,7 @@ public abstract class MergeManager {
 			
 			if(id.equals(row.get("mapped_ID"))){
 				ArrayList<Row> samePersonRows = new ArrayList<>();
-				for(Row tempRow:d.getRows()){
+				for(Row tempRow:personToRows.get(row.get("mapped_ID"))){
 					if(tempRow.get("mapped_ID").equals(id) && isMappedToAnother(tempRow.get("ID"))){
 						samePersonRows.add(tempRow);
 					}
@@ -139,6 +142,7 @@ public abstract class MergeManager {
 				if(samePersonRows!=null){
 					for(Row tempRow:samePersonRows){
 						rowToId.put(tempRow, samePersonRows.get(0).get("ID"));
+						tempRow.set("mapped_ID", samePersonRows.get(0).get("ID"));
 					}
 				}
 			}

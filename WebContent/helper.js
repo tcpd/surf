@@ -54,6 +54,12 @@ function commentHandler(commentId){
 function createNameParameter(id){
     var node=document.getElementById("isDone-"+id);
     node.setAttribute("name", "isDone-"+id);
+    pnode = node.parentNode
+    hiddenNode = document.createElement("input")
+    hiddenNode.setAttribute("type", "hidden")
+    hiddenNode.setAttribute("name", node.id)
+    hiddenNode.setAttribute("value", "off")
+    pnode.appendChild(hiddenNode)
 }
 
 //script to display the full comment

@@ -30,43 +30,6 @@ import="com.google.common.collect.Multimap"
 </head>
 <body>
 
-	<%!
-   //SETTING UP RREQUIRED VARIABLES
-
-	//boolean isFirst;
-	//Dataset d;
-	//MergeManager mergeManager;
-
-	
-
-    //add other csv here or eventually take the file input from user
-    //static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
-	//static final String bihar="";
-	//static final String rajasthan="";
-	%>
-
-
-
-	
-   
-   <!--
-   
-   //setUpParameter sets up a parameter which can be used across same page reloads and different pages.
-	
-   final String setUpParameter(String param){
-	   if(request.getParameter(param)!= null){
-			param = request.getParameter(param).toString();
-			session.setAttribute(param, param);
-			return param;
-		}
-	   p
-	   
-	   else{
-			param = session.getAttribute(param);
-			return param;
-		}   
-    }
-   -->
    
 <div id="loading" style="padding-top: 20%">
 	<img id="loading-image" src="loading.gif" alt="LOADING.."/>
@@ -368,7 +331,7 @@ import="com.google.common.collect.Multimap"
 									selectedHTML="";
 								}
 								else if(selected.equals("yes")){
-									selectedHTML="checked";
+									selectedHTML="checked=\"checked\"";
 								}
 								else{
 									selectedHTML="";
@@ -495,7 +458,7 @@ var filterVariables = new Array();
 filterVariables[0]=('${algorithm}')
 filterVariables[1]=('${dataset}')
 filterVariables[2]=('${onlyWinners}')
-filterVariables[3]= <%=session.getAttribute("algo-arg")%>
+filterVariables[3]=(<%=session.getAttribute("algo-arg")%>);
 
 </script>
 

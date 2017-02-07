@@ -64,6 +64,7 @@ public class IncumbencyServlet extends HttpServlet {
             String currentFile = session.getAttribute("currentFile").toString();
 
             mergeManager.addSimilarCandidates();
+            mergeManager.setupPersonMap();
 
             boolean shouldSave=false;
 			if(saveButtonPressed(request)){

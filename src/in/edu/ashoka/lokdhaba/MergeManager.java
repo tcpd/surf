@@ -15,51 +15,9 @@ public abstract class MergeManager {
 	HashMap<Row, String> rowToId;
     HashMap<String, Row> idToRow;
     String [] arguments;
-    
-    //future algorithms will need references here; this is to keep objects in memory for faster reloading of page
-    static Map<HttpSession,ExactSameNameMergeManager> exactSameNameMergeManagerMaps = new HashMap<>();
-    static Map<HttpSession,SimilarNameMergeManager> similarNameMergeManagerED1Maps = new HashMap<>();
-    static Map<HttpSession,SimilarNameMergeManager> similarNameMergeManagerED2Maps = new HashMap<>();
-    static Map<HttpSession,DummyMergeManager> dummyMergeManagerMaps = new HashMap<>();
-    
-    static Map<String,Set<String>> attributesDataSet;
-    ArrayList<Collection<Row>> listOfSimilarCandidates; 
-    
-    
-    
-    //this is a factory method which generates the right manager
-    // these methods are singleton
-    //for any new algorithms, these need to be updated
-    
-    //DEPRECIATED CODE
-    /*public static MergeManager getManager(HttpSession session, String algo, Dataset d, boolean forceRefresh){
-    	//System.out.println("I am in MergeManager");
-    	if(algo.equals("exactSameName")){
-    		if(exactSameNameMergeManagerMaps.get(session)==null||forceRefresh){
-    			exactSameNameMergeManagerMaps.put(session, new ExactSameNameMergeManager(d));
-    		}
-    			return exactSameNameMergeManagerMaps.get(session);
-    	}	
-    	else if(algo.equals("editDistance1")){
-    		if(similarNameMergeManagerED1Maps.get(session)==null||forceRefresh){
-    			similarNameMergeManagerED1Maps.put(session, new SimilarNameMergeManager(d, 1));
-    		}
-    			return similarNameMergeManagerED1Maps.get(session);
-    	}
-    	else if(algo.equals("editDistance2")){
-    		if(similarNameMergeManagerED2Maps.get(session)==null||forceRefresh){
-    			similarNameMergeManagerED2Maps.put(session, new SimilarNameMergeManager(d, 2));
-    		}
-    			return similarNameMergeManagerED2Maps.get(session);
-    	}
-    	else if(algo.equals("dummyAllName")){
-    		if(dummyMergeManagerMaps.get(session)==null||forceRefresh){
-    			dummyMergeManagerMaps.put(session, new DummyMergeManager(d));
-    		}
-    		return dummyMergeManagerMaps.get(session);
-    	}
-		return null;
-    }*/
+
+    ArrayList<Collection<Row>> listOfSimilarCandidates;
+    Multimap<String,Row> personToRows;
     
     public static MergeManager getManager(String algo, Dataset d){
 		MergeManager mergeManager = null;
@@ -136,11 +94,11 @@ public abstract class MergeManager {
 			}
 		}
 
-		//setting mapped id here instead of inside save
+		/*//setting mapped id here instead of inside save
 		Collection<Row> rows = d.getRows();
 		for(Row row:rows){
 			row.set("mapped_ID", rowToId.get(row));
-		}
+		}*/
 	}
 
 	final public void forceMerge(String [] ids){
@@ -187,21 +145,24 @@ public abstract class MergeManager {
 		}
 	}
 	final public void save(String filePath) throws IOException{
-
-		/*try {
-			d.save(filePath);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 		d.save(filePath);
 	}
+
 	final public void load(){
 		rowToId = new HashMap<>();
 		idToRow = new HashMap<>();
 		for(Row row:d.getRows()){
 			idToRow.put(row.get("ID"), row);
 			rowToId.put(row, row.get("mapped_ID"));
+		}
+	}
+
+	final public void setupPersonMap(){
+		personToRows = LinkedHashMultimap.create();
+		for(Collection<Row> group:listOfSimilarCandidates){
+			for(Row row:group){
+				personToRows.put(row.get("mapped_ID"),row);
+			}
 		}
 	}
 	
@@ -308,6 +269,7 @@ public abstract class MergeManager {
 		for(Row row:rowToId.keySet()){
 			String id = getRootId(rowToId.get(row));
 			rowToId.put(row, id);
+			row.set("mapped_ID", rowToId.get(row));
 		}
 	}
 	
@@ -365,7 +327,24 @@ public abstract class MergeManager {
 	//method that updates the drop down information
 	public void updateIsDone(Map<String, String> map){
 		for(String key:map.keySet()){
-			idToRow.get(key).set("is_done", (map.get(key).equals("on")?"yes":"no"));
+			//idToRow.get(key).set("is_done", (map.get(key).equals("on")?"yes":"no"));
+
+			Row row = idToRow.get(key);
+			Collection<Row> person = personToRows.get(row.get("mapped_ID"));
+			//This needs to be done because person to row map isn't updated after merge, it is only updated when the incumbents view is generated.
+			if(person.size()<=1){
+				idToRow.get(key).set("is_done", (map.get(key).equals("on")?"yes":"no"));
+				continue;
+			}
+			for(Row record:person){
+				if(map.get(key).equals("on")){
+					record.set("is_done","yes");
+				}else{
+					record.set("is_done","no");
+				}
+
+			}
+
 			//System.out.println(idToRow.get(key).get("is_done"));
 		}
 	}

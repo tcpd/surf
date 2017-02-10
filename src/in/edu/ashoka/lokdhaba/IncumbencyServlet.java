@@ -64,12 +64,19 @@ public class IncumbencyServlet extends HttpServlet {
             String currentFile = session.getAttribute("currentFile").toString();
 
             mergeManager.addSimilarCandidates();
-            if(saveButtonPressed(request)){
-                boolean shouldSave = updateTable(request);
-                if(shouldSave){
-                    mergeManager.save(currentFile);
-                }
-            }
+            mergeManager.setupPersonMap();
+
+            boolean shouldSave=false;
+			if(saveButtonPressed(request)){
+				shouldSave = updateTable(request);
+			}
+			else if (resetButtonPressed(request)){
+				mergeManager.resetIsDone();
+				shouldSave = true;
+			}
+			else{
+				shouldSave = false;
+			}
 
             checkFilterParameters(request);
             generateIncumbents(request.getSession());
@@ -77,6 +84,12 @@ public class IncumbencyServlet extends HttpServlet {
 
             request.getSession().setAttribute("mergeManager", mergeManager);
             request.getRequestDispatcher("/incumbency_table.jsp").forward(request, response);
+
+            //Handle csv write after the page has been redirected to save waiting time
+			if(shouldSave){
+				mergeManager.save(currentFile);
+			}
+
         } catch (IOException e){
             request.getSession().invalidate();
             throw e;
@@ -119,6 +132,10 @@ public class IncumbencyServlet extends HttpServlet {
 	private boolean saveButtonPressed(HttpServletRequest request){
 		return (request.getParameter("submit")!=null && request.getParameter("submit").equals("Save"));
 	}
+
+	private boolean resetButtonPressed(HttpServletRequest request){
+		return (request.getParameter("submit")!=null && request.getParameter("submit").equals("Reset"));
+	}
 	
 	private boolean updateTable(HttpServletRequest request){
 		boolean shouldSave=false;
@@ -143,16 +160,20 @@ public class IncumbencyServlet extends HttpServlet {
 		MergeManager mergeManager = (MergeManager)request.getSession().getAttribute("mergeManager");
 		
 		if(userRows!=null && userRows.length>0){
+            //TESTING STUFF: REMOVE WHEN DONE
+            //mergeManager.forceMerge(new String [] {"18284","8661"});
+            //shouldSave = true;
+            //TILL HERE
 			mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.updateUserIds(userRows,request.getSession().getAttribute("userName").toString(),request.getSession().getAttribute("email").toString());
-			//dropdown needs to be updated too on merge
+			//isdone needs to be updated too on merge
 			for(String row:userRows){
-				isDoneMap.put(row, "yes");
+				isDoneMap.put(row, "on");
 			}
 			shouldSave = true;
 		}
-		
+
 		if(!commentMap.isEmpty()){
 			mergeManager.updateComments(commentMap);
 			shouldSave = true;
@@ -221,7 +242,7 @@ public class IncumbencyServlet extends HttpServlet {
 	private void setUpAlgorithm(HttpServletRequest request){
 		//Check whether algo changed
 		if(request.getParameter("algorithm")!= null){
-			if(request.getParameter("algorithm").equals(request.getSession().getAttribute("algorithm").toString())){
+			if(request.getSession().getAttribute("algorithm")!=null && request.getParameter("algorithm").equals(request.getSession().getAttribute("algorithm").toString())){
 				request.getSession().setAttribute("algorithmChanged",false);
 			}else{
 				request.getSession().setAttribute("algorithmChanged",true);
@@ -235,6 +256,11 @@ public class IncumbencyServlet extends HttpServlet {
 	}
 	
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
+
+		//IF algorithm's argument changes. Algo needs to be reloaded
+		if(request.getParameter("algo-arg")!=null){
+			request.getSession().setAttribute("algorithmChanged",true);
+		}
 
 		//SETs UP mergeManager
 		MergeManager mergeManager;
@@ -255,7 +281,17 @@ public class IncumbencyServlet extends HttpServlet {
 		else{
 		    mergeManager.load();
 		}
-		
+
+		//LOAD LATEST ARGUMENTS
+		if(request.getParameter("algo-arg")!=null){
+			request.getSession().setAttribute("algo-arg", request.getParameter("algo-arg"));
+			mergeManager.setArguments(request.getParameter("algo-arg"));
+		}
+
+		//change back the status of datasetChanged & algorithmChanged
+		request.getSession().setAttribute("datasetChanged", false);
+		request.getSession().setAttribute("algorithmChanged", false);
+
 		request.getSession().setAttribute("mergeManager", mergeManager);
 	}
 	

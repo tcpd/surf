@@ -30,43 +30,6 @@ import="com.google.common.collect.Multimap"
 </head>
 <body>
 
-	<%!
-   //SETTING UP RREQUIRED VARIABLES
-
-	//boolean isFirst;
-	//Dataset d;
-	//MergeManager mergeManager;
-
-	
-
-    //add other csv here or eventually take the file input from user
-    //static final String ge="/Users/Kshitij/Documents/CS/Incumbency Project/lokdhaba/GE/candidates/csv/candidates_info_updated.csv";
-	//static final String bihar="";
-	//static final String rajasthan="";
-	%>
-
-
-
-	
-   
-   <!--
-   
-   //setUpParameter sets up a parameter which can be used across same page reloads and different pages.
-	
-   final String setUpParameter(String param){
-	   if(request.getParameter(param)!= null){
-			param = request.getParameter(param).toString();
-			session.setAttribute(param, param);
-			return param;
-		}
-	   p
-	   
-	   else{
-			param = session.getAttribute(param);
-			return param;
-		}   
-    }
-   -->
    
 <div id="loading" style="padding-top: 20%">
 	<img id="loading-image" src="loading.gif" alt="LOADING.."/>
@@ -117,10 +80,15 @@ import="com.google.common.collect.Multimap"
 						Algorithm:
 						<select class="form-control" name="algorithm" id="algorithm">
 								<option value="exactSameName">Exact Same Name</option>
+								<option value="exactSameNameWithConstituency">Exact Same Name with Constituency</option>
 								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
 								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
 								<option value="dummyAllName">All names</option>
 						</select>
+					</div>
+					<div class="form-group">
+						Arguments for Algorithm:
+						<input type="text" class="form-control" id="algo-arg" name="algo-arg">
 					</div>
 					<div class="form-group">
 						Filter:
@@ -166,11 +134,12 @@ import="com.google.common.collect.Multimap"
 					<a class="navbar-brand" href="#">Neta Analytics - Candidate Mapper</a>
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton"/>
+				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton" onclick="$('#loading').fadeIn()"/>
 				<button type="button" onclick="loadFilterSettings()" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
 						<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
 						Settings
 				</button>
+				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Reset" id="resetButton" onclick="return resetButtonPressed()"/>
 				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
 						<ol class="breadcrumb">
@@ -280,11 +249,12 @@ import="com.google.common.collect.Multimap"
 					//IF NEW GROUP, CREATE A HEADER FOR THE ROWS
 					%>
 						<tr <%=rowStyleData %>>
-							<td colspan="9">
+							<td colspan="7">
 								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select all for Merging</button>
 							</td>
-							<td colspan="3">
+							<td colspan="5">
 								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Select all as Done</button>
+								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Select Up till here as Done</button>
 							</td>
 						</tr>
 					<%
@@ -354,27 +324,21 @@ import="com.google.common.collect.Multimap"
 						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
 						<c:out value="${tableData}"></c:out>
 						<td class="cell-table table-cell-done">
-						<select id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')">
 							<%
-							String selected = row.get("is_done");
-							String selectedNo,selectedYes;
-							if(selected==null||selected.equals("no")){
-								selectedNo="selected";
-								selectedYes="";
-							}
-							else if(selected.equals("yes")){
-								selectedNo="";
-								selectedYes="selected";
-							}
-							else{
-								selectedNo="selected";
-								selectedYes="";
-							}
+								String selected = row.get("is_done");
+								String selectedHTML;
+								if(selected==null||selected.equals("no")){
+									selectedHTML="";
+								}
+								else if(selected.equals("yes")){
+									selectedHTML="checked=\"checked\"";
+								}
+								else{
+									selectedHTML="";
+								}
 							%>
-							
-							<option value="no" <%=selectedNo %>>no</option>
-							<option value="yes"<%=selectedYes %>>yes</option>
-						</select>
+							<input type="checkbox" id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')" <%=selectedHTML%>>
+						</input>
 						</td>
 					</c:otherwise>
 				</c:choose>
@@ -403,7 +367,7 @@ import="com.google.common.collect.Multimap"
   	
   	<!-- Listing previous page url here-->
   	<c:if test="${currentPage != 1}">
-	    <li class="page-item" onclick="resetScroll()">
+	    <li class="page-item" onclick="resetScroll(); $('#loading').fadeIn();">
 		<a class="page-link" href="IncumbencyServlet?page=${currentPage - 1}" aria-label="Previous">
 		<span aria-hidden="true">&laquo;</span>
 		<span class="sr-only">Previous</span>
@@ -421,7 +385,7 @@ import="com.google.common.collect.Multimap"
 						<c:set var="pageIsActive" value="page-item"></c:set>
 					</c:otherwise>
 				</c:choose>
-				<li class="${pageIsActive}" onclick="resetScroll()">
+				<li class="${pageIsActive}" onclick="resetScroll(); $('#loading').fadeIn();">
 					<a class="page-link" href="IncumbencyServlet?page=${i}">${i}</a>
 				</li>
 	</c:forEach>
@@ -429,7 +393,7 @@ import="com.google.common.collect.Multimap"
     <!-- Listing next page url here -->
     
     <c:if test="${currentPage lt noOfPages}">
-				<li class="page-item" onclick="resetScroll()">
+				<li class="page-item" onclick="resetScroll(); $('#loading').fadeIn()">
       			<a class="page-link" href="IncumbencyServlet?page=${currentPage + 1}" aria-label="Next">
         		<span aria-hidden="true">&raquo;</span>
         		<span class="sr-only">Next</span>
@@ -486,7 +450,15 @@ for(var i = 0; i < values.length; i++) {
 	filterValue.appendChild(el);
 };
 
+</script>
 
+<script type="application/javascript">
+//CREATE VARIABLES TO BE USED AS LOADING VARIABLES
+var filterVariables = new Array();
+filterVariables[0]=('${algorithm}')
+filterVariables[1]=('${dataset}')
+filterVariables[2]=('${onlyWinners}')
+filterVariables[3]=(<%=session.getAttribute("algo-arg")%>);
 
 </script>
 

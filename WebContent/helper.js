@@ -50,10 +50,16 @@ function commentHandler(commentId){
     node.focus();
 };
 
-//name attribute gets created only when the dropdown is clicked; this is for efficiency
+//name attribute gets created only when the checkbox is clicked; this is for efficiency; these are sent to servlet
 function createNameParameter(id){
     var node=document.getElementById("isDone-"+id);
     node.setAttribute("name", "isDone-"+id);
+    pnode = node.parentNode
+    hiddenNode = document.createElement("input")
+    hiddenNode.setAttribute("type", "hidden")
+    hiddenNode.setAttribute("name", node.id)
+    hiddenNode.setAttribute("value", "off")
+    pnode.appendChild(hiddenNode)
 }
 
 //script to display the full comment
@@ -200,12 +206,17 @@ function saveFilterSettings(){
 }
 
 function loadFilterSettings(){
-    if(getCookie("algorithm")!="")
+    /*if(getCookie("algorithm")!="")
         document.getElementById("algorithm").value = getCookie("algorithm");
     if(getCookie("dataset")!="")
         document.getElementById("dataset").value = getCookie("dataset");
     if(getCookie("onlyWinners")!="")
-        document.getElementById("onlyWinners").value = getCookie("onlyWinners");
+        document.getElementById("onlyWinners").value = getCookie("onlyWinners");*/
+    //CHECK incumbency_table.jsp FOR filterVariables value.
+    document.getElementById("algorithm").value = filterVariables[0]
+    document.getElementById("dataset").value = filterVariables[1]
+    document.getElementById("onlyWinners").value = filterVariables[2]
+    document.getElementById("algo-arg").value = filterVariables[3]
 }
 
 //THESE FUNCTIONS USE HARD CODE TAGNAMES & VALUES;CHANGES MIGHT BE REQUIRED HERE IF THE TABLE CHANGES
@@ -229,12 +240,30 @@ function selectAllRowsInGroupForDone(groupID){
         var row = rowList[i]
         if(row.childNodes.length>23 && row.childNodes[23].childNodes.length>1){
             var selectElement = row.childNodes[23].childNodes[1]
-            if(selectElement.tagName == "SELECT"){
+            if(selectElement.tagName == "INPUT" && selectElement.type == "checkbox"){
                 selectElement.click()
-                selectElement.value = "yes"
+                selectElement.checked = "true"
             }
         }
     }
+}
+
+function selectUpTillHereForDone(groupID){
+    userConsent = confirm("This will mark all rows from the top to up till previous group as Done. Proceed?")
+    if(userConsent){
+        nGroupID = parseInt(groupID.substring(1))
+        for(var i=0; i<nGroupID; i++){
+            selectAllRowsInGroupForDone('g'+i)
+        }
+    }
+}
+
+function resetButtonPressed(){
+    userConsent = confirm("Warning: All the Rows in the Dataset will be marked as not Done. Only do this if you have switched to new algorithm and want to re-evaluate the mappings.");
+    if(userConsent){
+        return true;
+    }
+    return false;
 }
 
 //POPULATES DROPDOWN FOR FILTER VALUES

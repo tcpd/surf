@@ -359,7 +359,44 @@ public class Bihar extends Object {
 
         return resultMap;
     }
-    
+
+    public static Multimap<String, Row> getExactSameNameWithConstituency (Collection<Row> allRows, Dataset d, int startStringSize) throws IOException {
+        //split based on cname and constituency
+        Multimap<String, Row> tempMap = SurfExcel.split(allRows, "PC_Name");
+        Multimap<String, Row> resultMap = HashMultimap.create();
+        List<String> listCField = new ArrayList<>(tempMap.keySet());
+        Collections.sort(listCField, SurfExcel.stringLengthComparator);
+        Collections.unmodifiableList(listCField);
+        for(int i=0; i<listCField.size(); i++){
+            Collection<Row> constituencyGroup = tempMap.get(listCField.get(i));
+            for(Row row:constituencyGroup){
+                if(row.get("c"+SurfExcel.FIELDSPEC_SEPARATOR+"Name").length()>=startStringSize){
+                    resultMap.put(row.get("PC_Name")+SurfExcel.FIELDSPEC_SEPARATOR+row.get("c"+SurfExcel.FIELDSPEC_SEPARATOR+"Name").substring(0,startStringSize),row);
+                }
+                else{
+                    resultMap.put(row.get("PC_Name")+SurfExcel.FIELDSPEC_SEPARATOR+row.get("c"+SurfExcel.FIELDSPEC_SEPARATOR+"Name"),row);
+                }
+            }
+        }
+
+        //only keep duplicates
+        List<String> list = new ArrayList<String>();
+        for(String key:resultMap.keySet()){
+            if(resultMap.get(key).size()<2)
+                list.add(key);
+        }
+        for(String key:list){
+            resultMap.asMap().remove(key);
+        }
+
+        //remove nota
+        resultMap.asMap().remove("ab he ne no of ove");
+        resultMap.asMap().remove("AB NONE OF OWE TE");
+
+        return resultMap;
+
+    }
+
     public static void merge(HashMap<Row, String> rowToId, HashMap<String, Row> idToRow, String []ids) {
     	String defaultId = ids[0];
     	for(int i=1;i<ids.length;i++) {

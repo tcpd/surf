@@ -37,7 +37,7 @@ public class SimilarNameMergeManager extends MergeManager {
 				}
 				listOfSimilarCandidates.add(temp);
 			}
-			
+			sortAlphabetically(listOfSimilarCandidates);
 		}catch(IOException e){
 			e.printStackTrace();
 		}

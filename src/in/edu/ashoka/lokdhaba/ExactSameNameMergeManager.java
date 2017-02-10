@@ -34,12 +34,13 @@ public class ExactSameNameMergeManager extends MergeManager{
 					row.set("common_group_id", row.get("_st_Name"));
 				}
 			}
-			
+			sortAlphabetically(listOfSimilarCandidates);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		algorithmRun=true;
 		
 		

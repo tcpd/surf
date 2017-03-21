@@ -183,7 +183,7 @@ import="com.google.common.collect.Multimap"
 
 		<div>
 			<div class="table-div table-responsive">
-				<table class="table table-hover">
+				<table class="table">
 					<tbody class="inside-table" id="table-body">
 <%
 							

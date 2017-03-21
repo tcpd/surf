@@ -298,7 +298,7 @@ function populateDropdown() {
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS
 
 $("document").ready(function(){
-	$("tr td:not(:nth-last-child(2)):not(:last-child)").on("click", function(e){
+	$("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function(e){
 		if($(e.target).closest('input[type="checkbox"]').length > 0){
 			$(this).parent().toggleClass("success");
         }

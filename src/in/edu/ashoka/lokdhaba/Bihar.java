@@ -252,14 +252,14 @@ public class Bihar extends Object {
         Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
         
         //only show duplicates
-        List<String> list = new ArrayList<String>();
+        /*List<String> list = new ArrayList<String>();
         for(String key:resultMap.keySet()){
         	if(resultMap.get(key).size()<2)
         		list.add(key);
         }
         for(String key:list){
         	resultMap.asMap().remove(key);
-        }
+        }*/
         
         return resultMap;
     }
@@ -310,14 +310,14 @@ public class Bihar extends Object {
 	        }
 	        
 	        //only keep duplicates
-	        List<String> list = new ArrayList<String>();
+	        /*List<String> list = new ArrayList<String>();
 	        for(String key:resultMap.keySet()){
 	        	if(resultMap.get(key).size()<2)
 	        		list.add(key);
 	        }
 	        for(String key:list){
 	        	resultMap.asMap().remove(key);
-	        }
+	        }*/
 	        
 	        //remove nota
 	        resultMap.asMap().remove("ab he ne no of ove");
@@ -380,14 +380,14 @@ public class Bihar extends Object {
         }
 
         //only keep duplicates
-        List<String> list = new ArrayList<String>();
+        /*List<String> list = new ArrayList<String>();
         for(String key:resultMap.keySet()){
             if(resultMap.get(key).size()<2)
                 list.add(key);
         }
         for(String key:list){
             resultMap.asMap().remove(key);
-        }
+        }*/
 
         //remove nota
         resultMap.asMap().remove("ab he ne no of ove");

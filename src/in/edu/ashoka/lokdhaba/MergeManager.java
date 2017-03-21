@@ -195,7 +195,8 @@ public abstract class MergeManager {
 			for(Row row:similarRows){
 				mp.put(rowToId.get(row), row);
 			}
-			listOfSet.add(mp);
+			if(mp.values().size()>1)	//check whether there are more than 1 member in a group
+				listOfSet.add(mp);
 		}
 		if(onlyWinners)onlyKeepWinners(listOfSet);
 		//sortAlphabetically(listOfSet);

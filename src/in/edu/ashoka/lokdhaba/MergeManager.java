@@ -18,6 +18,7 @@ public abstract class MergeManager {
 
     ArrayList<Collection<Row>> listOfSimilarCandidates;
     Multimap<String,Row> personToRows;
+    HashMap<String, Collection<Row>> rowToGroup;
     
     public static MergeManager getManager(String algo, Dataset d){
 		MergeManager mergeManager = null;
@@ -161,11 +162,20 @@ public abstract class MergeManager {
 		}
 	}
 
-	final public void setupPersonMap(){
+	final public void setupPersonToRowMap(){
 		personToRows = LinkedHashMultimap.create();
 		for(Collection<Row> group:listOfSimilarCandidates){
 			for(Row row:group){
 				personToRows.put(row.get("mapped_ID"),row);
+			}
+		}
+	}
+
+	final public void setupRowToGroupMap(){
+		rowToGroup = new HashMap<>();
+		for(Collection<Row> group:listOfSimilarCandidates){
+			for(Row row:group){
+				rowToGroup.put(row.get("ID"),group);
 			}
 		}
 	}
@@ -190,7 +200,7 @@ public abstract class MergeManager {
 	
 	final public ArrayList<Multimap<String,Row>> getIncumbents(boolean onlyWinners){
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:listOfSimilarCandidates){
+		for(Collection<Row> similarRows:getGroupMergedListOfSimilarCandidate()){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
 			for(Row row:similarRows){
 				mp.put(rowToId.get(row), row);
@@ -207,7 +217,7 @@ public abstract class MergeManager {
 	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values, boolean onlyWinners){
 		
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:listOfSimilarCandidates){
+		for(Collection<Row> similarRows:getGroupMergedListOfSimilarCandidate()){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
 			for(Row row:similarRows){
 				for(String value:values){
@@ -241,6 +251,21 @@ public abstract class MergeManager {
 		});
 		
 	}*/
+
+	final private ArrayList<Collection<Row>> getGroupMergedListOfSimilarCandidate(){
+		ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates = new ArrayList<>();
+		groupMergedListOfSimilarCandidates.addAll(listOfSimilarCandidates);
+		for(String person: personToRows.keySet()){
+			Collection<Row> baseGroup = rowToGroup.get(personToRows.get(person).iterator().next().get("ID"));
+			for(Row row:personToRows.get(person)){
+				if(!baseGroup.equals(rowToGroup.get(row.get("ID")))){
+					baseGroup.addAll(rowToGroup.get(row.get("ID")));
+					groupMergedListOfSimilarCandidates.remove(rowToGroup.get(row.get("ID")));
+				}
+			}
+		}
+		return groupMergedListOfSimilarCandidates;
+	}
 
 	final public void sortAlphabetically(ArrayList<Collection<Row>> listOfSet){
 		listOfSet.sort(new Comparator<Collection<Row>>(){

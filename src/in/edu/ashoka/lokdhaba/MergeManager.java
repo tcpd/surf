@@ -257,11 +257,19 @@ public abstract class MergeManager {
 		groupMergedListOfSimilarCandidates.addAll(listOfSimilarCandidates);
 		for(String person: personToRows.keySet()){
 			Collection<Row> baseGroup = rowToGroup.get(personToRows.get(person).iterator().next().get("ID"));
+			Collection<Row> nonPersistantGroup = new ArrayList<Row>(baseGroup);
+			boolean differentGroup = false;
 			for(Row row:personToRows.get(person)){
 				if(!baseGroup.equals(rowToGroup.get(row.get("ID")))){
-					baseGroup.addAll(rowToGroup.get(row.get("ID")));
+					differentGroup = true;
+					nonPersistantGroup.addAll(rowToGroup.get(row.get("ID")));
 					groupMergedListOfSimilarCandidates.remove(rowToGroup.get(row.get("ID")));
 				}
+			}
+			if(differentGroup) {
+				int index = groupMergedListOfSimilarCandidates.indexOf(baseGroup);
+				groupMergedListOfSimilarCandidates.remove(baseGroup);
+				groupMergedListOfSimilarCandidates.add(index, nonPersistantGroup);
 			}
 		}
 		return groupMergedListOfSimilarCandidates;

@@ -107,12 +107,10 @@ public abstract class MergeManager {
         for(int i = 1; i<ids.length; i++){
 			Row tempRow = idToRow.get(ids[i]);
 			rowToId.put(tempRow, defaultId);
+			tempRow.set("mapped_ID", defaultId);
 		}
-
-		Collection<Row> rows = d.getRows();
-		for(Row row:rows){
-			row.set("mapped_ID", rowToId.get(row));
-		}
+		setupPersonToRowMap();
+		setupRowToGroupMap();
     }
 
 	//basic version; might need improvements
@@ -148,6 +146,8 @@ public abstract class MergeManager {
 				}
 			}
 		}
+		setupPersonToRowMap();
+		setupRowToGroupMap();
 	}
 	final public void save(String filePath) throws IOException{
 		d.save(filePath);

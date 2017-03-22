@@ -263,7 +263,7 @@ public class IncumbencyServlet extends HttpServlet {
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
 
 		//IF algorithm's argument changes. Algo needs to be reloaded
-		if(request.getParameter("algo-arg")!=null){
+		if(request.getParameter("algo-arg")!=null&&!request.getParameter("algo-arg").equals("")){
 			request.getSession().setAttribute("algorithmChanged",true);
 		}
 

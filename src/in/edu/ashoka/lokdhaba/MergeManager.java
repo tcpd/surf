@@ -18,6 +18,7 @@ public abstract class MergeManager {
 
     ArrayList<Collection<Row>> listOfSimilarCandidates;
     Multimap<String,Row> personToRows;
+    HashMap<String, Collection<Row>> rowToGroup;
     
     public static MergeManager getManager(String algo, Dataset d){
 		MergeManager mergeManager = null;
@@ -106,12 +107,10 @@ public abstract class MergeManager {
         for(int i = 1; i<ids.length; i++){
 			Row tempRow = idToRow.get(ids[i]);
 			rowToId.put(tempRow, defaultId);
+			tempRow.set("mapped_ID", defaultId);
 		}
-
-		Collection<Row> rows = d.getRows();
-		for(Row row:rows){
-			row.set("mapped_ID", rowToId.get(row));
-		}
+		setupPersonToRowMap();
+		setupRowToGroupMap();
     }
 
 	//basic version; might need improvements
@@ -147,6 +146,8 @@ public abstract class MergeManager {
 				}
 			}
 		}
+		setupPersonToRowMap();
+		setupRowToGroupMap();
 	}
 	final public void save(String filePath) throws IOException{
 		d.save(filePath);
@@ -161,11 +162,20 @@ public abstract class MergeManager {
 		}
 	}
 
-	final public void setupPersonMap(){
+	final public void setupPersonToRowMap(){
 		personToRows = LinkedHashMultimap.create();
 		for(Collection<Row> group:listOfSimilarCandidates){
 			for(Row row:group){
 				personToRows.put(row.get("mapped_ID"),row);
+			}
+		}
+	}
+
+	final public void setupRowToGroupMap(){
+		rowToGroup = new HashMap<>();
+		for(Collection<Row> group:listOfSimilarCandidates){
+			for(Row row:group){
+				rowToGroup.put(row.get("ID"),group);
 			}
 		}
 	}
@@ -190,12 +200,13 @@ public abstract class MergeManager {
 	
 	final public ArrayList<Multimap<String,Row>> getIncumbents(boolean onlyWinners){
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:listOfSimilarCandidates){
+		for(Collection<Row> similarRows:getGroupMergedListOfSimilarCandidate()){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
 			for(Row row:similarRows){
 				mp.put(rowToId.get(row), row);
 			}
-			listOfSet.add(mp);
+			if(mp.values().size()>1)	//check whether there are more than 1 member in a group
+				listOfSet.add(mp);
 		}
 		if(onlyWinners)onlyKeepWinners(listOfSet);
 		//sortAlphabetically(listOfSet);
@@ -206,7 +217,7 @@ public abstract class MergeManager {
 	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values, boolean onlyWinners){
 		
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:listOfSimilarCandidates){
+		for(Collection<Row> similarRows:getGroupMergedListOfSimilarCandidate()){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
 			for(Row row:similarRows){
 				for(String value:values){
@@ -240,6 +251,29 @@ public abstract class MergeManager {
 		});
 		
 	}*/
+
+	final private ArrayList<Collection<Row>> getGroupMergedListOfSimilarCandidate(){
+		ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates = new ArrayList<>();
+		groupMergedListOfSimilarCandidates.addAll(listOfSimilarCandidates);
+		for(String person: personToRows.keySet()){
+			Collection<Row> baseGroup = rowToGroup.get(personToRows.get(person).iterator().next().get("ID"));
+			Collection<Row> nonPersistantGroup = new ArrayList<Row>(baseGroup);
+			boolean differentGroup = false;
+			for(Row row:personToRows.get(person)){
+				if(!baseGroup.equals(rowToGroup.get(row.get("ID")))){
+					differentGroup = true;
+					nonPersistantGroup.addAll(rowToGroup.get(row.get("ID")));
+					groupMergedListOfSimilarCandidates.remove(rowToGroup.get(row.get("ID")));
+				}
+			}
+			if(differentGroup) {
+				int index = groupMergedListOfSimilarCandidates.indexOf(baseGroup);
+				groupMergedListOfSimilarCandidates.remove(baseGroup);
+				groupMergedListOfSimilarCandidates.add(index, nonPersistantGroup);
+			}
+		}
+		return groupMergedListOfSimilarCandidates;
+	}
 
 	final public void sortAlphabetically(ArrayList<Collection<Row>> listOfSet){
 		listOfSet.sort(new Comparator<Collection<Row>>(){

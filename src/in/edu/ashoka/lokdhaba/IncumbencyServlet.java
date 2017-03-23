@@ -63,12 +63,14 @@ public class IncumbencyServlet extends HttpServlet {
             MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
             String currentFile = session.getAttribute("currentFile").toString();
 
-            mergeManager.addSimilarCandidates();
-            mergeManager.setupPersonMap();
+            //MOVED FROM HERE
+			mergeManager.addSimilarCandidates();
+			mergeManager.setupPersonToRowMap();
+			mergeManager.setupRowToGroupMap();
 
             boolean shouldSave=false;
 			if(saveButtonPressed(request)){
-				shouldSave = updateTable(request);
+				shouldSave = updateTable(request, request.getParameter("submit").equals("Force Merge"));
 			}
 			else if (resetButtonPressed(request)){
 				mergeManager.resetIsDone();
@@ -128,16 +130,16 @@ public class IncumbencyServlet extends HttpServlet {
 				descriptionMap.put(name.replace("Description", ""), getServletContext().getInitParameter(name));
 		}
 	}
-	
+	//Handles button pressed action for both save as well as force merge button
 	private boolean saveButtonPressed(HttpServletRequest request){
-		return (request.getParameter("submit")!=null && request.getParameter("submit").equals("Save"));
+		return (request.getParameter("submit")!=null && (request.getParameter("submit").equals("Save")||(request.getParameter("submit").equals("Force Merge"))));
 	}
 
 	private boolean resetButtonPressed(HttpServletRequest request){
 		return (request.getParameter("submit")!=null && request.getParameter("submit").equals("Reset"));
 	}
 	
-	private boolean updateTable(HttpServletRequest request){
+	private boolean updateTable(HttpServletRequest request, boolean forceMerge){
 		boolean shouldSave=false;
 		String [] userRows = request.getParameterValues("row");
 		
@@ -161,10 +163,13 @@ public class IncumbencyServlet extends HttpServlet {
 		
 		if(userRows!=null && userRows.length>0){
             //TESTING STUFF: REMOVE WHEN DONE
-            //mergeManager.forceMerge(new String [] {"18284","8661"});
+            //mergeManager.forceMerge(new String [] {"56104","32956"});
             //shouldSave = true;
             //TILL HERE
-			mergeManager.merge(userRows);
+			if(forceMerge)
+				mergeManager.forceMerge(userRows);
+			else
+				mergeManager.merge(userRows);
 			mergeManager.updateMappedIds();
 			mergeManager.updateUserIds(userRows,request.getSession().getAttribute("userName").toString(),request.getSession().getAttribute("email").toString());
 			//isdone needs to be updated too on merge
@@ -258,7 +263,7 @@ public class IncumbencyServlet extends HttpServlet {
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
 
 		//IF algorithm's argument changes. Algo needs to be reloaded
-		if(request.getParameter("algo-arg")!=null){
+		if(request.getParameter("algo-arg")!=null&&!request.getParameter("algo-arg").equals("")){
 			request.getSession().setAttribute("algorithmChanged",true);
 		}
 

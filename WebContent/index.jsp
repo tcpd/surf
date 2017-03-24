@@ -8,13 +8,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Candidate Mapper</title>
+<title>Surf</title>
 	<base href="${pageContext.request.contextPath}">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style.css">
 </head>
 <body>
-<h1 class="text-center" style="padding-top:20px;">Neta Analytics - Candidate Mapper</h1>
+<h1 class="text-center" style="padding-top:20px;">Surf</h1>
 
 <div class="user-input">
 <form action="${pageContext.request.contextPath}/IncumbencyServlet" method="get" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">

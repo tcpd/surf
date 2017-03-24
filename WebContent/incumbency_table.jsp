@@ -26,7 +26,7 @@ import="com.google.common.collect.Multimap"
 <!-- 	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script> -->
 	<script src="helper.js" type="text/javascript"></script>
 
-<title>Candidate Mapper</title>
+<title>Surf</title>
 </head>
 <body>
 
@@ -131,7 +131,7 @@ import="com.google.common.collect.Multimap"
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">Neta Analytics - Candidate Mapper</a>
+					<a class="navbar-brand" href="#">Surf</a>
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton" onclick="$('#loading').fadeIn()"/>

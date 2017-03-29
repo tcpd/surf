@@ -19,17 +19,19 @@ public abstract class MergeManager {
     ArrayList<Collection<Row>> listOfSimilarCandidates;
     Multimap<String,Row> personToRows;
     HashMap<String, Collection<Row>> rowToGroup;
+
     
     public static MergeManager getManager(String algo, Dataset d){
 		MergeManager mergeManager = null;
+
 		if(algo.equals("exactSameName")){
 			mergeManager = new ExactSameNameMergeManager(d);
 		}
 		else if(algo.equals("editDistance1")){
-			mergeManager = new SimilarNameMergeManager(d, 1);
+			mergeManager = new SimilarNameMergeManager(d, 1);	//TESTING
 		}
 		else if(algo.equals("editDistance2")){
-			mergeManager = new SimilarNameMergeManager(d, 2);
+			mergeManager = new SimilarNameMergeManager(d, 2);	//TESTING
 		}
 		else if(algo.equals("dummyAllName")){
 			mergeManager = new DummyMergeManager(d);
@@ -40,7 +42,17 @@ public abstract class MergeManager {
 		else{}
 		return mergeManager;
 	}
-    
+
+	Comparator<Collection<Row>> getComparator(String comparatorType){
+		Comparator<Collection<Row>> comparator;
+    	if(comparatorType.equals("confidence"))
+    		comparator = SurfExcel.sizeComparator;
+    	else if(comparatorType.equals("alphabetical"))
+    		comparator = SurfExcel.alphabeticalComparartor;
+    	else
+    		comparator = SurfExcel.alphabeticalComparartor;
+    	return comparator;
+	}
     
 	
     protected MergeManager(Dataset d){
@@ -209,7 +221,7 @@ public abstract class MergeManager {
 				listOfSet.add(mp);
 		}
 		if(onlyWinners)onlyKeepWinners(listOfSet);
-		//sortAlphabetically(listOfSet);
+
 		return listOfSet;
 	}
 	
@@ -233,7 +245,7 @@ public abstract class MergeManager {
 		}
 		
 		if(onlyWinners)onlyKeepWinners(listOfSet);
-		//sortAlphabetically(listOfSet);	Tesing the correct place to put this
+
 		return listOfSet;
 	}
 
@@ -286,6 +298,10 @@ public abstract class MergeManager {
 
 		});
 
+	}
+
+	final public void sort(String comparatorType){
+		listOfSimilarCandidates.sort(getComparator(comparatorType));
 	}
 	
 	

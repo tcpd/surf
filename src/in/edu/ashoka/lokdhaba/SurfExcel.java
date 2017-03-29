@@ -40,6 +40,20 @@ public class SurfExcel {
         }
     };
 
+    static Comparator<Collection<Row>> alphabeticalComparartor = new Comparator<Collection<Row>>() {
+        @Override
+        public int compare(Collection<Row> o1, Collection<Row> o2) {
+            return o1.iterator().next().get("Name").compareTo(o2.iterator().next().get("Name"));
+        }
+    };
+
+    static Comparator<Collection<Row>> sizeComparator = new Comparator<Collection<Row>>() {
+        @Override
+        public int compare(Collection<Row> o1, Collection<Row> o2) {
+            return o2.iterator().next().get("Name").length() - o1.iterator().next().get("Name").length();
+        }
+    };
+
     public static void warn (String s) {
         out.println("WARNING " + s);
     }

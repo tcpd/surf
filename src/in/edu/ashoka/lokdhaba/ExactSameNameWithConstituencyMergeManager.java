@@ -1,6 +1,7 @@
 package in.edu.ashoka.lokdhaba;
 
 import com.google.common.collect.Multimap;
+import com.sun.scenario.effect.Merge;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class ExactSameNameWithConstituencyMergeManager extends MergeManager{
                     row.set("common_group_id", row.get("_st_Name-PC_Name"));
                 }
             }
-            sortAlphabetically(listOfSimilarCandidates);
+            //sort(listOfSimilarCandidates, SurfExcel.alphabeticalComparartor);   //This algorithm needs to be in alphabetical order regardless
 
         } catch (IOException e) {
             // TODO Auto-generated catch block

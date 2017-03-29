@@ -1,11 +1,7 @@
 package in.edu.ashoka.lokdhaba;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -57,6 +53,7 @@ public class IncumbencyServlet extends HttpServlet {
             assignAttributes(request, session, "userName", "Name Not Specified",false);
             assignAttributes(request, session, "email", "email Not Specified",false);
             assignAttributes(request, session, "onlyWinners", "false", false);
+            assignAttributes(request, session, "comparatorType", "alphabetical", false);
 
             setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
 
@@ -357,7 +354,8 @@ public class IncumbencyServlet extends HttpServlet {
 	    boolean onlyWinners = session.getAttribute("onlyWinners").toString().equals("true");
 	    
 	    MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
-	    
+	    //SORT HAPPENING HERE
+	    mergeManager.sort((String)session.getAttribute("comparatorType"));
 	    //WORKING WITH FILTER PARAMETERS & GENERATING INCUMBENTS LIST
 		
   		if(filterValue!= null && filterParam!=null){

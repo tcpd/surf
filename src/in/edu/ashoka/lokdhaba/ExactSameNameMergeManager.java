@@ -9,6 +9,7 @@ import java.util.HashSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MutableClassToInstanceMap;
+import com.sun.scenario.effect.Merge;
 
 public class ExactSameNameMergeManager extends MergeManager{
 	
@@ -34,7 +35,6 @@ public class ExactSameNameMergeManager extends MergeManager{
 					row.set("common_group_id", row.get("_st_Name"));
 				}
 			}
-			sortAlphabetically(listOfSimilarCandidates);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

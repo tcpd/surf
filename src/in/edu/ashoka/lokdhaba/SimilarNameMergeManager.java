@@ -3,6 +3,7 @@ package in.edu.ashoka.lokdhaba;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 
 import com.google.common.collect.Multimap;
 
@@ -14,7 +15,6 @@ public class SimilarNameMergeManager extends MergeManager {
 	public SimilarNameMergeManager(Dataset d, int distance) {
 		super(d);
 		this.distance = distance;
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -37,7 +37,6 @@ public class SimilarNameMergeManager extends MergeManager {
 				}
 				listOfSimilarCandidates.add(temp);
 			}
-			sortAlphabetically(listOfSimilarCandidates);
 		}catch(IOException e){
 			e.printStackTrace();
 		}

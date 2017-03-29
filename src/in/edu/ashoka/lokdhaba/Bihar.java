@@ -249,8 +249,11 @@ public class Bihar extends Object {
         out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = "+distance+")");
         SurfExcel.similarPairsForField(allRows, "Name", distance);
         //Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
-        Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
-        
+        //Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), comparator);
+        Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2);
+
+
+
         //only show duplicates
         /*List<String> list = new ArrayList<String>();
         for(String key:resultMap.keySet()){

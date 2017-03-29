@@ -110,6 +110,13 @@ import="com.google.common.collect.Multimap"
 							<option value="true">Yes</option>
 						</select>
 					</div>
+					<div class=form-group>
+						Sort By:
+						<select id="comparatorType" class="form-control" name="comparatorType">
+							<option value="alphabetical">Alphabets</option>
+							<option value="confidence">Confidence</option>
+						</select>
+					</div>
 				<div class="modal-footer">
 					<button type="submit" onclick="saveFilterSettings()" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
 	      		</div>

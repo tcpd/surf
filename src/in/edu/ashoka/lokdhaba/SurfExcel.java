@@ -54,6 +54,13 @@ public class SurfExcel {
         }
     };
 
+    static Comparator<Collection<Row>> confidenceComparator = new Comparator<Collection<Row>>() {
+        @Override
+        public int compare(Collection<Row> o1, Collection<Row> o2) {
+            return Integer.parseInt(o2.iterator().next().get("confidence")) - Integer.parseInt(o1.iterator().next().get("confidence"));
+        }
+    };
+
     public static void warn (String s) {
         out.println("WARNING " + s);
     }

@@ -45,8 +45,10 @@ public abstract class MergeManager {
 
 	Comparator<Collection<Row>> getComparator(String comparatorType){
 		Comparator<Collection<Row>> comparator;
-    	if(comparatorType.equals("confidence"))
-    		comparator = SurfExcel.sizeComparator;
+    	if(comparatorType.equals("confidence")) {
+    		evaluateConfidence();	//confidence needs to be evaluated first for every row
+			comparator = SurfExcel.confidenceComparator;
+		}
     	else if(comparatorType.equals("alphabetical"))
     		comparator = SurfExcel.alphabeticalComparartor;
     	else
@@ -208,7 +210,19 @@ public abstract class MergeManager {
 			}
 		}
 	}
-	
+
+	final public void evaluateConfidence(){
+		for(Collection<Row> group:listOfSimilarCandidates){
+			//Evaluate confidence for the current group
+			int confidence = 0;
+			confidence += group.iterator().next().get("st_Name").length();
+
+			//set confidence for current rows
+			for(Row row:group){
+				row.set("confidence",String.valueOf(confidence));
+			}
+		}
+	}
 	
 	final public ArrayList<Multimap<String,Row>> getIncumbents(boolean onlyWinners){
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();

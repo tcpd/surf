@@ -213,10 +213,20 @@ function loadFilterSettings(){
     if(getCookie("onlyWinners")!="")
         document.getElementById("onlyWinners").value = getCookie("onlyWinners");*/
     //CHECK incumbency_table.jsp FOR filterVariables value.
-    document.getElementById("algorithm").value = filterVariables[0]
+
+    /*document.getElementById("algorithm").value = filterVariables[0]
     document.getElementById("dataset").value = filterVariables[1]
     document.getElementById("onlyWinners").value = filterVariables[2]
-    document.getElementById("algo-arg").value = filterVariables[3]
+    document.getElementById("algo-arg").value = filterVariables[3]*/
+
+    $(function () {
+        $("#algorithm").val(filterVariables[0]);
+        $("#dataset").val(filterVariables[1]);
+        $("#onlyWinners").val(filterVariables[2]);
+        $("#algo-arg").val(filterVariables[3]);
+        $("#comparatorType").val(filterVariables[4]);
+        $("#filterParam").val(filterVariables[5]);
+    });
 }
 
 //THESE FUNCTIONS USE HARD CODE TAGNAMES & VALUES;CHANGES MIGHT BE REQUIRED HERE IF THE TABLE CHANGES

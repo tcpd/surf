@@ -67,6 +67,10 @@ import="com.google.common.collect.Multimap"
 	       	<div class="filterForm">
 				<form class="form" role="filter" method="get" action="${pageContext.request.contextPath}/IncumbencyServlet" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">
 					<div class="form-group">
+						<%
+							//script for loading the settings
+
+						%>
 							Dataset:
 							<select class="form-control" name="dataset" id="dataset">
 							<!--MODIFY HERE -->
@@ -466,7 +470,9 @@ var filterVariables = new Array();
 filterVariables[0]=('${algorithm}')
 filterVariables[1]=('${dataset}')
 filterVariables[2]=('${onlyWinners}')
-filterVariables[3]=(<%=session.getAttribute("algo-arg")%>);
+filterVariables[3]=(<%=(session.getAttribute("algo-arg").equals(""))?"\'\'":(String)session.getAttribute("algo-arg")%>);
+filterVariables[4]=('${comparatorType}')
+filterVariables[5]='${filterParam}'
 
 </script>
 

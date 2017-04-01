@@ -63,7 +63,7 @@ public class IncumbencyServlet extends HttpServlet {
             //MOVED FROM HERE
 			mergeManager.addSimilarCandidates();
 			mergeManager.setupPersonToRowMap();
-			mergeManager.setupRowToGroupMap();
+			//mergeManager.setupRowToGroupMap();
 
             boolean shouldSave=false;
 			if(saveButtonPressed(request)){

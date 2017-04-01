@@ -18,7 +18,7 @@ public abstract class MergeManager {
 
     ArrayList<Collection<Row>> listOfSimilarCandidates;
     Multimap<String,Row> personToRows;
-    HashMap<String, Collection<Row>> rowToGroup;
+    HashMap<String, Integer> rowToGroup;
 
     
     public static MergeManager getManager(String algo, Dataset d){
@@ -124,7 +124,7 @@ public abstract class MergeManager {
 			tempRow.set("mapped_ID", defaultId);
 		}
 		setupPersonToRowMap();
-		setupRowToGroupMap();
+		//setupRowToGroupMap();
     }
 
 	//basic version; might need improvements
@@ -161,7 +161,7 @@ public abstract class MergeManager {
 			}
 		}
 		setupPersonToRowMap();
-		setupRowToGroupMap();
+		//setupRowToGroupMap();
 	}
 	final public void save(String filePath) throws IOException{
 		d.save(filePath);
@@ -187,9 +187,10 @@ public abstract class MergeManager {
 
 	final public void setupRowToGroupMap(){
 		rowToGroup = new HashMap<>();
-		for(Collection<Row> group:listOfSimilarCandidates){
+		for(int i=0; i<listOfSimilarCandidates.size(); i++){
+			Collection<Row> group = listOfSimilarCandidates.get(i);
 			for(Row row:group){
-				rowToGroup.put(row.get("ID"),group);
+				rowToGroup.put(row.get("ID"),i);
 			}
 		}
 	}
@@ -279,10 +280,15 @@ public abstract class MergeManager {
 	}*/
 
 	final private ArrayList<Collection<Row>> getGroupMergedListOfSimilarCandidate(){
+		setupRowToGroupMap();
 		ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates = new ArrayList<>();
+		/*
 		groupMergedListOfSimilarCandidates.addAll(listOfSimilarCandidates);
 		for(String person: personToRows.keySet()){
 			Collection<Row> baseGroup = rowToGroup.get(personToRows.get(person).iterator().next().get("ID"));
+			System.out.println("Testing...");
+			System.out.println(groupMergedListOfSimilarCandidates.indexOf(baseGroup));
+			System.out.println(listOfSimilarCandidates.indexOf(baseGroup));
 			Collection<Row> nonPersistantGroup = new ArrayList<Row>(baseGroup);
 			boolean differentGroup = false;
 			for(Row row:personToRows.get(person)){
@@ -295,8 +301,39 @@ public abstract class MergeManager {
 			if(differentGroup) {
 				int index = groupMergedListOfSimilarCandidates.indexOf(baseGroup);
 				groupMergedListOfSimilarCandidates.remove(baseGroup);
-				groupMergedListOfSimilarCandidates.add(index, nonPersistantGroup);
+				//DEbugging
+				try{
+					groupMergedListOfSimilarCandidates.add(index, nonPersistantGroup);
+				}catch(IndexOutOfBoundsException e){
+					int dindex = listOfSimilarCandidates.indexOf(baseGroup);
+					System.out.println(dindex);
+					System.out.println(baseGroup);
+					System.out.println(groupMergedListOfSimilarCandidates.get(dindex));
+				}
+
 			}
+		}*/
+
+		//Trying new stuff
+		List<Integer> mergedGroupsIndices = new ArrayList<>();
+		for(int i=0; i<listOfSimilarCandidates.size();i++){
+			if(mergedGroupsIndices.contains(i))
+				continue;
+			Collection<Row> group = listOfSimilarCandidates.get(i);
+			Collection<Row> mergedGroup = new ArrayList<>(group);
+			Set<String> persons = new HashSet<>();
+			for(Row row:group){
+				persons.add(rowToId.get(row));
+			}
+			for(String person:persons){
+				for(Row row:personToRows.get(person)){
+					if(!rowToGroup.get(row.get("ID")).equals(i)){
+						mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
+						mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
+					}
+				}
+			}
+			groupMergedListOfSimilarCandidates.add(mergedGroup);
 		}
 		return groupMergedListOfSimilarCandidates;
 	}

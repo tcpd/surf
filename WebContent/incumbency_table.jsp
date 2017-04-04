@@ -115,10 +115,10 @@ import="com.google.common.collect.Multimap"
 						</select>
 					</div>
 					<div class=form-group>
-						Sort By:
+						Sort Order:
 						<select id="comparatorType" class="form-control" name="comparatorType">
-							<option value="alphabetical">Alphabets</option>
-							<option value="confidence">Confidence</option>
+							<option value="alphabetical">Alphabetical</option>
+							<option value="confidence">By Confidence</option>
 						</select>
 					</div>
 				<div class="modal-footer">

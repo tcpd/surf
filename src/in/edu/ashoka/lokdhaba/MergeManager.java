@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class MergeManager {
 
@@ -225,7 +226,7 @@ public abstract class MergeManager {
 		}
 	}
 	
-	final public ArrayList<Multimap<String,Row>> getIncumbents(boolean onlyWinners){
+	/*final public ArrayList<Multimap<String,Row>> getIncumbents(boolean onlyWinners){
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
 		for(Collection<Row> similarRows:getGroupMergedListOfSimilarCandidate()){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
@@ -238,28 +239,42 @@ public abstract class MergeManager {
 		if(onlyWinners)onlyKeepWinners(listOfSet);
 
 		return listOfSet;
-	}
+	}*/
 	
 	//returns a list of group of similar named incumbents
-	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values, boolean onlyWinners){
-		
+	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values, boolean onlyWinners, String searchQuery){
+		boolean filterNeeded = (attribute!=null)&&(!attribute.equals(""))&&(values!=null);
+		for(String value:values){
+			if(value.equals("All Records")){
+				filterNeeded = false;
+				break;
+			}
+		}
+		boolean isSearch = searchQuery!=null && !searchQuery.equals("");
+		List<Collection<Row>> groupList;
+		if(isSearch){
+			groupList = search(searchQuery);
+		}else{
+			groupList = getGroupMergedListOfSimilarCandidate();
+		}
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:getGroupMergedListOfSimilarCandidate()){
+		for(Collection<Row> similarRows:groupList){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
 			for(Row row:similarRows){
-				for(String value:values){
-					if(row.get(attribute).equals(value))
-						mp.put(rowToId.get(row), row);
-					//else
-					//	continue;
+				if(filterNeeded){	//APPLY FILTER IF NEEDED
+					for(String value:values){
+						if(row.get(attribute).equals(value))
+							mp.put(rowToId.get(row), row);
+					}
+				} else {			//NO FILTER APPLIED
+					mp.put(rowToId.get(row), row);
 				}
-				
 			}
 			if(mp.values().size()>1)	//check whether there are more than 1 member in a group
 				listOfSet.add(mp);
 		}
 		
-		if(onlyWinners)onlyKeepWinners(listOfSet);
+		if(onlyWinners && !isSearch)onlyKeepWinners(listOfSet);
 
 		return listOfSet;
 	}
@@ -460,6 +475,42 @@ public abstract class MergeManager {
 				row.set("is_done", "no");
 		}
 	}
+
+	public List<Collection<Row>> search(String searchQuery){
+		int thresholdDistance = 3;
+		int weight =10;
+		List<Collection<Row>> result = new ArrayList<>();
+		Multimap<Integer,Row> matchDistance = LinkedHashMultimap.create();
+		String searchQueryFlattened = searchQuery.replace(" ","").toLowerCase();
+		for(Row row:d.getRows()){
+			String combined = "";
+			combined += row.get("Name")+" "+row.get("Year")+" "+row.get("PC_name")+ " " + row.get("State");
+			String nameFlattened = row.get("Name").replace(" ","").toLowerCase();
+			if(nameFlattened.contains(searchQueryFlattened)){
+				matchDistance.put(StringUtils.getLevenshteinDistance(searchQueryFlattened,nameFlattened),row);
+				continue;
+			}
+			int distance =  StringUtils.getLevenshteinDistance(searchQueryFlattened,nameFlattened);
+			if(distance < thresholdDistance){
+				matchDistance.put(distance*weight,row);
+			}
+		}
+		Collection<Integer> distanceKeys = matchDistance.keySet();
+		List<Integer> distanceList = new ArrayList<>(distanceKeys);
+		distanceList.sort(new Comparator<Integer>() {
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return o1-o2;
+			}
+		});
+		Collection<Row> group = new ArrayList<>();
+		for(int currentDistance:distanceList){
+			group.addAll(matchDistance.get(currentDistance));
+		}
+		result.add(group);
+		return result;
+	}
+
 	
 	public Map<String,Set<String>> getAttributesDataSet(String [] attributes){
 		Map<String,Set<String>> attributeMap = new HashMap<>();

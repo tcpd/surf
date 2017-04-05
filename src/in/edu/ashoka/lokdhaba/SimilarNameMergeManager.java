@@ -42,19 +42,4 @@ public class SimilarNameMergeManager extends MergeManager {
 		}
 		algorithmRun = true;
 	}
-	
-	public void display2(){
-		ArrayList<Multimap<String, Row>> similarIncumbents = getIncumbents(false);
-		int i=0;
-		for(Multimap<String,Row> mp:similarIncumbents) {
-			System.out.println("Group "+i+"================================================");
-			for(String key:mp.keySet()){
-				System.out.println("Similar people:"+key+"----------------------------------------");
-				for(Row row:mp.get(key)){
-					System.out.println(row);
-				}
-			}
-		}
-	}
-
 }

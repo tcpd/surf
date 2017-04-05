@@ -54,6 +54,7 @@ public class IncumbencyServlet extends HttpServlet {
             assignAttributes(request, session, "email", "email Not Specified",false);
             assignAttributes(request, session, "onlyWinners", "false", false);
             assignAttributes(request, session, "comparatorType", "alphabetical", false);
+            assignAttributes(request, session, "searchValue", null, false);
 
             setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());
 
@@ -352,28 +353,15 @@ public class IncumbencyServlet extends HttpServlet {
 		String filterParam = session.getAttribute("filterParam").toString();
 	    String [] filterValue = (String [])session.getAttribute("filterValue");
 	    boolean onlyWinners = session.getAttribute("onlyWinners").toString().equals("true");
+	    String searchQuery = (String)session.getAttribute("searchValue");
+	    session.setAttribute("searchValue",null);
 	    
 	    MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
 	    //SORT HAPPENING HERE
 	    mergeManager.sort((String)session.getAttribute("comparatorType"));
+
 	    //WORKING WITH FILTER PARAMETERS & GENERATING INCUMBENTS LIST
-		
-  		if(filterValue!= null && filterParam!=null){
-  			boolean isAllRecords=false;
-  			for(String value:filterValue){
-  				if(value.equals("All Records")){
-  					isAllRecords=true;
-  				}
-  			}
-  			if(isAllRecords)
-  				incumbentsList = mergeManager.getIncumbents(onlyWinners);
-  			else{
-  				incumbentsList = mergeManager.getIncumbents(filterParam,filterValue, onlyWinners);
-  			}
-  			
-  		}else{
-  			incumbentsList = mergeManager.getIncumbents(onlyWinners);
-  		}
+  		incumbentsList = mergeManager.getIncumbents(filterParam,filterValue,onlyWinners,searchQuery);
   				
   		int[] progressData = mergeManager.getListCount(incumbentsList);
   		

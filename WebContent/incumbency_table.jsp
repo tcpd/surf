@@ -152,6 +152,17 @@ import="com.google.common.collect.Multimap"
 						Settings
 				</button>
 				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Reset" id="resetButton" onclick="return resetButtonPressed()"/>
+				<!adding search bar>
+				<div class="col-sm-3 col-md-3 pull-right">
+					<form class="navbar-form" role="search">
+						<div class="input-group">
+							<input type="text" style="margin-right:0em; cursor:auto; height:35px;" class="form-control btn btn-default navbar-btn navbar-right" placeholder="Search Name..." name="searchValue" id="searchValue">
+							<span class="input-group-btn">
+								<button style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" type="submit" id="searchButton"><i class="glyphicon glyphicon-search"></i></button>
+							</span>
+						</div>
+					</form>
+				</div>
 				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
 						<ol class="breadcrumb">
@@ -208,16 +219,20 @@ import="com.google.common.collect.Multimap"
 		//TRYING TO SORT data based on constituency and then year
 		final Multimap<String, Row> incumbentsGroupFinal = incumbentsGroup;
 		List<String> keyList = new ArrayList<String>(incumbentsGroup.keySet());
+		if(request.getParameter("searchValue")!=null && !request.getParameter("searchValue").equals("")){
+		    //Do nothing
+		}else{
+			keyList.sort(new Comparator<String>() {
+				@Override
+				public int compare(String s1, String s2) {
+					int result = incumbentsGroupFinal.get(s1).iterator().next().get("PC_name").toLowerCase().compareTo(
+							incumbentsGroupFinal.get(s2).iterator().next().get("PC_name").toLowerCase());
+					return result==0 ? (incumbentsGroupFinal.get(s1).iterator().next().get("Year").toLowerCase().compareTo(
+							incumbentsGroupFinal.get(s2).iterator().next().get("Year").toLowerCase())):result;
+				}
+			});
+		}
 
-		keyList.sort(new Comparator<String>() {
-			@Override
-			public int compare(String s1, String s2) {
-				int result = incumbentsGroupFinal.get(s1).iterator().next().get("PC_name").toLowerCase().compareTo(
-						incumbentsGroupFinal.get(s2).iterator().next().get("PC_name").toLowerCase());
-				return result==0 ? (incumbentsGroupFinal.get(s1).iterator().next().get("Year").toLowerCase().compareTo(
-						incumbentsGroupFinal.get(s2).iterator().next().get("Year").toLowerCase())):result;
-			}
-		});
 
 		//TILL HERE
 		for(String key:keyList){

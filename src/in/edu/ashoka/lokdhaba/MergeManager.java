@@ -11,18 +11,18 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class MergeManager {
 
-	static final String SEPERATOR = "-";
+	//static final String SEPERATOR = "-";
 	Dataset d;
 	HashMap<Row, String> rowToId;
     HashMap<String, Row> idToRow;
-    String [] arguments;
+    String arguments;
 
     ArrayList<Collection<Row>> listOfSimilarCandidates;
     Multimap<String,Row> personToRows;
     HashMap<String, Integer> rowToGroup;
 
     
-    public static MergeManager getManager(String algo, Dataset d){
+    public static MergeManager getManager(String algo, Dataset d, String arguments){
 		MergeManager mergeManager = null;
 
 		if(algo.equals("exactSameName")){
@@ -39,6 +39,9 @@ public abstract class MergeManager {
 		}
 		else if(algo.equals("exactSameNameWithConstituency")){
 			mergeManager = new ExactSameNameWithConstituencyMergeManager(d);
+		}
+		else if(algo.equals("search")){
+			mergeManager = new SearchMergeManager(d, arguments);
 		}
 		else{}
 		return mergeManager;
@@ -252,11 +255,7 @@ public abstract class MergeManager {
 		}
 		boolean isSearch = searchQuery!=null && !searchQuery.equals("");
 		List<Collection<Row>> groupList;
-		if(isSearch){
-			groupList = search(searchQuery);
-		}else{
 			groupList = getGroupMergedListOfSimilarCandidate();
-		}
 		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
 		for(Collection<Row> similarRows:groupList){
 			Multimap<String, Row> mp = LinkedHashMultimap.create();
@@ -351,19 +350,6 @@ public abstract class MergeManager {
 			groupMergedListOfSimilarCandidates.add(mergedGroup);
 		}
 		return groupMergedListOfSimilarCandidates;
-	}
-
-	final public void sortAlphabetically(ArrayList<Collection<Row>> listOfSet){
-		listOfSet.sort(new Comparator<Collection<Row>>(){
-
-			@Override
-			public int compare(Collection<Row> o1, Collection<Row> o2) {
-
-				return o1.iterator().next().get("Name").compareTo(o2.iterator().next().get("Name"));
-			}
-
-		});
-
 	}
 
 	final public void sort(String comparatorType){
@@ -475,42 +461,6 @@ public abstract class MergeManager {
 				row.set("is_done", "no");
 		}
 	}
-
-	public List<Collection<Row>> search(String searchQuery){
-		int thresholdDistance = 3;
-		int weight =10;
-		List<Collection<Row>> result = new ArrayList<>();
-		Multimap<Integer,Row> matchDistance = LinkedHashMultimap.create();
-		String searchQueryFlattened = searchQuery.replace(" ","").toLowerCase();
-		for(Row row:d.getRows()){
-			String combined = "";
-			combined += row.get("Name")+" "+row.get("Year")+" "+row.get("PC_name")+ " " + row.get("State");
-			String nameFlattened = row.get("Name").replace(" ","").toLowerCase();
-			if(nameFlattened.contains(searchQueryFlattened)){
-				matchDistance.put(StringUtils.getLevenshteinDistance(searchQueryFlattened,nameFlattened),row);
-				continue;
-			}
-			int distance =  StringUtils.getLevenshteinDistance(searchQueryFlattened,nameFlattened);
-			if(distance < thresholdDistance){
-				matchDistance.put(distance*weight,row);
-			}
-		}
-		Collection<Integer> distanceKeys = matchDistance.keySet();
-		List<Integer> distanceList = new ArrayList<>(distanceKeys);
-		distanceList.sort(new Comparator<Integer>() {
-			@Override
-			public int compare(Integer o1, Integer o2) {
-				return o1-o2;
-			}
-		});
-		Collection<Row> group = new ArrayList<>();
-		for(int currentDistance:distanceList){
-			group.addAll(matchDistance.get(currentDistance));
-		}
-		result.add(group);
-		return result;
-	}
-
 	
 	public Map<String,Set<String>> getAttributesDataSet(String [] attributes){
 		Map<String,Set<String>> attributeMap = new HashMap<>();
@@ -534,6 +484,6 @@ public abstract class MergeManager {
 		}
 
 	public final void setArguments(String arguments){
-		this.arguments = arguments.split(SEPERATOR);
+		this.arguments = arguments;
 	}
 }

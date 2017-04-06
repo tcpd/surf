@@ -327,4 +327,30 @@ $("document").ready(function(){
 $(window).on("load",function(){
     $('#loading').fadeOut();
 });
+//Script for Search button
+$(window).on("load", function () {
+    $("#searchValue").bind("enterKey",function (e) {
+        $("#searchButton").click();
+    });
+    $("#searchValue").keyup(function(e){
+        if(e.keyCode == 13){
+            $(this).trigger("enterKey")
+        }
+    });
+
+    $("#searchButton").on("click", function () {
+        if($("#searchValue").val()=="")
+            $("#algorithm").val("exactSameName");
+        else {
+            $("#algorithm").val("search");
+            $("#algo-arg").val($("#searchValue").val());
+        }
+        $("#settingsSubmit").click();
+        $("#loading").fadeIn();
+    });
+});
+
+$(window).on("load", function(){
+    $("#searchValue").val(filterVariables[3]);
+});
 

@@ -25,9 +25,9 @@ public class ExactSameNameWithConstituencyMergeManager extends MergeManager{
         listOfSimilarCandidates = new ArrayList<>();
         try {
             int startStringSize = 1;    //DEFAULT SIZE OF 1
-            if(super.arguments!=null && arguments[0]!=null && super.arguments[0] instanceof String){
+            if(super.arguments!=null && super.arguments instanceof String){
                 try{
-                    startStringSize = Integer.parseInt(super.arguments[0]);
+                    startStringSize = Integer.parseInt(super.arguments);
                 } catch(NumberFormatException e){
                     startStringSize = 1;
                 }

@@ -88,6 +88,7 @@ import="com.google.common.collect.Multimap"
 								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
 								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
 								<option value="dummyAllName">All names</option>
+								<option value="search">Search</option>
 						</select>
 					</div>
 					<div class="form-group">
@@ -122,7 +123,7 @@ import="com.google.common.collect.Multimap"
 						</select>
 					</div>
 				<div class="modal-footer">
-					<button type="submit" onclick="saveFilterSettings()" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
+					<button type="submit" onclick="saveFilterSettings()" id="settingsSubmit" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
 	      		</div>
    		</form>
     </div>
@@ -154,14 +155,12 @@ import="com.google.common.collect.Multimap"
 				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Reset" id="resetButton" onclick="return resetButtonPressed()"/>
 				<!adding search bar>
 				<div class="col-sm-3 col-md-3 pull-right">
-					<form class="navbar-form" role="search">
 						<div class="input-group">
 							<input type="text" style="margin-right:0em; cursor:auto; height:35px;" class="form-control btn btn-default navbar-btn navbar-right" placeholder="Search Name..." name="searchValue" id="searchValue">
 							<span class="input-group-btn">
-								<button style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" type="submit" id="searchButton"><i class="glyphicon glyphicon-search"></i></button>
+								<button style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" type="button" id="searchButton"><i class="glyphicon glyphicon-search"></i></button>
 							</span>
 						</div>
-					</form>
 				</div>
 				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
@@ -171,7 +170,6 @@ import="com.google.common.collect.Multimap"
 						</ol>
 						<li><div class="navbar-text"><%= progressData[3] %> Total Groups</div></li>
 						<li><div class="navbar-text"><%= progressData[0] %> Total Records</div></li>
-						<li><div class="navbar-text"><%= progressData[2] %> Records Mapped</div></li>
 						<li><div class="navbar-text"><%= progressData[4] %> Records Reviewed</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
 <!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
@@ -219,7 +217,7 @@ import="com.google.common.collect.Multimap"
 		//TRYING TO SORT data based on constituency and then year
 		final Multimap<String, Row> incumbentsGroupFinal = incumbentsGroup;
 		List<String> keyList = new ArrayList<String>(incumbentsGroup.keySet());
-		if(request.getParameter("searchValue")!=null && !request.getParameter("searchValue").equals("")){
+		if(((String)session.getAttribute("algorithm")).equals("search")){
 		    //Do nothing
 		}else{
 			keyList.sort(new Comparator<String>() {
@@ -485,7 +483,7 @@ var filterVariables = new Array();
 filterVariables[0]=('${algorithm}')
 filterVariables[1]=('${dataset}')
 filterVariables[2]=('${onlyWinners}')
-filterVariables[3]=(<%=(session.getAttribute("algo-arg").equals(""))?"\'\'":(String)session.getAttribute("algo-arg")%>);
+filterVariables[3]=(<%=(session.getAttribute("algo-arg").equals(""))?"\'\'":"'"+(String)session.getAttribute("algo-arg")+"'"%>);
 filterVariables[4]=('${comparatorType}')
 filterVariables[5]='${filterParam}'
 

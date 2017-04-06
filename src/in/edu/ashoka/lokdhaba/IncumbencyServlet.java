@@ -261,7 +261,7 @@ public class IncumbencyServlet extends HttpServlet {
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
 
 		//IF algorithm's argument changes. Algo needs to be reloaded
-		if(request.getParameter("algo-arg")!=null&&!request.getParameter("algo-arg").equals("")){
+		if(request.getParameter("algo-arg")!=null){
 			request.getSession().setAttribute("algorithmChanged",true);
 		}
 
@@ -269,7 +269,7 @@ public class IncumbencyServlet extends HttpServlet {
 		MergeManager mergeManager;
 		//if the dataset is same, no need to refresh merge manager; refresh otherwise
 		if(request.getSession().getAttribute("mergeManager")==null || (Boolean)request.getSession().getAttribute("datasetChanged") || (Boolean)request.getSession().getAttribute("algorithmChanged")){
-			mergeManager = MergeManager.getManager(algorithm, (Dataset)request.getSession().getAttribute("d"));
+			mergeManager = MergeManager.getManager(algorithm, (Dataset)request.getSession().getAttribute("d"), request.getParameter("algo-arg"));
 		}
 		else
 		{

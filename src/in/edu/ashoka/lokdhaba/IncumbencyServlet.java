@@ -228,8 +228,6 @@ public class IncumbencyServlet extends HttpServlet {
 
 			Dataset d = Dataset.getDataset(request.getSession().getAttribute("currentFile").toString());
 			request.getSession().setAttribute("d", d);
-			Bihar.initRowFormat(d.getRows(), d);
-			
 			request.getSession().setAttribute("datasetName", pathMap.keySet());
 			request.getSession().setAttribute("datasetDescription", descriptionMap);
 			request.getSession().setAttribute("datasetPath", pathMap);
@@ -261,7 +259,9 @@ public class IncumbencyServlet extends HttpServlet {
 	private void setUpMergeManager(HttpServletRequest request, String algorithm){
 
 		//IF algorithm's argument changes. Algo needs to be reloaded
-		if(request.getParameter("algo-arg")!=null){
+		if(request.getParameter("algo-arg")!=null
+				&& request.getSession().getAttribute("algo-arg")!=null
+				&& !request.getSession().getAttribute("algo-arg").toString().equals(request.getParameter("algo-arg"))){
 			request.getSession().setAttribute("algorithmChanged",true);
 		}
 

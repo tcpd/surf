@@ -102,6 +102,8 @@ public class Dataset implements Serializable{
             synchronized (Dataset.class){
                 if(!datasetMap.containsKey(filename)){
                     datasetMap.put(filename, new Dataset(filename));
+                    //CREATE ALL NECESSARY TOKENS AND FORMATTING
+                    Bihar.initRowFormat(datasetMap.get(filename).getRows(),datasetMap.get(filename));
                 }
             }
         }

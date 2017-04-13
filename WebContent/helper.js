@@ -349,8 +349,16 @@ $(window).on("load", function () {
         $("#loading").fadeIn();
     });
 });
-
+//Load value on the search bar
 $(window).on("load", function(){
     $("#searchValue").val(filterVariables[3]);
 });
 
+//Adjust table height
+$(window).on("load", function () {
+    $("#table-container").css("margin-top", $("nav.navbar").height()+10)
+});
+
+$(window).resize(function () {
+    $("#table-container").css("margin-top", $("nav.navbar").height()+10)
+});

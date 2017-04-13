@@ -203,7 +203,7 @@ import="com.google.common.collect.Multimap"
 
 
 		<div>
-			<div class="table-div table-responsive">
+			<div class="table-div table-responsive" id="table-container">
 				<table class="table">
 					<tbody class="inside-table" id="table-body">
 <%

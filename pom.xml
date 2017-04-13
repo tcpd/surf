@@ -4,7 +4,7 @@
 	<groupId>in.edu.ashoka.surf</groupId>
 	<artifactId>surf</artifactId>
 	<version>0.0.1</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<properties>
         	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -98,7 +98,7 @@
 	<build>
     <defaultGoal>clean compile assembly:single</defaultGoal>
     <sourceDirectory>src</sourceDirectory>
-	    <finalName>er</finalName>
+	    <finalName>surf</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -113,20 +113,29 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<warSourceDirectory>WebContent</warSourceDirectory>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
  
-	<plugin>
-      <artifactId>maven-assembly-plugin</artifactId>
-      <configuration>
-        <archive>
-          <manifest>
-            <mainClass>in.edu.ashoka.lokdhaba.SurfExcel</mainClass>
-          </manifest>
-        </archive>
-        <descriptorRefs>
-          <descriptorRef>jar-with-dependencies</descriptorRef>
-        </descriptorRefs>
-      </configuration>
-    </plugin>
+			<!--<plugin>
+			  <artifactId>maven-assembly-plugin</artifactId>
+			  <configuration>
+				<archive>
+				  <manifest>
+					<mainClass>in.edu.ashoka.lokdhaba.IncumbencyServlet</mainClass>
+				  </manifest>
+				</archive>
+				<descriptorRefs>
+				  <descriptorRef>jar-with-dependencies</descriptorRef>
+				</descriptorRefs>
+			  </configuration>
+			</plugin>-->
 
 
             <plugin>

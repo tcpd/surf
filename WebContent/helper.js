@@ -347,18 +347,21 @@ $(window).on("load", function () {
         }
         $("#settingsSubmit").click();
         $("#loading").fadeIn();
+        resetScroll();
     });
 });
 //Load value on the search bar
 $(window).on("load", function(){
-    $("#searchValue").val(filterVariables[3]);
+    if(filterVariables[0]=="search")
+            $("#searchValue").val(filterVariables[3]);
 });
 
 //Adjust table height
+//on load
 $(window).on("load", function () {
     $("#table-container").css("margin-top", $("nav.navbar").height()+10)
 });
-
+//on resize
 $(window).resize(function () {
     $("#table-container").css("margin-top", $("nav.navbar").height()+10)
 });

@@ -365,3 +365,17 @@ $(window).on("load", function () {
 $(window).resize(function () {
     $("#table-container").css("margin-top", $("nav.navbar").height()+10)
 });
+
+//Show warning on force merge
+$(window).on("load", function () {
+    $("#forceMergeButton").on("click", function () {
+        userConsent = confirm("You are about to merge rows from multiple groups together. Are you sure?");
+        if(!userConsent){
+            return false
+        }
+        else{
+            $('#loading').fadeIn();
+            return true
+        }
+    });
+});

@@ -147,7 +147,7 @@ import="com.google.common.collect.Multimap"
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton" onclick="$('#loading').fadeIn()"/>
-				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Force Merge" id="forceMergeButton" onclick="$('#loading').fadeIn()"/>
+				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Force Merge" id="forceMergeButton"/>
 				<button type="button" onclick="loadFilterSettings()" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
 						<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
 						Settings

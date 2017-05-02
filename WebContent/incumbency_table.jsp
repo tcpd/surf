@@ -236,19 +236,19 @@ import="com.google.common.collect.Multimap"
 		for(String key:keyList){
 			newPerson=true;
 			for(Row row:incumbentsGroup.get(key)){
-				String tableData;
+				String tableData = "";
 				String rowStyleData;
 				String unMerge;
 				String rowCompletionColor;
+				boolean isChildPerson = false;
 				if(mergeManager.isMappedToAnother(row.get("ID"))){
 					tableData = "<mapped dummy tag>";
-					pageContext.setAttribute("tableData","<mapped dummy tag>");	//attribute is used by jstl; couldnt find a better way to do this
-					
+					isChildPerson = true;
 				} 
-				else {
+				/*else {
 					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
 					pageContext.setAttribute("tableData","");	//same as above; used ny jstl
-				}
+				}*/
 				
 				if(incumbentsGroup.get(key).size()>1){
 					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
@@ -284,14 +284,17 @@ import="com.google.common.collect.Multimap"
 						</tr>
 					<%
 					rowStyleData = "class=\"table-row-same-person trow " + rowCompletionColor + " \"";
+					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("mapped_ID")+"\"/>";
+					isChildPerson = false;
 				}
 				else if(newPerson==true){
 					newPerson=false;
 					rowStyleData = "class=\"table-row-same-person trow "+rowCompletionColor+" \"";
+					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("mapped_ID")+"\"/>";
+					isChildPerson = false;
 				}
-				else{rowStyleData = "class=\""+rowCompletionColor+" \"";}
-			
-			
+				else{rowStyleData = "class=\""+rowCompletionColor+" \""; isChildPerson=true;}
+				pageContext.setAttribute("isChildPerson",isChildPerson);	//needed for jstl later on
 %>
 			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>" id=<%=row.get("ID")%>>
 				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
@@ -336,7 +339,7 @@ import="com.google.common.collect.Multimap"
 				
 				<%-- <c:set var="tableData" scope="page" value="lolo"></c:set> --%>
 				<c:choose>
-					<c:when test="${tableData eq '<mapped dummy tag>' }">
+					<c:when test="${isChildPerson eq true }">
 						<td class="cell-table table-cell-comments" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
 						</td>
 						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>

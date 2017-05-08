@@ -321,6 +321,32 @@ $("document").ready(function(){
 	});
 });
 
+//Select all person rows of a person on click
+$(document).ready(function () {
+    $("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function (event) {
+        temp = event.target.parentNode;
+        while(temp.previousElementSibling!=null){
+            if(temp.previousElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
+                $(temp.previousElementSibling).toggleClass("success");
+                //Look for checkbox
+                if(temp.previousElementSibling.firstElementChild.firstElementChild.type==="checkbox"){
+                    var checkboxValue = $(temp.previousElementSibling.firstElementChild.firstElementChild).prop("checked");
+                    $(temp.previousElementSibling.firstElementChild.firstElementChild).prop("checked", !checkboxValue);
+                }
+                temp = temp.previousElementSibling;
+            }else
+                break;
+        }
+        temp = event.target.parentNode;
+        while(temp.nextElementSibling!=null){
+            if(temp.nextElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
+                $(temp.nextElementSibling).toggleClass("success");
+                temp = temp.nextElementSibling;
+            }else
+                break;
+        }
+    })
+});
 
 
 //LOADING SCRIPT
@@ -379,3 +405,4 @@ $(window).on("load", function () {
         }
     });
 });
+

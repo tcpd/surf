@@ -296,7 +296,7 @@ import="com.google.common.collect.Multimap"
 				else{rowStyleData = "class=\""+rowCompletionColor+" \""; isChildPerson=true;}
 				pageContext.setAttribute("isChildPerson",isChildPerson);	//needed for jstl later on
 %>
-			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>" id=<%=row.get("ID")%>>
+			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
 				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
 				<td class="cell-table table-cell-name">
 					<a href="http://www.google.com/search?q=<%=row.get("Name").replace(" ","+")+"+"+row.get("PC_name").replace(" ","+")+"+"+row.get("Year")%>" target="_blank" onclick="document.getElementById(<%=row.get("ID")%>).childNodes[1].click()">
@@ -326,7 +326,6 @@ import="com.google.common.collect.Multimap"
 				<td class="cell-table table-cell-votes">
 					<%=row.get("Votes1")%>
 				</td>
-				
 				
 				<%-- <td class="cell-table">
 					<%=row.get("ID")%>

@@ -252,6 +252,9 @@ function selectAllRowsInGroupForDone(groupID){
             var selectElement = row.childNodes[23].childNodes[1]
             if(selectElement.tagName == "INPUT" && selectElement.type == "checkbox"){
                 console.log(selectElement)
+                if(selectElement.checked)   //TO MAke sure all are checked
+                    $(selectElement).click()
+                else{}
                 $(selectElement).click()
             }
         }

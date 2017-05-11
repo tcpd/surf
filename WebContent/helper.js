@@ -54,12 +54,14 @@ function commentHandler(commentId){
 function createNameParameter(id){
     var node=document.getElementById("isDone-"+id);
     node.setAttribute("name", "isDone-"+id);
-    pnode = node.parentNode
-    hiddenNode = document.createElement("input")
-    hiddenNode.setAttribute("type", "hidden")
-    hiddenNode.setAttribute("name", node.id)
-    hiddenNode.setAttribute("value", "off")
-    pnode.appendChild(hiddenNode)
+    pnode = node.parentNode;
+    if(($(pnode).children().length)<=1){
+        hiddenNode = document.createElement("input")
+        hiddenNode.setAttribute("type", "hidden")
+        hiddenNode.setAttribute("name", node.id)
+        hiddenNode.setAttribute("value", "off")
+        pnode.appendChild(hiddenNode)
+    }
 }
 
 //script to display the full comment
@@ -251,7 +253,6 @@ function selectAllRowsInGroupForDone(groupID){
         if(row.childNodes.length>23 && row.childNodes[23].childNodes.length>1){
             var selectElement = row.childNodes[23].childNodes[1]
             if(selectElement.tagName == "INPUT" && selectElement.type == "checkbox"){
-                console.log(selectElement)
                 if(selectElement.checked)   //TO MAke sure all are checked
                     $(selectElement).click()
                 else{}

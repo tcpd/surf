@@ -62,6 +62,10 @@ body{
 	background-color: #cc9494;
 }
 
+.row-selected-for-done{
+    background-color: #b783e2;
+}
+
 .row-not-done{
 }
 

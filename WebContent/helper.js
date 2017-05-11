@@ -251,8 +251,8 @@ function selectAllRowsInGroupForDone(groupID){
         if(row.childNodes.length>23 && row.childNodes[23].childNodes.length>1){
             var selectElement = row.childNodes[23].childNodes[1]
             if(selectElement.tagName == "INPUT" && selectElement.type == "checkbox"){
-                selectElement.click()
-                selectElement.checked = "true"
+                console.log(selectElement)
+                $(selectElement).click()
             }
         }
     }
@@ -406,3 +406,28 @@ $(window).on("load", function () {
     });
 });
 
+$(document).ready(function () {
+    $("tr td.table-cell-done").click(function (event) {
+        var temp = $(this).parent()[0];
+        //console.log(temp)
+        if($(this.firstElementChild).prop('checked')){
+            $(this).parent().addClass('row-selected-for-done');
+            while(temp.nextElementSibling!=null){
+                if(temp.nextElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
+                    $(temp.nextElementSibling).addClass('row-selected-for-done')
+                    temp = temp.nextElementSibling
+                }else
+                    break;
+            }
+        }else{
+            $(this).parent().removeClass('row-selected-for-done')
+            while(temp.nextElementSibling!=null){
+                if(temp.nextElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
+                    $(temp.nextElementSibling).removeClass('row-selected-for-done')
+                    temp = temp.nextElementSibling
+                }else
+                    break;
+            }
+        }
+    })
+});

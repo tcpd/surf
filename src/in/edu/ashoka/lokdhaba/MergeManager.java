@@ -228,21 +228,7 @@ public abstract class MergeManager {
 			}
 		}
 	}
-	
-	/*final public ArrayList<Multimap<String,Row>> getIncumbents(boolean onlyWinners){
-		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:getGroupMergedListOfSimilarCandidate()){
-			Multimap<String, Row> mp = LinkedHashMultimap.create();
-			for(Row row:similarRows){
-				mp.put(rowToId.get(row), row);
-			}
-			if(mp.values().size()>1)	//check whether there are more than 1 member in a group
-				listOfSet.add(mp);
-		}
-		if(onlyWinners)onlyKeepWinners(listOfSet);
 
-		return listOfSet;
-	}*/
 	
 	//returns a list of group of similar named incumbents
 	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values, boolean onlyWinners, String searchQuery){
@@ -278,57 +264,11 @@ public abstract class MergeManager {
 		return listOfSet;
 	}
 
-	/*
-	final public void sortAlphabetically(ArrayList<Multimap<String,Row>> listOfSet){
-		//Queue<String> pq = new PriorityQueue<>();
-		listOfSet.sort(new Comparator<Multimap<String,Row>>(){
-
-			@Override
-			public int compare(Multimap<String, Row> o1, Multimap<String, Row> o2) {
-				
-				return o1.values().iterator().next().get("Name").compareTo(o2.values().iterator().next().get("Name"));
-			}
-			
-		});
-		
-	}*/
 
 	final private ArrayList<Collection<Row>> getGroupMergedListOfSimilarCandidate(){
 		setupRowToGroupMap();
 		ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates = new ArrayList<>();
-		/*
-		groupMergedListOfSimilarCandidates.addAll(listOfSimilarCandidates);
-		for(String person: personToRows.keySet()){
-			Collection<Row> baseGroup = rowToGroup.get(personToRows.get(person).iterator().next().get("ID"));
-			System.out.println("Testing...");
-			System.out.println(groupMergedListOfSimilarCandidates.indexOf(baseGroup));
-			System.out.println(listOfSimilarCandidates.indexOf(baseGroup));
-			Collection<Row> nonPersistantGroup = new ArrayList<Row>(baseGroup);
-			boolean differentGroup = false;
-			for(Row row:personToRows.get(person)){
-				if(!baseGroup.equals(rowToGroup.get(row.get("ID")))){
-					differentGroup = true;
-					nonPersistantGroup.addAll(rowToGroup.get(row.get("ID")));
-					groupMergedListOfSimilarCandidates.remove(rowToGroup.get(row.get("ID")));
-				}
-			}
-			if(differentGroup) {
-				int index = groupMergedListOfSimilarCandidates.indexOf(baseGroup);
-				groupMergedListOfSimilarCandidates.remove(baseGroup);
-				//DEbugging
-				try{
-					groupMergedListOfSimilarCandidates.add(index, nonPersistantGroup);
-				}catch(IndexOutOfBoundsException e){
-					int dindex = listOfSimilarCandidates.indexOf(baseGroup);
-					System.out.println(dindex);
-					System.out.println(baseGroup);
-					System.out.println(groupMergedListOfSimilarCandidates.get(dindex));
-				}
 
-			}
-		}*/
-
-		//Trying new stuff
 		List<Integer> mergedGroupsIndices = new ArrayList<>();
 		for(int i=0; i<listOfSimilarCandidates.size();i++){
 			if(mergedGroupsIndices.contains(i))

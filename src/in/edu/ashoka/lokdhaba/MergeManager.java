@@ -270,24 +270,42 @@ public abstract class MergeManager {
 		ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates = new ArrayList<>();
 
 		List<Integer> mergedGroupsIndices = new ArrayList<>();
+		Map<Integer, Integer> groupMap = new HashMap<>();
 		for(int i=0; i<listOfSimilarCandidates.size();i++){
-			if(mergedGroupsIndices.contains(i))
-				continue;
 			Collection<Row> group = listOfSimilarCandidates.get(i);
-			Collection<Row> mergedGroup = new ArrayList<>(group);
+			Collection<Row> mergedGroup = new ArrayList<>();
 			Set<String> persons = new HashSet<>();
 			for(Row row:group){
 				persons.add(rowToId.get(row));
 			}
-			for(String person:persons){
-				for(Row row:personToRows.get(person)){
-					if(!rowToGroup.get(row.get("ID")).equals(i)){
-						mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
-						mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
+			//IF GROUP NOT PRESENT
+			if(!mergedGroupsIndices.contains(i)){
+				mergedGroup.addAll(group);
+				for(String person:persons){
+					for(Row row:personToRows.get(person)){
+						if(!rowToGroup.get(row.get("ID")).equals(i)){
+							mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
+							mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
+							groupMap.put( rowToGroup.get(row.get("ID")) , groupMergedListOfSimilarCandidates.size());
+						}
+					}
+				}
+				groupMergedListOfSimilarCandidates.add(mergedGroup);
+			}
+			else{	//IF GROUP PRESENT
+				int parentGroup = groupMap.get(i);
+				for(String person:persons){
+					for(Row row:personToRows.get(person)){
+						//If the current row doesn't belong to current group and it's parent's group
+						if(!rowToGroup.get(row.get("ID")).equals(i) && !rowToGroup.get(row.get("ID")).equals(parentGroup)){
+							mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
+							mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
+							groupMap.put(rowToGroup.get(row.get("ID")),parentGroup);
+						}
 					}
 				}
 			}
-			groupMergedListOfSimilarCandidates.add(mergedGroup);
+
 		}
 		return groupMergedListOfSimilarCandidates;
 	}

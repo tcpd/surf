@@ -182,10 +182,13 @@ public abstract class MergeManager {
 
 	final public void setupPersonToRowMap(){
 		personToRows = LinkedHashMultimap.create();
-		for(Collection<Row> group:listOfSimilarCandidates){
+		/*for(Collection<Row> group:listOfSimilarCandidates){
 			for(Row row:group){
 				personToRows.put(row.get("mapped_ID"),row);
 			}
+		}*/
+		for(Row row:d.getRows()){
+			personToRows.put(row.get("mapped_ID"),row);
 		}
 	}
 
@@ -268,7 +271,6 @@ public abstract class MergeManager {
 	final private ArrayList<Collection<Row>> getGroupMergedListOfSimilarCandidate(){
 		setupRowToGroupMap();
 		ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates = new ArrayList<>();
-
 		List<Integer> mergedGroupsIndices = new ArrayList<>();
 		Map<Integer, Integer> groupMap = new HashMap<>();
 		for(int i=0; i<listOfSimilarCandidates.size();i++){
@@ -283,10 +285,17 @@ public abstract class MergeManager {
 				mergedGroup.addAll(group);
 				for(String person:persons){
 					for(Row row:personToRows.get(person)){
-						if(!rowToGroup.get(row.get("ID")).equals(i)){
-							mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
-							mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
-							groupMap.put( rowToGroup.get(row.get("ID")) , groupMergedListOfSimilarCandidates.size());
+						if(rowToGroup.get(row.get("ID"))==null){	//rows belong to a person but didn't get added in any group in current algorithm
+							mergedGroup.add(row);
+							continue;
+						}else{
+							if(!rowToGroup.get(row.get("ID")).equals(i)){
+								if(mergedGroupsIndices.contains(rowToGroup.get(row.get("ID"))))
+									continue;
+								mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
+								mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
+								groupMap.put( rowToGroup.get(row.get("ID")) , groupMergedListOfSimilarCandidates.size());
+							}
 						}
 					}
 				}
@@ -296,14 +305,22 @@ public abstract class MergeManager {
 				int parentGroup = groupMap.get(i);
 				for(String person:persons){
 					for(Row row:personToRows.get(person)){
-						//If the current row doesn't belong to current group and it's parent's group
-						if(!rowToGroup.get(row.get("ID")).equals(i) && !rowToGroup.get(row.get("ID")).equals(parentGroup)){
-							mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
-							mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
-							groupMap.put(rowToGroup.get(row.get("ID")),parentGroup);
+						if(rowToGroup.get(row.get("ID"))==null){
+							mergedGroup.add(row);
+							continue;
+						}else{
+							//If the current row doesn't belong to current group and it's parent's group
+							if(!rowToGroup.get(row.get("ID")).equals(i) && !rowToGroup.get(row.get("ID")).equals(parentGroup)){
+								if(mergedGroupsIndices.contains(rowToGroup.get(row.get("ID"))))
+									continue;
+								mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
+								mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
+								groupMap.put(rowToGroup.get(row.get("ID")),parentGroup);
+							}
 						}
 					}
 				}
+				groupMergedListOfSimilarCandidates.get(parentGroup).addAll(mergedGroup);
 			}
 
 		}

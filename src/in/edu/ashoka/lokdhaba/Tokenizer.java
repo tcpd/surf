@@ -149,29 +149,40 @@ public class Tokenizer {
 //           out.println ("canonical: " + s + " -> " + result);
 
         // these are from Gilles
-        List<String> tokens = Util.tokenize(s);
-        for (int i = 0; i < tokens.size(); i++) {
-            s = s.replaceAll("MD", "MOHAMMAD");
-            s = s.replaceAll("MOHAMED", "MOHAMMAD");
-            s = s.replaceAll("MOHMED", "MOHAMMAD");
-            s = s.replaceAll("PT", "PANDIT");
-            s = s.replaceAll("PD", "PRASAD");
-            s = s.replaceAll("PR", "PRASAD");
+        List<String> tokens = Util.tokenize(result.toString());
+        result.delete(0, result.length());
+        for (int i=0; i<tokens.size(); i++) {
+            String token = tokens.get(i);
+            token = token.replaceAll("MD", "MOHAMMAD");
+            token = token.replaceAll("MOHAMED", "MOHAMMAD");
+            token = token.replaceAll("MOHMED", "MOHAMMAD");
+            token = token.replaceAll("PT", "PANDIT");
+            token = token.replaceAll("PD", "PRASAD");
+            token = token.replaceAll("PR", "PRASAD");
             if (i == 0)
-                s = s.replaceAll("KU", "KUNWAR");
+                token = token.replaceAll("KU", "KUNWAR");
             else
-                s = s.replaceAll("KU", "KUMAR"); // according to Gilles, KU in the middle of a name is KUMAR, but at the beginning its likely to be KUNWAR
+                token = token.replaceAll("KU", "KUMAR"); // according to Gilles, KU in the middle of a name is KUMAR, but at the beginning its likely to be KUNWAR
 
             // ignore titles
-            s = s.replaceAll("DR", "");
-            s = s.replaceAll("MR", "");
-            s = s.replaceAll("MRS", "");
-            s = s.replaceAll("SMT", "");
-            s = s.replaceAll("ENG", "");
-            s = s.replaceAll("ADV", "");
-            s = s.replaceAll("KUMAR", "");
-            s = s.replaceAll("SARDAR", "");
-            s = s.replaceAll("PANDIT", "");
+            token = token.replaceAll("DR", "");
+            token = token.replaceAll("MR", "");
+            token = token.replaceAll("MRS", "");
+            token = token.replaceAll("SMT", "");
+            token = token.replaceAll("ENG", "");
+            token = token.replaceAll("ADV", "");
+            token = token.replaceAll("KUMAR", "");
+            token = token.replaceAll("SARDAR", "");
+            token = token.replaceAll("PANDIT", "");
+
+            // remove bhai suffix
+            token = token.replaceAll("BAI", "");
+
+            token = token.replaceAll(" ", "");
+            if(!token.equals(""))
+                result.append(token);
+            if(i!=tokens.size()-1)
+                result.append(" ");
         }
         return result.toString();
     }

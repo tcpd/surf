@@ -18,8 +18,10 @@ public abstract class MergeManager {
     String arguments;
 
     ArrayList<Collection<Row>> listOfSimilarCandidates;
+    ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates;
     Multimap<String,Row> personToRows;
     HashMap<String, Integer> rowToGroup;
+    HashMap<String, Integer> rowToMergedGroup;
 
     
     public static MergeManager getManager(String algo, Dataset d, String arguments){
@@ -97,13 +99,13 @@ public abstract class MergeManager {
 	abstract public void addSimilarCandidates();
 	
 	final public void merge(String [] ids){
-		Multimap<String, String> mp = LinkedHashMultimap.create();
+		Multimap<Integer, String> mp = LinkedHashMultimap.create();
 		for(String id:ids){
-			mp.put(idToRow.get(id).get("common_group_id"), id);		//algorithm will decide the common_group_id
-			//idToRow.get(id).set("is_processed", "true"); 	//set is_processed to true; this will keep track of number of rows being processed
+			//mp.put(idToRow.get(id).get("common_group_id"), id);		//algorithm will decide the common_group_id
+			mp.put(rowToMergedGroup.get(id),id);
 		}
 		
-		for(String key:mp.keySet()){
+		for(Integer key:mp.keySet()){
 			ArrayList<String> innerIds= new ArrayList<>();
 			innerIds.addAll(0, mp.get(key));
 			String defaultId = getRootId(innerIds.get(0));
@@ -201,7 +203,17 @@ public abstract class MergeManager {
 			}
 		}
 	}
-	
+
+	final public void setupRowToMergedGroupMap(){
+		rowToMergedGroup = new HashMap<>();
+		for(int i=0; i<groupMergedListOfSimilarCandidates.size(); i++){
+			Collection<Row> group = groupMergedListOfSimilarCandidates.get(i);
+			for(Row row:group){
+				rowToMergedGroup.put(row.get("ID"),i);
+			}
+		}
+	}
+
 	final public void onlyKeepWinners(ArrayList<Multimap<String,Row>> listOfSet){
 		for(int i=0; i<listOfSet.size();i++){
 			Multimap<String, Row> group = listOfSet.get(i);
@@ -270,7 +282,7 @@ public abstract class MergeManager {
 
 	final private ArrayList<Collection<Row>> getGroupMergedListOfSimilarCandidate(){
 		setupRowToGroupMap();
-		ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates = new ArrayList<>();
+		groupMergedListOfSimilarCandidates = new ArrayList<>();
 		List<Integer> mergedGroupsIndices = new ArrayList<>();
 		Map<Integer, Integer> groupMap = new HashMap<>();
 		for(int i=0; i<listOfSimilarCandidates.size();i++){
@@ -324,6 +336,7 @@ public abstract class MergeManager {
 			}
 
 		}
+		setupRowToMergedGroupMap();
 		return groupMergedListOfSimilarCandidates;
 	}
 

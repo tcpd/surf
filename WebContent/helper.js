@@ -314,6 +314,7 @@ function populateDropdown() {
 $("document").ready(function(){
 	$("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function(e){
 		if($(e.target).closest('input[type="checkbox"]').length > 0){
+		    console.log($(this).parent())
 			$(this).parent().toggleClass("success");
         }
 		else{
@@ -329,7 +330,9 @@ $("document").ready(function(){
 $(document).ready(function () {
     $("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function (event) {
         temp = event.target.parentNode;
-        while(temp.previousElementSibling!=null){
+        while(temp.previousElementSibling!=null &&
+            temp.previousElementSibling.firstElementChild!=null &&
+            temp.previousElementSibling.firstElementChild.firstElementChild!=null){
             if(temp.previousElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
                 $(temp.previousElementSibling).toggleClass("success");
                 //Look for checkbox
@@ -410,6 +413,7 @@ $(window).on("load", function () {
     });
 });
 
+//Mark all person for as done/reviewed
 $(document).ready(function () {
     $("tr td.table-cell-done").click(function (event) {
         var temp = $(this).parent()[0];
@@ -433,5 +437,12 @@ $(document).ready(function () {
                     break;
             }
         }
+    })
+});
+
+//anchors shouldn't trigger parent's click events and mark the rows for selection
+$(document).ready(function () {
+    $('a').click(function (e) {
+        e.stopPropagation();
     })
 });

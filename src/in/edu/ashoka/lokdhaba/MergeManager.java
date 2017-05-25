@@ -83,6 +83,7 @@ public abstract class MergeManager {
 	//initialize the id's for each row
 	final public void initializeIds(){
 		SurfExcel.assignUnassignedIds(d.getRows(), "ID");
+		SurfExcel.assignUnassignedIds(d.getRows(), "mapped_ID");
 	}
 	
 	public final void performInitialMapping(){

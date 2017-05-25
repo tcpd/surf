@@ -314,7 +314,6 @@ function populateDropdown() {
 $("document").ready(function(){
 	$("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function(e){
 		if($(e.target).closest('input[type="checkbox"]').length > 0){
-		    console.log($(this).parent())
 			$(this).parent().toggleClass("success");
         }
 		else{

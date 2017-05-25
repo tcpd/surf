@@ -303,39 +303,29 @@ function populateDropdown() {
 }
 
 
-//TESTING SCRIPT
-//$("#test").on("click", function(){
-//<%-- //	document.write("<%=request.getParameterValues("demerges")%>"); --%>
-//});
-
-
 //SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS
-
-$("document").ready(function(){
-	$("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function(e){
-		if($(e.target).closest('input[type="checkbox"]').length > 0){
-			$(this).parent().toggleClass("success");
-        }
-		else{
-			$(this).parent().toggleClass("success");
-			var checkboxValue = $(this).parent().find("td:first-child input[type]").prop("checked");
-			$(this).parent().find("td:first-child input[type]").prop("checked", !checkboxValue);
-		}
-
-	});
-});
-
 //Select all person rows of a person on click
 $(document).ready(function () {
     $("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function (event) {
-        temp = event.target.parentNode;
-        while(temp.previousElementSibling!=null &&
-            temp.previousElementSibling.firstElementChild!=null &&
-            temp.previousElementSibling.firstElementChild.firstElementChild!=null){
+        temp = $(event.target).parents("tr")[0];
+        //color the current row
+        $(temp).toggleClass("success");
+        //if checkbox wasn't clicked look for it and click it
+        if(event.target.type!=="checkbox" &&
+            temp.firstElementChild!=null &&
+            temp.firstElementChild.firstElementChild!=null &&
+            temp.firstElementChild.firstElementChild.type==="checkbox") {
+            var checkboxValue = $(temp.firstElementChild.firstElementChild).prop("checked");
+            $(temp.firstElementChild.firstElementChild).prop("checked", !checkboxValue);
+        }
+        //attempt to color previous rows
+        while(temp.previousElementSibling!=null){
             if(temp.previousElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
                 $(temp.previousElementSibling).toggleClass("success");
                 //Look for checkbox
-                if(temp.previousElementSibling.firstElementChild.firstElementChild.type==="checkbox"){
+                if(temp.previousElementSibling.firstElementChild!=null &&
+                    temp.previousElementSibling.firstElementChild.firstElementChild!=null &&
+                    temp.previousElementSibling.firstElementChild.firstElementChild.type==="checkbox") {
                     var checkboxValue = $(temp.previousElementSibling.firstElementChild.firstElementChild).prop("checked");
                     $(temp.previousElementSibling.firstElementChild.firstElementChild).prop("checked", !checkboxValue);
                 }
@@ -343,7 +333,9 @@ $(document).ready(function () {
             }else
                 break;
         }
-        temp = event.target.parentNode;
+        //reset temp
+        temp = $(event.target).parents("tr")[0];
+        //attempt to color next rows
         while(temp.nextElementSibling!=null){
             if(temp.nextElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
                 $(temp.nextElementSibling).toggleClass("success");

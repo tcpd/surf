@@ -433,7 +433,7 @@ $(document).ready(function () {
 
 //anchors shouldn't trigger parent's click events and mark the rows for selection
 $(document).ready(function () {
-    $('a').click(function (e) {
+    $('td a').click(function (e) {
         e.stopPropagation();
     })
 });

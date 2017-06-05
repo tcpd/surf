@@ -422,25 +422,24 @@ public abstract class MergeManager {
 	//method that updates the drop down information
 	public void updateIsDone(Map<String, String> map){
 		for(String key:map.keySet()){
-			//idToRow.get(key).set("is_done", (map.get(key).equals("on")?"yes":"no"));
 
 			Row row = idToRow.get(key);
 			Collection<Row> person = personToRows.get(row.get("mapped_ID"));
 			//This needs to be done because person to row map isn't updated after merge, it is only updated when the incumbents view is generated.
 			if(person.size()<=1){
-				idToRow.get(key).set("is_done", (map.get(key).equals("on")?"yes":"no"));
-				continue;
-			}
-			for(Row record:person){
-				if(map.get(key).equals("on")){
-					record.set("is_done","yes");
-				}else{
-					record.set("is_done","no");
+				row.set("is_done", (map.get(key).equals("on")?"yes":"no"));
+			}else{
+				for(Row record:person){
+					if(map.get(key).equals("on")){
+						record.set("is_done","yes");
+					}else{
+						record.set("is_done","no");
+					}
+
 				}
-
 			}
-
-			//System.out.println(idToRow.get(key).get("is_done"));
+			//Finally if the row is still not marked
+			row.set("is_done", (map.get(key).equals("on")?"yes":"no"));
 		}
 	}
 

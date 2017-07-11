@@ -233,14 +233,14 @@ public class Dataset implements Serializable{
         saveTimeOfBackedUpFile = saveTime;
         //CREATE BACKUP FILE
         //first check for directory; if doesn't exist create
-        if(!new File(file.getParent()+"/backups").exists()){
-            new File(file.getParent()+"/backups").mkdir();
+        if(!new File(file.getParent()+File.separator+"backups").exists()){
+            new File(file.getParent()+File.separator+"backups").mkdir();
         }
-        String backupPath = file.getParent()+"/backups";
+        String backupPath = file.getParent()+File.separator+"backups";
         DateFormat df = new SimpleDateFormat("dd.MM.yy.HH:mm:ss");
         Date dateobj = new Date();
         String timestamp = "."+df.format(dateobj);
-        String backupFilePath = backupPath+"/"+file.getName()+timestamp;
+        String backupFilePath = backupPath+File.separator+file.getName()+timestamp;
         File backupFile = new File(backupFilePath);
 
         InputStream inputStream = new FileInputStream(file);

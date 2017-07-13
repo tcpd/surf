@@ -23,6 +23,7 @@ public abstract class MergeManager {
     HashMap<String, Integer> rowToGroup;
     HashMap<String, Integer> rowToMergedGroup;
 
+    static final int WINNER_POSITION_CAP = 3;
     
     public static MergeManager getManager(String algo, Dataset d, String arguments){
 		MergeManager mergeManager = null;
@@ -216,11 +217,12 @@ public abstract class MergeManager {
 	}
 
 	final public void onlyKeepWinners(ArrayList<Multimap<String,Row>> listOfSet){
+
 		for(int i=0; i<listOfSet.size();i++){
 			Multimap<String, Row> group = listOfSet.get(i);
 			boolean isWinner = false;
 			for(Row row:group.values()){
-				if(row.get("Position").equals("1")){
+				if(Integer.parseInt(row.get("Position"))<=WINNER_POSITION_CAP){
 					isWinner = true;
 					break;
 				}

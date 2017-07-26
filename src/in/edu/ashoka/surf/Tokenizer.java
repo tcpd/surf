@@ -116,7 +116,7 @@ public class Tokenizer {
         }
     }
 
-    static String[] replacements = new String[]{"[^A-Za-z\\s]", "", "TH", "T", "V", "W", "GH", "G", "BH", "B", "DH", "D", "JH", "J", "KH", "K", "MH", "M", "PH", "P", "SH", "S","ZH", "Z", "Z", "S","Y","I","AU", "OU","OO", "U","EE", "I", "KSH", "X"};
+    static String[] replacements = new String[]{"[^A-Za-z\\s]", "", "TH", "T", "V", "W", "GH", "G", "BH", "B", "DH", "D", "JH", "J", "KH", "K", "MH", "M", "PH", "P", "SH", "S","ZH", "Z", "Z", "S","Y","I","AU", "OU","OO", "U","EE", "I", "KSH", "X","Q","K"};
     static List<Pattern> replacementPatterns;
     static {
         // precompile patterns for performance. the patterns to be replaced

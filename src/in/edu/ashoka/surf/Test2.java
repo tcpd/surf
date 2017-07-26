@@ -1,10 +1,8 @@
-package in.edu.ashoka.lokdhaba;
+package in.edu.ashoka.surf;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -13,7 +11,7 @@ import com.google.common.collect.Multimap;
 public class Test2 {
 
 	public static void main(String[] args) throws IOException {
-		Dataset d = Dataset.getDataset("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+		Dataset d = Dataset.getDataset("/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv");
 		Collection<Row> rows = d.rows;
 		
 		//set ups what toString() of Row needs to print

@@ -1,12 +1,10 @@
-package in.edu.ashoka.lokdhaba;
+package in.edu.ashoka.surf;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import com.google.common.collect.Multimap;
 
@@ -60,21 +58,21 @@ public class Test {
 	
 	public static void test3() throws IOException {
 		String ID_PREFIX = "ID";
-		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
+		String file = "/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv";
 		
 	    Dataset d = Dataset.getDataset(file);
 	    MergeManager mergeManager = new SimilarNameMergeManager(d,1);
 	    mergeManager.initializeIds();
 	    mergeManager.performInitialMapping();
 	    mergeManager.addSimilarCandidates();
-	    ((SimilarNameMergeManager)mergeManager).display2();
+//	    ((SimilarNameMergeManager)mergeManager).display2();
 	    //mergeManager.merge(new String[]{"76174","76338","76689","76621"});
 	    //((JspMergeManager)mergeManager).display2();
 	}
 	
 	public static void test2() throws IOException {
 		String ID_PREFIX = "ID";
-		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
+		String file = "/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv";
 		
 	    Dataset d = Dataset.getDataset(file);
 	    MergeManager mergeManager = new ExactSameNameMergeManager(d);
@@ -87,7 +85,7 @@ public class Test {
 	
 	public static void test1() throws IOException{
 		String ID_PREFIX = "ID";
-		String file = "/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv";
+		String file = "/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv";
 		
 	    Dataset d = Dataset.getDataset(file);
 	    SurfExcel.assignUnassignedIds(d.getRows(), "ID");

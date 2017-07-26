@@ -128,7 +128,7 @@
 			  <configuration>
 				<archive>
 				  <manifest>
-					<mainClass>in.edu.ashoka.lokdhaba.IncumbencyServlet</mainClass>
+					<mainClin.edu.ashoka.surf.IncumbencyServlet</mainClass>
 				  </manifest>
 				</archive>
 				<descriptorRefs>

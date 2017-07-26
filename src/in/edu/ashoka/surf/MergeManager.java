@@ -1,13 +1,10 @@
-package in.edu.ashoka.lokdhaba;
+package in.edu.ashoka.surf;
 
 import java.io.IOException;
 import java.util.*;
 
-import javax.servlet.http.HttpSession;
-
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.commons.lang3.StringUtils;
 
 public abstract class MergeManager {
 

@@ -1,12 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"
-import="java.io.*"
-import="in.edu.ashoka.surf.SurfExcel"
-import="in.edu.ashoka.surf.Dataset"
 import="in.edu.ashoka.surf.Row"
 import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
-import="in.edu.ashoka.surf.Bihar"
 import="com.google.common.collect.Multimap"
 %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -14,6 +10,8 @@ import="com.google.common.collect.Multimap"
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="style.css">
@@ -66,20 +64,6 @@ import="com.google.common.collect.Multimap"
 	      <div class="modal-body">
 	       	<div class="filterForm">
 				<form class="form" role="filter" method="get" action="${pageContext.request.contextPath}/IncumbencyServlet" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">
-					<div class="form-group">
-						<%
-							//script for loading the settings
-
-						%>
-							Dataset:
-							<select class="form-control" name="dataset" id="dataset">
-							<!--MODIFY HERE -->
-							
-							<c:forEach var="name" items="${datasetName}">
-								<option value="${name}"><c:out value="${datasetDescription.get(name)}"></c:out></option>
-							</c:forEach>
-							</select>
-					</div>
 					<div class="form-group">
 						Algorithm:
 						<select class="form-control" name="algorithm" id="algorithm">
@@ -143,7 +127,7 @@ import="com.google.common.collect.Multimap"
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">Surf</a>
+					<span class="logo" style="font-size:30px">Surf</span>
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton" onclick="$('#loading').fadeIn()"/>

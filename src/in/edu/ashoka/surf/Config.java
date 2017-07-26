@@ -1,13 +1,10 @@
 package in.edu.ashoka.surf;
 
-import edu.stanford.muse.util.Util;
-import edu.stanford.muse.webapp.ModeConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -26,8 +23,6 @@ public class Config {
 
     static {
         Properties props = readProperties();
-        Map<String, String> pathMap = new HashMap<>();
-        Map<String, String> descriptionMap = new HashMap<>();
 
         // props file should like like:
         // UP_Path: /Users/user/foo/bar/...
@@ -39,6 +34,25 @@ public class Config {
                 keyToPath.put(key.replace("_Path", ""), props.getProperty(key));
             if (key.endsWith("_Description"))
                 keyToDescription.put(key.replace("_Description", ""), props.getProperty(key));
+        }
+
+        // do some sanity checking on each key
+        Iterator<Map.Entry<String,String>> iter = keyToDescription.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry<String,String> entry = iter.next();
+            String key = entry.getKey(), value = entry.getValue();
+
+            if (value == null || value.length() == 0) {
+                iter.remove();
+                log.warn ("Dataset key " + key + " does not have a valid description, dropping it.");
+            }
+
+            String path = keyToPath.get(key);
+            File f = new File(path);
+            if (!f.exists() || !f.canRead()) {
+                iter.remove();
+                log.warn("File for dataset with key " + key + " is not readable. Path = " + path);
+            }
         }
 
         // lock these maps so there is no chance of accidental change
@@ -71,7 +85,7 @@ public class Config {
                 InputStream is = new FileInputStream(PROPS_FILE);
                 props.load(is);
             } catch (Exception e) {
-                Util.print_exception("Error reading Surf properties file " + PROPS_FILE, e, log);
+                log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
             }
         } else {
             log.warn("Surf properties file " + PROPS_FILE + " does not exist or is not readable");

@@ -11,12 +11,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.common.collect.Multimap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Servlet implementation class IncumbencyServlet
  */
 @WebServlet("/IncumbencyServlet")
 public class IncumbencyServlet extends HttpServlet {
+	public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
+
 	private static final long serialVersionUID = 1L;
 	
 	//static boolean isFirst;
@@ -180,45 +184,18 @@ public class IncumbencyServlet extends HttpServlet {
 		//returns true if save needs to be done
 		return shouldSave;
 	}
-	
-	private void setUpDataset(HttpServletRequest request) throws IOException{
-		
-	    //this code mwill need changes
-		
-		//set defaults
-		if(request.getSession().getAttribute("d")==null){
-			String key = Config.keyToPath.keySet().iterator().next();
-			request.getSession().setAttribute("currentFile", Config.keyToPath.get(key));
-			request.getSession().setAttribute("dataset", key);
-		}
-	    
-		if(request.getSession().getAttribute("d")==null||request.getParameter("dataset")!=null){
-			
-			if(request.getParameter("dataset")!=null){
-				
-				//This must be done before setting the dataset attribute
-				if(!request.getParameter("dataset").equals(request.getSession().getAttribute("dataset")))
-					request.getSession().setAttribute("datasetChanged", true);
-				else
-					request.getSession().setAttribute("datasetChanged", false);
-				
-				request.getSession().setAttribute("currentFile", Config.keyToPath.get(request.getParameter("dataset")));
-				request.getSession().setAttribute("dataset", request.getParameter("dataset"));
-				
-			}
 
-			Dataset d = Dataset.getDataset(request.getSession().getAttribute("currentFile").toString());
-			request.getSession().setAttribute("d", d);
-			request.getSession().setAttribute("datasetName", Config.keyToPath.keySet());
-			request.getSession().setAttribute("datasetDescription", Config.keyToDescription);
-			request.getSession().setAttribute("datasetPath", Config.keyToPath);
-			
-			
-		}
-		//if dataset changed flag is still null
-		if(request.getSession().getAttribute("datasetChanged")==null){
-			request.getSession().setAttribute("datasetChanged", false);
-		}
+	/* if the request param datasetKey is present, loads the dataset and puts it in the session, otherwise does nothing. */
+	private void setUpDataset(HttpServletRequest request) throws IOException{
+	    String datasetKey = request.getParameter ("datasetKey");
+	    if (datasetKey != null) {
+			String path = Config.keyToPath.get(datasetKey);
+            Dataset d = Dataset.getDataset(path);
+            log.info ("Dataset d read from path " + path + " with " + d.getRows().size() + " rows");
+            HttpSession session = request.getSession();
+            session.setAttribute("d", d);
+            session.setAttribute ("currentFile", path);
+        }
 	}
 
 	private void setUpAlgorithm(HttpServletRequest request){

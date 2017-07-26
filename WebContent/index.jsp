@@ -51,7 +51,8 @@
 			<option value="exactSameNameWithConstituency">Exact Same Name with Constituency</option>
 			<option value="editDistance1">Approximate Name with Edit Distance 1</option>
 			<option value="editDistance2">Approximate Name with Edit Distance 2</option>
-			<option value="dummyAllName">All names</option>
+			<option value="compatibleNames">Compatible names in same constituency</option>
+            <option value="dummyAllName">All names</option>
 		</select>
 		</label>
 	</div>

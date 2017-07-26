@@ -39,9 +39,10 @@ public abstract class MergeManager {
 		}
 		else if(algo.equals("exactSameNameWithConstituency")){
 			mergeManager = new ExactSameNameWithConstituencyMergeManager(d);
-		}
-		else if(algo.equals("search")){
-			mergeManager = new SearchMergeManager(d, arguments);
+		} else if(algo.equals("compatibleNames")){
+			CompatibleNameManager cnm = new CompatibleNameManager(d);
+			cnm.setFields("cand1", "acname"); // this will be changed to PC_name for GE??
+			mergeManager = cnm;
 		}
 		else{}
 		return mergeManager;

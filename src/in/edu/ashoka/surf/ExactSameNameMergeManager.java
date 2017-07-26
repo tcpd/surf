@@ -1,15 +1,10 @@
-package in.edu.ashoka.lokdhaba;
+package in.edu.ashoka.surf;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MutableClassToInstanceMap;
-import com.sun.scenario.effect.Merge;
 
 public class ExactSameNameMergeManager extends MergeManager{
 	

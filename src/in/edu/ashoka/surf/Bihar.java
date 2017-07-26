@@ -1,12 +1,10 @@
-package in.edu.ashoka.lokdhaba;
+package in.edu.ashoka.surf;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
-import edu.stanford.muse.index.DataSet;
 import edu.stanford.muse.util.Util;
-import sun.font.CreatedFontTracker;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -37,8 +35,8 @@ public class Bihar extends Object {
         check if each name belongs to exactly one sex
         */
 
-//        Dataset d = new Dataset("/Users/hangal/workspace/lokdhaba/AE/State_Mastersheets/Bihar/Bihar_Mastersheet.csv");
-         Dataset d = Dataset.getDataset("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+//        Dataset d = new Dataset("/Users/hangal/workspace/surf/AE/State_Mastersheets/Bihar/Bihar_Mastersheet.csv");
+         Dataset d = Dataset.getDataset("/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv");
         Collection<Row> allRows = d.rows;
 
         Row.setToStringFields("Name-Sex-Year-AC_name-Party-Position-Votes");
@@ -170,7 +168,7 @@ public class Bihar extends Object {
             Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator);
             
             //for testing purpose
-            /*Multimap<String, Multimap<String, Row>> mappedNames = getSimilarPairs("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+            /*Multimap<String, Multimap<String, Row>> mappedNames = getSimilarPairs("/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv");
             NameData nameData = new ConcreteNameData();
             nameData.initialize();
             nameData.iterateNameData();
@@ -181,7 +179,7 @@ public class Bihar extends Object {
                 out.println(np.getName2().get("Candidate_name"));
             }*/
             
-            //Multimap<String,String> mappedNames = getExactSamePairs("/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/candidates_info.csv");
+            //Multimap<String,String> mappedNames = getExactSamePairs("/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv");
             //System.out.println();
 
 

@@ -1,4 +1,4 @@
-package in.edu.ashoka.lokdhaba;
+package in.edu.ashoka.surf;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -128,7 +128,7 @@ public class Tokenizer {
     }
 
     /** canonicalizes Indian variations of spellings and replaces a run of repeated letters by a single letter */
-    static String canonicalizeDesi(String s)
+    public static String canonicalizeDesi(String s)
     {
         for (int i = 0; i < replacementPatterns.size(); i++) {
             s = replacementPatterns.get(i).matcher(s).replaceAll(replacements[2*i+1]);

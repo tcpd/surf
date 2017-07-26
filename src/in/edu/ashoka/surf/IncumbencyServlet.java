@@ -1,4 +1,4 @@
-package in.edu.ashoka.lokdhaba;
+package in.edu.ashoka.surf;
 
 import java.io.IOException;
 import java.util.*;
@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.common.collect.Multimap;
-import com.sun.scenario.effect.Merge;
 
 /**
  * Servlet implementation class IncumbencyServlet
@@ -25,8 +24,6 @@ public class IncumbencyServlet extends HttpServlet {
 	//MergeManager mergeManager;
 	//filepaths
 	//String currentFile;
-	static Map<String, String> pathMap;
-	static Map<String, String> descriptionMap;
 	public final static long START_TIME = System.currentTimeMillis();
        
     /**
@@ -111,23 +108,7 @@ public class IncumbencyServlet extends HttpServlet {
 		// Finalization code...
 		Dataset.destroyTimer();
 	}
-	
-	public void init() throws ServletException{
-		//isFirst=true;
-		
-		//paths added here
-		
-		Enumeration parameterNames = getServletContext().getInitParameterNames();
-		pathMap = new HashMap<>();
-		descriptionMap = new HashMap<>();
-		while(parameterNames.hasMoreElements()){
-			String name = parameterNames.nextElement().toString();
-			if(name.contains("Path"))
-				pathMap.put(name.replace("Path", ""), getServletContext().getInitParameter(name));
-			if(name.contains("Description"))
-				descriptionMap.put(name.replace("Description", ""), getServletContext().getInitParameter(name));
-		}
-	}
+
 	//Handles button pressed action for both save as well as force merge button
 	private boolean saveButtonPressed(HttpServletRequest request){
 		return (request.getParameter("submit")!=null && (request.getParameter("submit").equals("Save")||(request.getParameter("submit").equals("Force Merge"))));
@@ -206,8 +187,8 @@ public class IncumbencyServlet extends HttpServlet {
 		
 		//set defaults
 		if(request.getSession().getAttribute("d")==null){
-			String key = pathMap.keySet().iterator().next();
-			request.getSession().setAttribute("currentFile", pathMap.get(key));
+			String key = Config.keyToPath.keySet().iterator().next();
+			request.getSession().setAttribute("currentFile", Config.keyToPath.get(key));
 			request.getSession().setAttribute("dataset", key);
 		}
 	    
@@ -221,16 +202,16 @@ public class IncumbencyServlet extends HttpServlet {
 				else
 					request.getSession().setAttribute("datasetChanged", false);
 				
-				request.getSession().setAttribute("currentFile",pathMap.get(request.getParameter("dataset")));
+				request.getSession().setAttribute("currentFile", Config.keyToPath.get(request.getParameter("dataset")));
 				request.getSession().setAttribute("dataset", request.getParameter("dataset"));
 				
 			}
 
 			Dataset d = Dataset.getDataset(request.getSession().getAttribute("currentFile").toString());
 			request.getSession().setAttribute("d", d);
-			request.getSession().setAttribute("datasetName", pathMap.keySet());
-			request.getSession().setAttribute("datasetDescription", descriptionMap);
-			request.getSession().setAttribute("datasetPath", pathMap);
+			request.getSession().setAttribute("datasetName", Config.keyToPath.keySet());
+			request.getSession().setAttribute("datasetDescription", Config.keyToDescription);
+			request.getSession().setAttribute("datasetPath", Config.keyToPath);
 			
 			
 		}

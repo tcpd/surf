@@ -213,11 +213,13 @@ public class Dataset implements Serializable{
         File existingFile = new File(file);
         File suffixFile = new File(fileWithSuffixOld);
         if(!existingFile.canWrite() || !existingFile.renameTo(suffixFile))
-            throw new IOException("failed to rename file");
+            throw new IOException("failed to rename existing file to old file");
 
         //RENAME THE NEW FILE TO EXISTING FILE
         suffixFile = new File(fileWithSuffixNew);
-        suffixFile.renameTo(new File(file));
+        if(!suffixFile.canWrite()||!suffixFile.renameTo(new File(file))){
+            throw new IOException("failed to rename new file to existing file");
+        }
 
         //PERFORM BACKUP
         //performBackup(new File(file));
@@ -237,7 +239,7 @@ public class Dataset implements Serializable{
             new File(file.getParent()+File.separator+"backups").mkdir();
         }
         String backupPath = file.getParent()+File.separator+"backups";
-        DateFormat df = new SimpleDateFormat("dd.MM.yy.HH:mm:ss");
+        DateFormat df = new SimpleDateFormat("dd-MM-yy-HH.mm.ss");
         Date dateobj = new Date();
         String timestamp = "."+df.format(dateobj);
         String backupFilePath = backupPath+File.separator+file.getName()+timestamp;

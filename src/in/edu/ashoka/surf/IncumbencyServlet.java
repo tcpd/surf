@@ -54,7 +54,7 @@ public class IncumbencyServlet extends HttpServlet {
             assignAttributes(request, session, "userName", "Name Not Specified",false);
             assignAttributes(request, session, "email", "email Not Specified",false);
             assignAttributes(request, session, "onlyWinners", "false", false);
-            assignAttributes(request, session, "comparatorType", "alphabetical", false);
+            assignAttributes(request, session, "comparatorType", "confidence", false);
             assignAttributes(request, session, "searchValue", null, false);
 
             setUpMergeManager(request, request.getSession().getAttribute("algorithm").toString());

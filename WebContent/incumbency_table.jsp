@@ -1,7 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"
-import="in.edu.ashoka.lokdhaba.Row"
-import="in.edu.ashoka.lokdhaba.MergeManager"
+import="in.edu.ashoka.surf.Row"
+import="in.edu.ashoka.surf.MergeManager"
+import="in.edu.ashoka.surf.Row"
+import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
 import="com.google.common.collect.Multimap"
 %>
@@ -10,6 +12,8 @@ import="com.google.common.collect.Multimap"
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="style.css">
@@ -63,28 +67,15 @@ import="com.google.common.collect.Multimap"
 	       	<div class="filterForm">
 				<form class="form" role="filter" method="get" action="${pageContext.request.contextPath}/IncumbencyServlet" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">
 					<div class="form-group">
-						<%
-							//script for loading the settings
-
-						%>
-							Dataset:
-							<select class="form-control" name="dataset" id="dataset">
-							<!--MODIFY HERE -->
-							
-							<c:forEach var="name" items="${datasetName}">
-								<option value="${name}"><c:out value="${datasetDescription.get(name)}"></c:out></option>
-							</c:forEach>
-							</select>
-					</div>
-					<div class="form-group">
 						Algorithm:
 						<select class="form-control" name="algorithm" id="algorithm">
 								<option value="exactSameName">Exact Same Name</option>
 								<option value="exactSameNameWithConstituency">Exact Same Name with Constituency</option>
 								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
 								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
-								<option value="dummyAllName">All names</option>
+								<option value="compatibleNames">Compatible names in same constituency</option>
 								<option value="search">Search</option>
+								<option value="dummyAllName">All names</option>
 						</select>
 					</div>
 					<div class="form-group">
@@ -139,7 +130,7 @@ import="com.google.common.collect.Multimap"
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">Surf</a>
+					<span class="logo" style="font-size:30px">Surf</span>
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton" onclick="$('#loading').fadeIn()"/>

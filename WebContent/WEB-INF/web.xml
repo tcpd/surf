@@ -12,22 +12,21 @@
     <servlet-name>IncumbencyTable</servlet-name>
     <url-pattern>/incumbency_table.jsp</url-pattern>
   </servlet-mapping>
-  <!-- <context-param>
-  	<param-name>upPath</param-name>
-    <param-value>/home/sudx/lokdhaba.java/lokdhaba/GE/candidates/csv/dummy_yolo.csv</param-value>
-  </context-param> -->
-  <context-param>
-  	<param-name>UP_Path</param-name>
-    <param-value>/home/sudx/tcpd/incumbency/mastersheets/mastersheet_UP_UK_test.csv</param-value>
-  </context-param>
-  <context-param>
-  	<description></description>
-  	<param-name>UP_Description</param-name>
-    <param-value>UP Election Candidates</param-value>
-  </context-param>
-  <!-- <context-param>
-  	<description></description>
-  	<param-name>upDescription</param-name>
-    <param-value>YOLO Candidate</param-value>
-  </context-param> -->
+
+  <filter>
+    <filter-name>LoggingFilter</filter-name>
+    <filter-class>
+      edu.stanford.muse.webapp.LoggingFilter
+    </filter-class>
+    <init-param>
+      <param-name>test-param</param-name>
+      <param-value>This parameter is for testing.</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>LoggingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
 </web-app>

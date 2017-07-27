@@ -1,12 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"
-import="java.io.*"
-import="in.edu.ashoka.lokdhaba.SurfExcel"
-import="in.edu.ashoka.lokdhaba.Dataset"
 import="in.edu.ashoka.lokdhaba.Row"
 import="in.edu.ashoka.lokdhaba.MergeManager"
 import="java.util.*"
-import="in.edu.ashoka.lokdhaba.Bihar"
 import="com.google.common.collect.Multimap"
 %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>

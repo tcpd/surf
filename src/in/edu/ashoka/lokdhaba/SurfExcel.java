@@ -181,7 +181,7 @@ public class SurfExcel {
                 if (key2.length() - key1.length() > maxEditDistance) // no need to compare because of length difference, but the remaining key2's could still match
                     continue;
                 if (Util1.editDistance(key1, key2) <= maxEditDistance)
-                    result.add(new Pair<String, String>(key1, key2));
+                    result.add(new Pair<>(key1, key2));
             }
 
         return result;

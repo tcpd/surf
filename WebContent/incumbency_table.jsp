@@ -2,6 +2,8 @@
 pageEncoding="UTF-8"
 import="in.edu.ashoka.surf.Row"
 import="in.edu.ashoka.surf.MergeManager"
+import="in.edu.ashoka.surf.Row"
+import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
 import="com.google.common.collect.Multimap"
 %>

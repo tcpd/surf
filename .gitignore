@@ -1,14 +1,84 @@
-/build/
-.classpath
-.idea/compiler.xml
-.idea/copyright/profiles_settings.xml
-.idea/libraries/muse_1_0_0_SNAPSHOT_classes.xml
-.idea/misc.xml
-.idea/workspace.xml
-.project
-.settings/.jsdtscope
-.settings/org.eclipse.jdt.core.prefs
-.settings/org.eclipse.wst.common.component
-.settings/org.eclipse.wst.common.project.facet.core.xml
-.settings/org.eclipse.wst.jsdt.ui.superType.container
-.settings/org.eclipse.wst.jsdt.ui.superType.name
+/out
+/build
+/target
+/assembly
+/target
+/target
+/\.settings
+*.zip
+*.nt
+*.ser
+*.model
+*~
+\#*\#
+/src/resources/models/
+/results
+/target
+/test
+/target
+/\.idea
+*.iml
+=======
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+# *.7z
+# *.dmg
+# *.gz
+# *.iso
+# *.rar
+# *.tar
+# *.zip
+# *.war
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.tmp
+
+# backups and recovered files
+#####################
+*~
+\#*\#
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+#git files#
+#####################
+*.iml
+*.json
+*.git
+/target
+/dist
+/deps
+/target
+/.extract
+/wiki
+/indexes
+/.idea
+/WebContent/WEB-INF/classes/instance_types_2015-04.en.txt.bz2
+/WebContent/WEB-INF/classes/instance_types_2014-04.en.txt.bz2
+/WebContent/WEB-INF/classes/models
+*~
+*.swp
+*.swo

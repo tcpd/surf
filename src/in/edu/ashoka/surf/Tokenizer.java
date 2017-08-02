@@ -174,9 +174,12 @@ public class Tokenizer {
             token = token.replaceAll("KUMAR", "");
             token = token.replaceAll("SARDAR", "");
             token = token.replaceAll("PANDIT", "");
+            token = token.replaceAll("MAULANA", "");
 
             // remove bhai suffix
             token = token.replaceAll("BAI", "");
+            token = token.replaceAll("BHAI", "");
+            token = token.replaceAll("BEN", "");
 
             token = token.replaceAll(" ", "");
             if(!token.equals(""))

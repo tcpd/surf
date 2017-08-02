@@ -17,7 +17,7 @@
 	<link rel="stylesheet" href="css/main.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
 
-	<script src="js/jquery-1.12.1.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
 	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="js/selectpicker.js"></script>
 

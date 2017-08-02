@@ -203,7 +203,7 @@ function saveFilterSettings(){
     var expdate = new Date ()
     expdate.setTime (expdate.getTime() + (expdays*24*60*60*1000)); // expiry date
     setCookie("algorithm",document.getElementById("algorithm").value,expdate);
-    setCookie("dataset",document.getElementById("dataset").value,expdate);
+    //setCookie("dataset",document.getElementById("dataset").value,expdate);
     setCookie("onlyWinners",document.getElementById("onlyWinners").value,expdate);
 }
 
@@ -223,7 +223,7 @@ function loadFilterSettings(){
 
     $(function () {
         $("#algorithm").val(filterVariables[0]);
-        $("#dataset").val(filterVariables[1]);
+        //$("#dataset").val(filterVariables[1]);
         $("#onlyWinners").val(filterVariables[2]);
         $("#algo-arg").val(filterVariables[3]);
         $("#comparatorType").val(filterVariables[4]);
@@ -353,6 +353,12 @@ $(window).on("load",function(){
 });
 //Script for Search button
 $(window).on("load", function () {
+    $('form').on('keyup keypress', function(e) {
+        var keyCode = e.keyCode || e.which;
+        if (keyCode === 13) {
+            e.preventDefault();
+        }
+    });
     $("#searchValue").bind("enterKey",function (e) {
         $("#searchButton").click();
     });

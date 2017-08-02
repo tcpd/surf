@@ -468,7 +468,7 @@ for(var i = 0; i < values.length; i++) {
 //CREATE VARIABLES TO BE USED AS LOADING VARIABLES
 var filterVariables = new Array();
 filterVariables[0]=('${algorithm}')
-filterVariables[1]=('${dataset}')
+filterVariables[1]=null
 filterVariables[2]=('${onlyWinners}')
 filterVariables[3]=(<%=(session.getAttribute("algo-arg").equals(""))?"\'\'":"'"+(String)session.getAttribute("algo-arg")+"'"%>);
 filterVariables[4]=('${comparatorType}')

@@ -86,7 +86,7 @@ public class Config {
     static boolean removeSuccessiveSameCharacters = true;
 
     // these will be customized per dataset, or even by the user at run time
-    public static String[] columnsToDisplay = new String[]{"Name", "Sex", "Year", "Constituency", "Party", "State", "Position", "Votes"};
+    public static String[] columnsToDisplay = new String[]{"Name", "Sex", "Year", "Constituency", "Party", "State", "Position", "Votes"}; // State can probably be taken out for AE, and put in only for GE
     public static String mappedIdColumn = "pid"; // name of column into which output id's will be written
     public static String primaryColumn = "Name"; // name of primary column that is being merged
     public static String secondaryColumn = "AC_no"; // name of secondary column by which fields can be grouped (may or may not be visible on screen)

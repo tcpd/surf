@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /*
 VIP class. This class has constants/settings that generally do not change during an ePADD execution, and are set only at startup.
@@ -17,6 +18,73 @@ Some settings have a default.
 Similarly, resource files should be read only through this class. Resource files are not expected to change during one execution of epadd.
  */
 public class Config {
+    // replacements applied at a per-token level
+
+    static String[] replacements = new String[]{
+            "[^A-Za-z\\s]", "",
+            "NAYAK", "NAIK",
+            "IYA", "IA", // # RAJORIA vs RAJORIYA
+            "AGRA", "AGAR", // AGRAWAL vs AGARWAL
+            "KER", "KAR", // SONKAR vs SONKER
+            "HAR", "HR", // e.g. VOHARA vs VOHRA
+            "HAT", "HT", // e.g. MAHATAB vs MAHTAB
+            "RAT", "RT", // e.g. BHARATENDRA vs BHARTENDRA
+            "RAJ", "RJ", // e.g. NEERJA vs NEERAJA
+            "SAL", "SL", // e.g. BHONSALE vs BHONSLE
+            "NAG", "NG", // e.g. WANAGE vs WANGE. Why, even HANAGAL vs HANGAL
+
+            // phonetic corrections
+            "TH", "T",
+            "V", "W",
+            "GH", "G",
+            "BH", "B",
+            "DH", "D",
+            "JH", "J",
+            "KH", "K",
+            "MH", "M",
+            "PH", "F",
+            "SH", "S",
+            "JH", "Z", // JHAVERI vs ZAVERI
+            "Z", "S",
+            "Y", "I",
+            "AU", "OU",
+            "OO", "U",
+            "EE", "I",
+            "KSH", "X",
+            "Q", "K",
+            "OW", "OU", // e.g. chowdhury, choudhury
+             // standardize the mohammads
+            "MD", "MOHAMMAD",
+            "MOHAMAD", "MOHAMMAD",
+            "MOHAMED", "MOHAMMAD",
+            "PD", "PRASAD",
+            "PR", "PRASAD",
+            "SINH$", "SING",
+
+            // remove an A at the end of a token, e.g. SHATRUGHAN vs SHATRUGHANA
+            "(.+)A", "\\\\1",
+
+            // suffix removal
+            "BAI$", "",
+            "BHAI$", "",
+            "BEN$", "",
+            "JI$", "",
+            "LAL$", "",
+            "KUMAR$", ""
+    };
+
+    static String ignoreTokens[] = new String[] {"MR", "MRS", "PROF", "DR",
+            "SHRI", "SMT", "SHRIMATI", "KM", "SUSRI",
+            "ENG", "ADV", "ADVOCATE",
+            "COL", "GENERAL", "GEN", "RETD", "RETIRED",
+            "ALIAS", "URF", "URPH",
+            "CHH", // for CHHATRAPATI, as in SHRIMANT CHH. UDAYANRAJE PRATAPSINHA BHONSALE. Really?
+            "SARDAR", "PANDIT", "PT", "MAULANA", "THIRU"};
+
+    static Set<String> ignoreTokensSet = new LinkedHashSet<>(Arrays.asList(ignoreTokens));
+
+    static boolean removeSuccessiveSameCharacters = true;
+
     public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
     public static Map<String, String> keyToPath  = new LinkedHashMap<>(), keyToDescription = new LinkedHashMap<>();

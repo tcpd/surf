@@ -105,8 +105,8 @@ import="com.google.common.collect.Multimap"
 					<div class=form-group>
 						Sort Order:
 						<select id="comparatorType" class="form-control" name="comparatorType">
-							<option value="alphabetical">Alphabetical</option>
 							<option value="confidence">By Confidence</option>
+							<option value="alphabetical">Alphabetical</option>
 						</select>
 					</div>
 				<div class="modal-footer">
@@ -262,11 +262,11 @@ import="com.google.common.collect.Multimap"
 					%>
 						<tr <%=rowStyleData %>>
 							<td colspan="7">
-								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select all for Merging</button>
+								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select and merge all</button>
 							</td>
 							<td colspan="5">
-								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Select all as Done</button>
-								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Select Up till here as Done</button>
+								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Mark as Done</button>
+								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Merge all groups above</button>
 							</td>
 						</tr>
 					<%

@@ -1,12 +1,6 @@
 package in.edu.ashoka.surf;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
@@ -18,6 +12,16 @@ import edu.stanford.muse.util.Util;
 
 public class Tokenizer {
     static String DELIMITERS = " -.,;:/'\\t<>\"`()@1234567890";
+
+    private static List<Pattern> replacementPatterns;
+    static {
+        // precompile patterns for performance. the patterns to be replaced
+        // // replacements is an array 2X the size of replacementPatterns.
+        replacementPatterns = new ArrayList<>();
+        for (int i = 0; i < Config.replacements.length; i += 2) {
+            replacementPatterns.add(Pattern.compile(Config.replacements[i]));
+        }
+    }
 
     /** generates weighted token counts for tokens in each key. the count of a key (token) in the multiset is its weight. */
     private static Multiset<String> generateTokens(Multimap<String, Row> map) {
@@ -116,76 +120,55 @@ public class Tokenizer {
         }
     }
 
-    static String[] replacements = new String[]{"[^A-Za-z\\s]", "", "TH", "T", "V", "W", "GH", "G", "BH", "B", "DH", "D", "JH", "J", "KH", "K", "MH", "M", "PH", "P", "SH", "S","ZH", "Z", "Z", "S","Y","I","AU", "OU","OO", "U","EE", "I", "KSH", "X","Q","K"};
-    static List<Pattern> replacementPatterns;
-    static {
-        // precompile patterns for performance. the patterns to be replaced
-        // // replacements is an array 2X the size of replacementPatterns.
-        replacementPatterns = new ArrayList<>();
-        for (int i = 0; i < replacements.length; i += 2) {
-            replacementPatterns.add(Pattern.compile(replacements[i]));
-        }
-    }
-
     /** canonicalizes Indian variations of spellings and replaces a run of repeated letters by a single letter */
     public static String canonicalizeDesi(String s)
     {
-        for (int i = 0; i < replacementPatterns.size(); i++) {
-            s = replacementPatterns.get(i).matcher(s).replaceAll(replacements[2*i+1]);
-        }
-        char prev = ' ';
 
-        // remove successive, duplicate chars, e.g.
-        //  LOOK MAN SINGH RAI
-        // LOKMAN SINGH RAI
-        StringBuilder result = new StringBuilder();
-        for (char c : s.toCharArray())
-        {
-            if (c != prev)
-                result.append(c);
-            prev = c;
+        if (Config.removeSuccessiveSameCharacters) {
+            char prev = ' ';
+
+            // remove successive, duplicate chars, e.g.
+            //  LOOK MAN SINGH RAI
+            // LOKMAN SINGH RAI
+            StringBuilder sb = new StringBuilder();
+            for (char c : s.toCharArray()) {
+                if (c != prev)
+                    sb.append(c);
+                prev = c;
+            }
+            s = sb.toString();
         }
+
 //        if (!s.equals(result.toString()))
 //           out.println ("canonical: " + s + " -> " + result);
 
+        StringBuilder result = new StringBuilder();
+
         // these are from Gilles
-        List<String> tokens = Util.tokenize(result.toString());
-        result.delete(0, result.length());
+        List<String> tokens = Util.tokenize(s);
         for (int i=0; i<tokens.size(); i++) {
             String token = tokens.get(i);
-            token = token.replaceAll("MD", "MOHAMMAD");
-            token = token.replaceAll("MOHAMED", "MOHAMMAD");
-            token = token.replaceAll("MOHMED", "MOHAMMAD");
-            token = token.replaceAll("PT", "PANDIT");
-            token = token.replaceAll("PD", "PRASAD");
-            token = token.replaceAll("PR", "PRASAD");
+
+            // special case hack: according to Gilles, KU in the middle of a name is KUMAR, but at the beginning its likely to be KUNWAR
             if (i == 0)
-                token = token.replaceAll("KU", "KUNWAR");
+                token = token.replaceAll("^KU$", "KUNWAR");
             else
-                token = token.replaceAll("KU", "KUMAR"); // according to Gilles, KU in the middle of a name is KUMAR, but at the beginning its likely to be KUNWAR
+                token = token.replaceAll("^KU$", "KUMAR");
+
+            for (int j = 0; j < replacementPatterns.size(); j++) {
+                s = replacementPatterns.get(j).matcher(s).replaceAll(Config.replacements[2*j+1]);
+            }
 
             // ignore titles
-            token = token.replaceAll("DR", "");
-            token = token.replaceAll("MR", "");
-            token = token.replaceAll("MRS", "");
-            token = token.replaceAll("SMT", "");
-            token = token.replaceAll("ENG", "");
-            token = token.replaceAll("ADV", "");
-            token = token.replaceAll("KUMAR", "");
-            token = token.replaceAll("SARDAR", "");
-            token = token.replaceAll("PANDIT", "");
-            token = token.replaceAll("MAULANA", "");
-
-            // remove bhai suffix
-            token = token.replaceAll("BAI", "");
-            token = token.replaceAll("BHAI", "");
-            token = token.replaceAll("BEN", "");
+            if (Config.ignoreTokensSet.contains(token))
+                continue;
 
             token = token.replaceAll(" ", "");
-            if(!token.equals(""))
-                result.append(token);
-            if(i!=tokens.size()-1)
-                result.append(" ");
+            if (token.length() < 1)
+                continue;
+
+            result.append(token);
+            result.append(" ");
         }
         return result.toString();
     }

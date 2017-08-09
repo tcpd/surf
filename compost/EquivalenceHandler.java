@@ -23,7 +23,7 @@ public class EquivalenceHandler {
             String[] equivs = line.split("=");
             Arrays.sort(equivs); // sort alphabetically
             if (equivs.length != 2) {
-                SurfExcel.warn("Bad input at line# " + lineNum + " in " + equivalenceFile + ": " + line);
+                SurfExcel.warn("Bad input at line# " + lineNum + "in " + equivalenceFile + ": " + line);
                 continue;
             }
 

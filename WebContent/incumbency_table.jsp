@@ -155,8 +155,8 @@ import="com.google.common.collect.Multimap"
 						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterParamNav %></a></li>
 						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterValueNav %></a></li>
 						</ol>
-						<li><div class="navbar-text"><%= progressData[3] %> Total Groups</div></li>
-						<li><div class="navbar-text"><%= progressData[1] %> Total Records</div></li>
+						<li><div class="navbar-text"><%= progressData[3] %> Groups</div></li>
+						<li><div class="navbar-text"><%= progressData[1] %> Records</div></li>
 						<li><div class="navbar-text"><%= progressData[4] %> Records Reviewed</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
 <!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
@@ -282,8 +282,10 @@ import="com.google.common.collect.Multimap"
 				}
 				else{rowStyleData = "class=\""+rowCompletionColor+" \""; isChildPerson=true;}
 				pageContext.setAttribute("isChildPerson",isChildPerson);	//needed for jstl later on
+				String hoverText = "ID: " + row.get("ID") + " Person ID: " + row.get("mapped_ID");
 %>
-			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
+
+			<tr <%=rowStyleData %> ${groupId} title="<%=hoverText%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
 				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
 				<td class="cell-table table-cell-name">
 					<a href="http://www.google.com/search?q=<%=row.get("Name").replace(" ","+")+"+"+row.get("PC_name").replace(" ","+")+"+"+row.get("Year")%>" target="_blank">
@@ -470,7 +472,7 @@ for(var i = 0; i < values.length; i++) {
 //CREATE VARIABLES TO BE USED AS LOADING VARIABLES
 var filterVariables = new Array();
 filterVariables[0]=('${algorithm}')
-filterVariables[1]=('${dataset}')
+filterVariables[1]=null
 filterVariables[2]=('${onlyWinners}')
 filterVariables[3]=(<%=(session.getAttribute("algo-arg").equals(""))?"\'\'":"'"+(String)session.getAttribute("algo-arg")+"'"%>);
 filterVariables[4]=('${comparatorType}')

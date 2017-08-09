@@ -44,6 +44,9 @@ public abstract class MergeManager {
 			cnm.setFields("cand1", "acname"); // this will be changed to PC_name for GE??
 			mergeManager = cnm;
 		}
+		else if(algo.equals("search")){
+			mergeManager = new SearchMergeManager(d, arguments);
+		}
 		else{}
 		return mergeManager;
 	}

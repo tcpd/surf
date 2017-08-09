@@ -7,29 +7,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1802474-0326-4c22-b49a-ab380f77a67b" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/copyright/profiles_settings.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_guava_guava_18_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_2.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__javax_servlet_javax_servlet_api_3_0_1.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__javax_servlet_jstl_1_2.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_16.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_csv_1_1.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_5.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_log4j12_1_7_5.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/lib.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/muse_1_0_0_SNAPSHOT_classes.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/EquivalenceHandler.java" afterPath="$PROJECT_DIR$/compost/EquivalenceHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/helper.js" afterPath="$PROJECT_DIR$/WebContent/helper.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/incumbency_table.jsp" afterPath="$PROJECT_DIR$/WebContent/incumbency_table.jsp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/index.jsp" afterPath="$PROJECT_DIR$/WebContent/index.jsp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/surf.iml" afterPath="$PROJECT_DIR$/surf.iml" />
     </list>
     <ignored path="er.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -74,14 +54,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SurfExcel.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SurfExcel.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/SurfExcel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state relative-caret-position="105">
+              <caret line="7" column="27" lean-forward="true" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="27" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -181,11 +159,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Config.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Config.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="145">
-              <caret line="100" column="38" lean-forward="false" selection-start-line="100" selection-start-column="38" selection-end-line="100" selection-end-column="38" />
+            <state relative-caret-position="267">
+              <caret line="94" column="0" lean-forward="true" selection-start-line="88" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -262,9 +240,10 @@
         <option value="$PROJECT_DIR$/WebContent/upload.jsp" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/CanonMiner.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Tokenizer.java" />
-        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" />
         <option value="$PROJECT_DIR$/WebContent/helper.js" />
         <option value="$PROJECT_DIR$/WebContent/incumbency_table.jsp" />
+        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/SurfExcel.java" />
+        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" />
       </list>
     </option>
   </component>
@@ -1282,12 +1261,12 @@
       <workItem from="1501078717056" duration="204000" />
       <workItem from="1501079005448" duration="8313000" />
       <workItem from="1501935493217" duration="3866000" />
-      <workItem from="1502178601844" duration="12454000" />
+      <workItem from="1502178601844" duration="12784000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="50912000" />
+    <option name="totallyTimeSpent" value="51242000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-13" y="23" width="1440" height="873" extended-state="0" />
@@ -1688,14 +1667,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="145">
-          <caret line="100" column="38" lean-forward="false" selection-start-line="100" selection-start-column="38" selection-end-line="100" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/WebContent/index.jsp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="292">
@@ -1781,11 +1752,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/SurfExcel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state relative-caret-position="105">
+          <caret line="7" column="27" lean-forward="true" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="267">
+          <caret line="94" column="0" lean-forward="true" selection-start-line="88" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>

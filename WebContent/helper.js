@@ -263,17 +263,18 @@ function selectAllRowsInGroupForDone(groupID){
 }
 
 function selectUpTillHereForDone(groupID){
-    userConsent = confirm("This will mark all rows from the top to up till previous group as Done. Proceed?")
+    nGroupID = parseInt(groupID.substring(1))
+    userConsent = confirm("This will merge all rows in the " + (nGroupID-1) + " preceding groups. Proceed?")
     if(userConsent){
-        nGroupID = parseInt(groupID.substring(1))
         for(var i=0; i<nGroupID; i++){
-            selectAllRowsInGroupForDone('g'+i)
+//            selectAllRowsInGroupForDone('g'+i)
+            selectAllRowsInGroupForMerge('g'+i)
         }
     }
 }
 
 function resetButtonPressed(){
-    userConsent = confirm("Warning: All the Rows in the Dataset will be marked as not Done. Only do this if you have switched to new algorithm and want to re-evaluate the mappings.");
+    userConsent = confirm("Warning: All rows in the dataset will be marked \"Not Done\". Are you sure");
     if(userConsent){
         return true;
     }

@@ -105,8 +105,8 @@ import="com.google.common.collect.Multimap"
 					<div class=form-group>
 						Sort Order:
 						<select id="comparatorType" class="form-control" name="comparatorType">
-							<option value="alphabetical">Alphabetical</option>
 							<option value="confidence">By Confidence</option>
+							<option value="alphabetical">Alphabetical</option>
 						</select>
 					</div>
 				<div class="modal-footer">
@@ -155,8 +155,8 @@ import="com.google.common.collect.Multimap"
 						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterParamNav %></a></li>
 						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterValueNav %></a></li>
 						</ol>
-						<li><div class="navbar-text"><%= progressData[3] %> Total Groups</div></li>
-						<li><div class="navbar-text"><%= progressData[1] %> Total Records</div></li>
+						<li><div class="navbar-text"><%= progressData[3] %> Groups</div></li>
+						<li><div class="navbar-text"><%= progressData[1] %> Records</div></li>
 						<li><div class="navbar-text"><%= progressData[4] %> Records Reviewed</div></li>
 						<li><div class="navbar-text"><%= userName%></div></li>
 <!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
@@ -262,11 +262,11 @@ import="com.google.common.collect.Multimap"
 					%>
 						<tr <%=rowStyleData %>>
 							<td colspan="7">
-								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select all for Merging</button>
+								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select and merge all</button>
 							</td>
 							<td colspan="5">
-								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Select all as Done</button>
-								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Select Up till here as Done</button>
+								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Mark as Done</button>
+								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Merge all groups above</button>
 							</td>
 						</tr>
 					<%
@@ -282,8 +282,10 @@ import="com.google.common.collect.Multimap"
 				}
 				else{rowStyleData = "class=\""+rowCompletionColor+" \""; isChildPerson=true;}
 				pageContext.setAttribute("isChildPerson",isChildPerson);	//needed for jstl later on
+				String hoverText = "ID: " + row.get("ID") + " Person ID: " + row.get("mapped_ID");
 %>
-			<tr <%=rowStyleData %> ${groupId} title="ID- <%=row.get("ID")%>, Person ID- <%=row.get("mapped_ID")%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
+
+			<tr <%=rowStyleData %> ${groupId} title="<%=hoverText%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
 				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
 				<td class="cell-table table-cell-name">
 					<a href="http://www.google.com/search?q=<%=row.get("Name").replace(" ","+")+"+"+row.get("PC_name").replace(" ","+")+"+"+row.get("Year")%>" target="_blank">

@@ -77,7 +77,7 @@ public class Bihar extends Object {
 
         out.println (SEPARATOR + " Checking for ac_names with same canonicalized value");
         Display.displaySimilarValuesForField(allRows, "AC_name", 2, 3 /* max rows */);
-        SurfExcel.assignUnassignedIds(allRows, "AC_name");
+        //SurfExcel.assignUnassignedIds(allRows, "AC_name");
         SurfExcel.profile(allRows, "AC_name");
 
         // perform some consistency checks

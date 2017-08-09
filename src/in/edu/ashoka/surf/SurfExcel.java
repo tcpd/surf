@@ -437,17 +437,39 @@ public class SurfExcel {
         return result;
     }
 
-	public static void assignUnassignedIds(Collection<Row> allRows, String columnId) {
+    /*This method tries to generate values for ID & mapped_ID*/
+	public static void assignUnassignedIds(Collection<Row> allRows) {
 		// any row which doesn't have an id assigned to it. Should be assigned one here. Each row is assigned a unique number
-		
-		long count=1;
-		
-			for(Row row:allRows){
-				row.set(columnId, String.valueOf(count));
-				count++;
-			}
-		
-		
+		Map<String,Boolean> pidMap = new HashMap<>();
+		//If encountering pid for the first time add the same to ID
+		for(Row row: allRows){
+		    if((!row.get("mapped_ID").equals("")||!row.get("mapped_ID").equals("NA")) && (pidMap.get(row.get("mapped_ID"))==null || pidMap.get(row.get("mapped_ID")).equals(false))){
+		        row.set("ID",row.get("mapped_ID"));
+		        pidMap.put(row.get("mapped_ID"),true);
+            }
+        }
+        long tempID = 1;
+		for(Row row:allRows){
+		    //IF ID is assigned, don't do anything
+		    if(!row.get("ID").equals(""))
+		        continue;
+		    while(!(pidMap.get(String.valueOf(tempID))==null||pidMap.get(String.valueOf(tempID)).equals(false)))
+                tempID++;
+		    if(pidMap.get(String.valueOf(tempID))==null||pidMap.get(String.valueOf(tempID)).equals(false)){
+                row.set("ID",String.valueOf(tempID));
+                if(row.get("mapped_ID").equals(""))
+                    row.set("mapped_ID",String.valueOf(tempID));
+                pidMap.put(String.valueOf(tempID),true);
+            }
+        }
+        //Perform checks
+        Map<String, Boolean> checkMap = new HashMap<>();
+		for(Row row:allRows){
+		    if(checkMap.get(row.get("ID"))!=null)
+		        throw new InputMismatchException();
+		    checkMap.put(row.get("ID"),true);
+        }
+
 	}
 
 

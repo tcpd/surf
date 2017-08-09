@@ -84,17 +84,17 @@ public abstract class MergeManager {
     
 	//initialize the id's for each row
 	final public void initializeIds(){
-		SurfExcel.assignUnassignedIds(d.getRows(), "ID");
-		SurfExcel.assignUnassignedIds(d.getRows(), "mapped_ID");
+		SurfExcel.assignUnassignedIds(d.getRows());
 	}
 	
 	public final void performInitialMapping(){
 		rowToId = new HashMap<>();
 		idToRow = new HashMap<>();
 		for(Row row:d.getRows()){
-    		rowToId.put(row, row.get("ID"));
+    		rowToId.put(row, row.get("mapped_ID"));
     		idToRow.put(row.get("ID"), row);
-    		row.set("comments", ""); 	//set comments to empty on initial mapping
+    		if(row.get("comments").equals(""))
+    			row.set("comments", ""); 	//set comments to empty on initial mapping
     	}
 	}
 	

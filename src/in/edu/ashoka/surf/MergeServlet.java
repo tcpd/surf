@@ -15,10 +15,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Servlet implementation class IncumbencyServlet
+ * Servlet implementation class MergeServlet
  */
-@WebServlet("/IncumbencyServlet")
-public class IncumbencyServlet extends HttpServlet {
+@WebServlet("/merge")
+public class MergeServlet extends HttpServlet {
 	public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
 
 	private static final long serialVersionUID = 1L;
@@ -33,7 +33,7 @@ public class IncumbencyServlet extends HttpServlet {
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public IncumbencyServlet() {
+    public MergeServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -69,7 +69,7 @@ public class IncumbencyServlet extends HttpServlet {
 
             boolean shouldSave=false;
 			if(saveButtonPressed(request)){
-				shouldSave = updateTable(request, request.getParameter("submit").equals("Force Merge"));
+				shouldSave = updateTable(request, request.getParameter("submit").equals("Force MergeServlet"));
 			}
 			else if (resetButtonPressed(request)){
 				mergeManager.resetIsDone();
@@ -80,11 +80,11 @@ public class IncumbencyServlet extends HttpServlet {
 			}
 
             checkFilterParameters(request);
-            generateIncumbents(request.getSession());
-            generateIncumbentsView(request);
+            generateGroups(request.getSession());
+            generateGroupsView(request);
 
-            request.getSession().setAttribute("mergeManager", mergeManager);
-            request.getRequestDispatcher("/incumbency_table.jsp").forward(request, response);
+            session.setAttribute("mergeManager", mergeManager);
+            request.getRequestDispatcher("/table.jsp").forward(request, response);
 
             //Handle csv write after the page has been redirected to save waiting time
 			if(shouldSave){
@@ -97,8 +97,6 @@ public class IncumbencyServlet extends HttpServlet {
         }
 
 	}
-	
-	
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
@@ -115,7 +113,7 @@ public class IncumbencyServlet extends HttpServlet {
 
 	//Handles button pressed action for both save as well as force merge button
 	private boolean saveButtonPressed(HttpServletRequest request){
-		return (request.getParameter("submit")!=null && (request.getParameter("submit").equals("Save")||(request.getParameter("submit").equals("Force Merge"))));
+		return (request.getParameter("submit")!=null && (request.getParameter("submit").equals("Save")||(request.getParameter("submit").equals("Force MergeServlet"))));
 	}
 
 	private boolean resetButtonPressed(HttpServletRequest request){
@@ -306,8 +304,8 @@ public class IncumbencyServlet extends HttpServlet {
 			
 	}
 	
-	private void generateIncumbents(HttpSession session){
-		ArrayList<Multimap<String, Row>> incumbentsList;
+	private void generateGroups(HttpSession session){
+		ArrayList<Multimap<String, Row>> groupsList;
 		String filterParam = session.getAttribute("filterParam").toString();
 	    String [] filterValue = (String [])session.getAttribute("filterValue");
 	    boolean onlyWinners = session.getAttribute("onlyWinners").toString().equals("true");
@@ -318,18 +316,17 @@ public class IncumbencyServlet extends HttpServlet {
 	    //SORT HAPPENING HERE
 	    mergeManager.sort((String)session.getAttribute("comparatorType"));
 
-	    //WORKING WITH FILTER PARAMETERS & GENERATING INCUMBENTS LIST
-  		incumbentsList = mergeManager.getIncumbents(filterParam,filterValue,onlyWinners,searchQuery);
+	    //WORKING WITH FILTER PARAMETERS & GENERATING Groups LIST
+  		groupsList = mergeManager.getGroups(filterParam,filterValue,onlyWinners,searchQuery);
   				
-  		int[] progressData = mergeManager.getListCount(incumbentsList);
+  		int[] progressData = mergeManager.getListCount(groupsList);
   		
   		//Setting up Incumbents list and progress related data
   		session.setAttribute("progressData", progressData);
-		session.setAttribute("incumbentsList", incumbentsList);
-		
+		session.setAttribute("groupsList", groupsList);
 	}
 	
-	public void generateIncumbentsView(HttpServletRequest request){
+	public void generateGroupsView(HttpServletRequest request){
 		
 		HttpSession session = request.getSession();
 		//set defaults
@@ -340,22 +337,21 @@ public class IncumbencyServlet extends HttpServlet {
 			page = Integer.parseInt(request.getParameter("page"));
 		}
 		
-		
-		ArrayList<Multimap<String, Row>> incumbentsList = (ArrayList<Multimap<String, Row>>) session.getAttribute("incumbentsList");
+		ArrayList<Multimap<String, Row>> groupsList = (ArrayList<Multimap<String, Row>>) session.getAttribute("groupsList");
 		ArrayList<Multimap<String, Row>> subList;
-		if(incumbentsList.size()>recordsPerPage){
+		if(groupsList.size()>recordsPerPage){
 			int high = page*recordsPerPage;
-			if(incumbentsList.size()<high){
-				high=incumbentsList.size();
+			if(groupsList.size()<high){
+				high=groupsList.size();
 			}
-			subList = new ArrayList<>(incumbentsList.subList((page-1)*recordsPerPage, high));
+			subList = new ArrayList<>(groupsList.subList((page-1)*recordsPerPage, high));
 		}
 		else{
-			subList = incumbentsList;
+			subList = groupsList;
 		}
 		
 		
-		int noOfRecords = incumbentsList.size();
+		int noOfRecords = groupsList.size();
 				
 		int noOfPages = (int) Math.ceil(noOfRecords*1.0/recordsPerPage);
 		session.setAttribute("subList", subList);

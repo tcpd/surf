@@ -3,6 +3,10 @@ https://en.wikipedia.org/wiki/Metaphone#Metaphone_3
 http://aspell.net/metaphone/dmetaph.cpp
 Code: https://github.com/OpenRefine/OpenRefine/blob/master/main/src/com/google/refine/clustering/binning/Metaphone3.java
 
+OpenRefine uses apache codec for cologne phonetic.
+Cologne phonetics:
+https://en.wikipedia.org/wiki/Cologne_phonetics
+(See lucene: https://lucene.apache.org/core/6_1_0/analyzers-phonetic/org/apache/lucene/analysis/phonetic/package-summary.html)
 
 OpenRefine clustering algorithms:
 https://github.com/OpenRefine/OpenRefine/wiki/Clustering-In-Depth

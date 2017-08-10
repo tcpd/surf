@@ -214,7 +214,7 @@ function loadFilterSettings(){
         document.getElementById("dataset").value = getCookie("dataset");
     if(getCookie("onlyWinners")!="")
         document.getElementById("onlyWinners").value = getCookie("onlyWinners");*/
-    //CHECK incumbency_table.jsp FOR filterVariables value.
+    //CHECK table.jsp FOR filterVariables value.
 
     /*document.getElementById("algorithm").value = filterVariables[0]
     document.getElementById("dataset").value = filterVariables[1]

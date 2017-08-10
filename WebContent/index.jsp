@@ -27,7 +27,7 @@
 <div class="logo" style="text-align:center">Surf</div>
 
 <div class="user-input">
-<form action="IncumbencyServlet" method="get">
+<form action="merge" method="get">
 	<div class="form-group">
 		<label for="userName">Username</label>
 		<input type="text" class="form-control" id="userName" name="userName">

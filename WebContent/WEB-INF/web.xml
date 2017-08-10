@@ -5,12 +5,12 @@
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
   <servlet>
-    <servlet-name>IncumbencyTable</servlet-name>
-    <jsp-file>/incumbency_table.jsp</jsp-file>
+    <servlet-name>table</servlet-name>
+    <jsp-file>/table.jsp</jsp-file>
   </servlet>
   <servlet-mapping>
-    <servlet-name>IncumbencyTable</servlet-name>
-    <url-pattern>/incumbency_table.jsp</url-pattern>
+    <servlet-name>table</servlet-name>
+    <url-pattern>/table.jsp</url-pattern>
   </servlet-mapping>
 
   <filter>

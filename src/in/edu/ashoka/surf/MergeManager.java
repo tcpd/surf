@@ -249,8 +249,8 @@ public abstract class MergeManager {
 	}
 
 	
-	//returns a list of group of similar named incumbents
-	final public ArrayList<Multimap<String,Row>> getIncumbents(String attribute, String [] values, boolean onlyWinners, String searchQuery){
+	//returns a list of group of similar named groups
+	final public ArrayList<Multimap<String,Row>> getGroups(String attribute, String [] values, boolean onlyWinners, String searchQuery){
 		boolean filterNeeded = (attribute!=null)&&(!attribute.equals(""))&&(values!=null);
 		for(String value:values){
 			if(value.equals("All Records")){
@@ -428,7 +428,7 @@ public abstract class MergeManager {
 
 			Row row = idToRow.get(key);
 			Collection<Row> person = personToRows.get(row.get("mapped_ID"));
-			//This needs to be done because person to row map isn't updated after merge, it is only updated when the incumbents view is generated.
+			//This needs to be done because person to row map isn't updated after merge, it is only updated when the groups view is generated.
 			if(person.size()<=1){
 				row.set("is_done", (map.get(key).equals("on")?"yes":"no"));
 			}else{

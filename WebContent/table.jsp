@@ -48,7 +48,7 @@ import="com.google.common.collect.Multimap"
 	   	filterParamNav = session.getAttribute("filterParamNav").toString();
 	   	filterValueNav = session.getAttribute("filterValueNav").toString();
 
-		ArrayList<Multimap<String, Row>> incumbentsList = (ArrayList<Multimap<String, Row>>)session.getAttribute("subList");			
+		ArrayList<Multimap<String, Row>> groupsList = (ArrayList<Multimap<String, Row>>)session.getAttribute("subList");
 		int[] progressData = (int[])session.getAttribute("progressData");	
 		MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
 
@@ -66,7 +66,7 @@ import="com.google.common.collect.Multimap"
 	      </div>
 	      <div class="modal-body">
 	       	<div class="filterForm">
-				<form class="form" role="filter" method="get" action="${pageContext.request.contextPath}/IncumbencyServlet" onsubmit="${pageContext.request.contextPath}/IncumbencyServlet">
+				<form class="form" role="filter" method="get" action="MergeServlet" onsubmit="${pageContext.request.contextPath}/MergeServlet">
 					<div class="form-group">
 						Algorithm:
 						<select class="form-control" name="algorithm" id="algorithm">
@@ -200,21 +200,21 @@ import="com.google.common.collect.Multimap"
 							
 	boolean newGroup=false, newPerson=false;
 	int gid = 0;
-	for(Multimap<String, Row> incumbentsGroup:incumbentsList){
+	for(Multimap<String, Row> group:groupsList){
 		newGroup=true;
 		//TRYING TO SORT data based on constituency and then year
-		final Multimap<String, Row> incumbentsGroupFinal = incumbentsGroup;
-		List<String> keyList = new ArrayList<String>(incumbentsGroup.keySet());
+		final Multimap<String, Row> groupFinal = group;
+		List<String> keyList = new ArrayList<String>(group.keySet());
 		if(((String)session.getAttribute("algorithm")).equals("search")){
 		    //Do nothing
 		}else{
 			keyList.sort(new Comparator<String>() {
 				@Override
 				public int compare(String s1, String s2) {
-					int result = incumbentsGroupFinal.get(s1).iterator().next().get("PC_name").toLowerCase().compareTo(
-							incumbentsGroupFinal.get(s2).iterator().next().get("PC_name").toLowerCase());
-					return result==0 ? (incumbentsGroupFinal.get(s1).iterator().next().get("Year").toLowerCase().compareTo(
-							incumbentsGroupFinal.get(s2).iterator().next().get("Year").toLowerCase())):result;
+					int result = groupFinal.get(s1).iterator().next().get("PC_name").toLowerCase().compareTo(
+							groupFinal.get(s2).iterator().next().get("PC_name").toLowerCase());
+					return result==0 ? (groupFinal.get(s1).iterator().next().get("Year").toLowerCase().compareTo(
+							groupFinal.get(s2).iterator().next().get("Year").toLowerCase())):result;
 				}
 			});
 		}
@@ -223,7 +223,7 @@ import="com.google.common.collect.Multimap"
 		//TILL HERE
 		for(String key:keyList){
 			newPerson=true;
-			for(Row row:incumbentsGroup.get(key)){
+			for(Row row:group.get(key)){
 				String tableData = "";
 				String rowStyleData;
 				String unMerge;
@@ -238,13 +238,13 @@ import="com.google.common.collect.Multimap"
 					pageContext.setAttribute("tableData","");	//same as above; used ny jstl
 				}*/
 				
-				if(incumbentsGroup.get(key).size()>1){
+				if(group.get(key).size()>1){
 					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
 				}else{
 					unMerge = "";
 				}
 				
-				if(row.get("is_done").toString().equals("yes")){
+				if(row.get("is_done").equals("yes")){
 					rowCompletionColor = "row-done";
 				}else{
 					rowCompletionColor = "row-not-done";
@@ -287,7 +287,7 @@ import="com.google.common.collect.Multimap"
 				hoverText += " Canonical: " + Util.escapeHTML(row.get ("cname"));
 				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("tname"));
 				hoverText += " Sorted: " + Util.escapeHTML(row.get ("stname"));
-				String pc_num = "Constituency number: " + row.get("AC_no") + " Subregion: " + row.get("subregion");
+				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
 			%>
 
 			<tr <%=rowStyleData %> ${groupId} title="<%=hoverText%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
@@ -305,7 +305,7 @@ import="com.google.common.collect.Multimap"
 				</td>
 				<td class="cell-table table-cell-constituency">
 					<a href="https://www.google.co.in/maps/place/<%=row.get("PC_name").replace(" ","+")+","+row.get("State").replace("_","+")%>" target="_blank">
-						<span title="<%=pc_num%>"%><%=Util.escapeHTML(row.get("PC_name"))%></span>
+						<span title="<%=pcInfo%>"%><%=Util.escapeHTML(row.get("PC_name"))%></span>
 					</a>
 				</td>
 				<td class="cell-table table-cell-party">
@@ -389,7 +389,7 @@ import="com.google.common.collect.Multimap"
   	<!-- Listing previous page url here-->
   	<c:if test="${currentPage != 1}">
 	    <li class="page-item" onclick="resetScroll(); $('#loading').fadeIn();">
-		<a class="page-link" href="IncumbencyServlet?page=${currentPage - 1}" aria-label="Previous">
+		<a class="page-link" href="merge?page=${currentPage - 1}" aria-label="Previous">
 		<span aria-hidden="true">&laquo;</span>
 		<span class="sr-only">Previous</span>
 	 	</a>
@@ -407,7 +407,7 @@ import="com.google.common.collect.Multimap"
 					</c:otherwise>
 				</c:choose>
 				<li class="${pageIsActive}" onclick="resetScroll(); $('#loading').fadeIn();">
-					<a class="page-link" href="IncumbencyServlet?page=${i}">${i}</a>
+					<a class="page-link" href="merge?page=${i}">${i}</a>
 				</li>
 	</c:forEach>
     
@@ -415,7 +415,7 @@ import="com.google.common.collect.Multimap"
     
     <c:if test="${currentPage lt noOfPages}">
 				<li class="page-item" onclick="resetScroll(); $('#loading').fadeIn()">
-      			<a class="page-link" href="IncumbencyServlet?page=${currentPage + 1}" aria-label="Next">
+      			<a class="page-link" href="merge?page=${currentPage + 1}" aria-label="Next">
         		<span aria-hidden="true">&raquo;</span>
         		<span class="sr-only">Next</span>
       			</a>

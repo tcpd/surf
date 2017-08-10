@@ -226,7 +226,7 @@ public class Dataset implements Serializable{
     }
 
     /*
-    * long upTime = System.currentTimeMillis() - IncumbencyServlet.START_TIME;
+    * long upTime = System.currentTimeMillis() - MergeServlet.START_TIME;
         if(force || upTime-lastBackUpTime > TIME_INTERVAL_BETWEEN_BACKUPS ||lastBackUpTime==0){
         lastBackUpTime = System.currentTimeMillis();
     * */

@@ -13,7 +13,8 @@ import org.apache.commons.csv.CSVRecord;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-
+import org.apache.commons.io.FileExistsException;
+import org.apache.commons.io.FileUtils;
 
 
 public class Dataset implements Serializable{
@@ -162,12 +163,18 @@ public class Dataset implements Serializable{
                 newFile.delete();
         }else{
             File newFile = new File(fileWithSuffixNew);
-            if(newFile.exists())
-                newFile.renameTo(new File(filename));
+            if(newFile.exists()) {
+                FileUtils.copyFile(newFile, new File(fileWithSuffixNew));
+                if(!FileUtils.deleteQuietly(newFile))
+                    throw new FileExistsException("failed to delete .new file");
+            }
             else{
                 File oldFile = new File(fileWithSuffixOld);
-                if(oldFile.exists())
-                    oldFile.renameTo(new File(filename));
+                if(oldFile.exists()) {
+                    FileUtils.copyFile(oldFile, new File(filename));
+                    if(!FileUtils.deleteQuietly(oldFile))
+                        throw new FileExistsException("failed to delete .old file");
+                }
                 else
                     throw new FileNotFoundException("file not found");
             }
@@ -212,14 +219,13 @@ public class Dataset implements Serializable{
         String fileWithSuffixOld = file + ".old";
         File existingFile = new File(file);
         File suffixFile = new File(fileWithSuffixOld);
-        if(!existingFile.canWrite() || !existingFile.renameTo(suffixFile))
-            throw new IOException("failed to rename existing file to old file");
+        FileUtils.copyFile(existingFile, suffixFile);
 
         //RENAME THE NEW FILE TO EXISTING FILE
         suffixFile = new File(fileWithSuffixNew);
-        if(!suffixFile.canWrite()||!suffixFile.renameTo(new File(file))){
-            throw new IOException("failed to rename new file to existing file");
-        }
+        FileUtils.copyFile(suffixFile, new File(file));
+        if(!FileUtils.deleteQuietly(suffixFile))
+            throw new FileExistsException("failed to delete .new file");
 
         //PERFORM BACKUP
         //performBackup(new File(file));
@@ -267,4 +273,5 @@ public class Dataset implements Serializable{
             d.timer.cancel();
         }
     }
+
 }

@@ -56,7 +56,9 @@ public class SurfExcel {
         out.println("WARNING " + s);
     }
 
-    /** given a set of rows, returns pairs of strings that are within ed edit distance, after canonicalization, etc. */
+    /** given a set of rows, returns pairs of strings that are within ed edit distance, after canonicalization, etc.
+     * Note: there may be more efficient ways of doing edit distance clustering. see https://github.com/OpenRefine/EditDistanceClusterer
+     **/
     public static List<Pair<String, String>> similarPairsForField(Collection<Row> rows, String field, int ed)
     {
         List<Pair<String, String>> result = new ArrayList<>();
@@ -89,7 +91,7 @@ public class SurfExcel {
         nonSpaceStFields = Collections.unmodifiableList(nonSpaceStFields);
 
         int totalComparisons = 0;
-        // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < 1, ignoring spaces.
+        // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < ed, ignoring spaces.
         // only check with stnames after it, because we want to report a pair of stnames A and B only once (A-B, not B-A)
         Map<String, String> childToParent = new LinkedHashMap<>();
         for (int i = 0; i < listStField.size(); i++) {

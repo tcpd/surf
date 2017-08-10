@@ -1,0 +1,13 @@
+Metaphone-1/2/3: 
+https://en.wikipedia.org/wiki/Metaphone#Metaphone_3
+http://aspell.net/metaphone/dmetaph.cpp
+
+Edit distance clustering:
+Efficient ways of doing edit distance clustering. see https://github.com/OpenRefine/EditDistanceClusterer
+
+OpenRefine clustering algorithms:
+https://github.com/OpenRefine/OpenRefine/wiki/Clustering-In-Depth
+
+Bangla phonetics:
+http://dspace.bracu.ac.bd/xmlui/bitstream/handle/10361/312/A%20double%20metaphone%20encoding%20for%20approximate.pdf?sequence=1&isAllowed=y
+

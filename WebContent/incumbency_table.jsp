@@ -7,6 +7,7 @@ import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
 import="com.google.common.collect.Multimap"
 %>
+<%@ page import="edu.stanford.muse.util.Util" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -283,7 +284,11 @@ import="com.google.common.collect.Multimap"
 				else{rowStyleData = "class=\""+rowCompletionColor+" \""; isChildPerson=true;}
 				pageContext.setAttribute("isChildPerson",isChildPerson);	//needed for jstl later on
 				String hoverText = "ID: " + row.get("ID") + " Person ID: " + row.get("mapped_ID");
-%>
+				hoverText += " Canonical: " + Util.escapeHTML(row.get ("cname"));
+				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("tname"));
+				hoverText += " Sorted: " + Util.escapeHTML(row.get ("stname"));
+				String pc_num = "Constituency number: " + row.get("AC_no") + " Subregion: " + row.get("subregion");
+			%>
 
 			<tr <%=rowStyleData %> ${groupId} title="<%=hoverText%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
 				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
@@ -293,27 +298,27 @@ import="com.google.common.collect.Multimap"
 					</a>
 				</td>
 				<td class="cell-table table-cell-sex">
-					<%=row.get("Sex")%>
+					<%=Util.escapeHTML(row.get("Sex"))%>
 				</td>
 				<td class="cell-table table-cell-year">
-					<%=row.get("Year")%>
+					<%=Util.escapeHTML(row.get("Year"))%>
 				</td>
 				<td class="cell-table table-cell-constituency">
 					<a href="https://www.google.co.in/maps/place/<%=row.get("PC_name").replace(" ","+")+","+row.get("State").replace("_","+")%>" target="_blank">
-						<%=row.get("PC_name")%>
+						<span title="<%=pc_num%>"%><%=Util.escapeHTML(row.get("PC_name"))%></span>
 					</a>
 				</td>
 				<td class="cell-table table-cell-party">
-					<%=row.get("Party")%>
+					<%=Util.escapeHTML(row.get("Party"))%>
 				</td>
 				<td class="cell-table table-cell-state">
-					<%=row.get("State")%>
+					<%=Util.escapeHTML(row.get("State"))%>
 				</td>
 				<td class="cell-table table-cell-position">
-					<%=row.get("Position")%>
+					<%=Util.escapeHTML(row.get("Position"))%>
 				</td>
 				<td class="cell-table table-cell-votes">
-					<%=row.get("Votes1")%>
+					<%=Util.escapeHTML(row.get("Votes1"))%>
 				</td>
 				
 				<%-- <td class="cell-table">

@@ -20,6 +20,7 @@ Similarly, resource files should be read only through this class. Resource files
 public class Config {
     // replacements applied at a per-token level
 
+    /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
             "[^A-Za-z\\s]", "",
             "NAYAK", "NAIK",
@@ -32,6 +33,14 @@ public class Config {
             "RAJ", "RJ", // e.g. NEERJA vs NEERAJA
             "SAL", "SL", // e.g. BHONSALE vs BHONSLE
             "NAG", "NG", // e.g. WANAGE vs WANGE. Why, even HANAGAL vs HANGAL
+
+            // suffix removal, do this before phonetic conversions
+            "BAI$", "",
+            "BHAI$", "",
+            "BEN$", "",
+            "JI$", "",
+            "LAL$", "",
+            "KUMAR$", "",
 
             // phonetic corrections
             "TH", "T",
@@ -62,15 +71,7 @@ public class Config {
             "SINH$", "SING",
 
             // remove an A at the end of a token, e.g. SHATRUGHAN vs SHATRUGHANA
-            "(.+)A", "\\\\1",
-
-            // suffix removal
-            "BAI$", "",
-            "BHAI$", "",
-            "BEN$", "",
-            "JI$", "",
-            "LAL$", "",
-            "KUMAR$", ""
+            "(.+)A", "\\\\1"
     };
 
     static String ignoreTokens[] = new String[] {"MR", "MRS", "PROF", "DR",

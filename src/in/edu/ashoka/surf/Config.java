@@ -65,15 +65,15 @@ public class Config {
             "Q", "K",
             "OW", "OU", // e.g. chowdhury, choudhury
              // standardize the mohammads
-            "MD", "MOHAMMAD",
+            "^MD$", "MOHAMMAD",
             "MOHAMAD", "MOHAMMAD",
             "MOHAMED", "MOHAMMAD",
-            "PD", "PRASAD",
-            "PR", "PRASAD",
+            "^PD$", "PRASAD",
+            "^PR$", "PRASAD",
             "SINH$", "SING",
 
             // remove an A at the end of a token, e.g. SHATRUGHAN vs SHATRUGHANA
-            "(.+)A$", "\\\\1"
+            // "(.+)A$", "\\1"
     };
 
     static String ignoreTokens[] = new String[] {"MR", "MRS", "PROF", "DR",

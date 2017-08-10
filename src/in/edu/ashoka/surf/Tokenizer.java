@@ -183,4 +183,12 @@ public class Tokenizer {
 
         return result;
     }
+
+
+    public static void main (String args[]) {
+        System.out.println (canonicalizeDesi("PATEL CHELABHAI PRABHUDAS"));
+
+
+
+    }
 }

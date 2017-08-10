@@ -21,7 +21,8 @@ public abstract class MergeManager {
     HashMap<String, Integer> rowToMergedGroup;
 
     static final int WINNER_POSITION_CAP = 3;
-    
+    Multimap <String, Row> idToRows = LinkedHashMultimap.create();
+
     public static MergeManager getManager(String algo, Dataset d, String arguments){
 		MergeManager mergeManager = null;
 
@@ -57,8 +58,6 @@ public abstract class MergeManager {
     		evaluateConfidence();	//confidence needs to be evaluated first for every row
 			comparator = SurfExcel.confidenceComparator;
 		}
-    	else if(comparatorType.equals("alphabetical"))
-    		comparator = SurfExcel.alphabeticalComparartor;
     	else
     		comparator = SurfExcel.alphabeticalComparartor;
     	return comparator;
@@ -67,10 +66,8 @@ public abstract class MergeManager {
 	
     protected MergeManager(Dataset d){
     	this.d=d;
-        if(!d.hasColumnName("ID"))
-            d.addToActualColumnName("ID");
-        if(!d.hasColumnName("mapped_ID"))
-            d.addToActualColumnName("mapped_ID");
+        if(!d.hasColumnName(Config.ID_FIELD))
+            d.addToActualColumnName(Config.ID_FIELD);
         if(!d.hasColumnName("comments"))
 		    d.addToActualColumnName("comments");
         if(!d.hasColumnName("user_name"))
@@ -79,20 +76,25 @@ public abstract class MergeManager {
 		    d.addToActualColumnName("email");
         if(!d.hasColumnName("is_done"))
 		    d.addToActualColumnName("is_done");
-		
+		computeIdtoRow(d.getRows());
     }
-    
-	//initialize the id's for each row
+
+    void computeIdtoRow(Collection<Row> allRows) {
+        for (Row r: allRows) {
+            idToRows.put (r.get("ID"), r);
+        }
+    }
+
+    //initialize the id's for each row
 	final public void initializeIds(){
 		SurfExcel.assignUnassignedIds(d.getRows());
 	}
 	
 	public final void performInitialMapping(){
 		rowToId = new HashMap<>();
-		idToRow = new HashMap<>();
 		for(Row row:d.getRows()){
     		rowToId.put(row, row.get("mapped_ID"));
-    		idToRow.put(row.get("ID"), row);
+    		idToRows.put(row.get("ID"), row);
     		if(row.get("comments").equals(""))
     			row.set("comments", ""); 	//set comments to empty on initial mapping
     	}
@@ -100,47 +102,33 @@ public abstract class MergeManager {
 	
 	//add candiates which will be judged based on their group
 	abstract public void addSimilarCandidates();
-	
-	final public void merge(String [] ids){
-		Multimap<Integer, String> mp = LinkedHashMultimap.create();
-		for(String id:ids){
-			//mp.put(idToRow.get(id).get("common_group_id"), id);		//algorithm will decide the common_group_id
-			mp.put(rowToMergedGroup.get(id),id);
-		}
-		
-		for(Integer key:mp.keySet()){
-			ArrayList<String> innerIds= new ArrayList<>();
-			innerIds.addAll(0, mp.get(key));
-			String defaultId = getRootId(innerIds.get(0));
-			for(int i=1;i<innerIds.size();i++){
-				Row tempRow = idToRow.get(innerIds.get(i));
-				rowToId.put(tempRow, defaultId);
+
+	/** for each element in list,
+	 *  the ids in each sub-list are merged.
+	 */
+	public void merge(List<List<String>> list) {
+		for (List<String> idGroup: list) {
+			String newIdForAllRowsInThisGroup = idGroup.get(0);
+			for (String id: idGroup) {
+				for (Row r: idToRows.get(id)) {
+					String oldId = r.get("ID");
+					if (newIdForAllRowsInThisGroup.equals (oldId)) {
+
+					} else {
+						r.set(Config.ID_FIELD, newIdForAllRowsInThisGroup);
+						idToRows.put (r.get(Config.ID_FIELD), r);
+						idToRows.remove (oldId, r);
+					}
+				}
 			}
 		}
-
-		/*//setting mapped id here instead of inside save
-		Collection<Row> rows = d.getRows();
-		for(Row row:rows){
-			row.set("mapped_ID", rowToId.get(row));
-		}*/
 	}
-
-	final public void forceMerge(String [] ids){
-		String defaultId = getRootId(ids[0]);
-        for(int i = 1; i<ids.length; i++){
-			Row tempRow = idToRow.get(ids[i]);
-			rowToId.put(tempRow, defaultId);
-			tempRow.set("mapped_ID", defaultId);
-		}
-		setupPersonToRowMap();
-		//setupRowToGroupMap();
-    }
 
 	//basic version; might need improvements
 	final public void deMerge(String [] ids){
 		//First take care of rows with different id and mapped id
 		for(String id:ids){
-			Row row = idToRow.get(id);
+			Row row = idToRows.get(id);
 			//marked rows also needs to be reviewed again
 			row.set("is_done", "no");
 			if(row.get("ID").equals(row.get("mapped_ID")))
@@ -152,7 +140,7 @@ public abstract class MergeManager {
 		
 		//Now take care of rows with same id and mapped id
 		for(String id:ids){
-			Row row = idToRow.get(id);
+			Row row = idToRows.get(id);
 			
 			if(id.equals(row.get("mapped_ID"))){
 				ArrayList<Row> samePersonRows = new ArrayList<>();
@@ -172,17 +160,9 @@ public abstract class MergeManager {
 		setupPersonToRowMap();
 		//setupRowToGroupMap();
 	}
+
 	final public void save(String filePath) throws IOException{
 		d.save(filePath);
-	}
-
-	final public void load(){
-		rowToId = new HashMap<>();
-		idToRow = new HashMap<>();
-		for(Row row:d.getRows()){
-			idToRow.put(row.get("ID"), row);
-			rowToId.put(row, row.get("mapped_ID"));
-		}
 	}
 
 	final public void setupPersonToRowMap(){
@@ -351,15 +331,15 @@ public abstract class MergeManager {
 	
 	//check whether this row is mapped to another name
 	final public boolean isMappedToAnother(String id){
-		if(rowToId.get(idToRow.get(id)).equals(id))
+		if(rowToId.get(idToRows.get(id)).equals(id))
 			return false;
 		else 
 			return true;
 	}
 	
 	final public String getRootId(String id){
-		while(!rowToId.get(idToRow.get(id)).equals(id)){
-			id = rowToId.get(idToRow.get(id));
+		while(!rowToId.get(idToRows.get(id)).equals(id)){
+			id = rowToId.get(idToRows.get(id));
 		}
 		return id;
 	}
@@ -417,8 +397,8 @@ public abstract class MergeManager {
 	
 	public void updateComments(Map<String,String> map){
 		for(String key:map.keySet()){
-			idToRow.get(key).set("comments", map.get(key));
-			//System.out.println(idToRow.get(key).get("comments"));
+			idToRows.get(key).set("comments", map.get(key));
+			//System.out.println(idToRows.get(key).get("comments"));
 		}
 	}
 	
@@ -426,7 +406,7 @@ public abstract class MergeManager {
 	public void updateIsDone(Map<String, String> map){
 		for(String key:map.keySet()){
 
-			Row row = idToRow.get(key);
+			Row row = idToRows.get(key);
 			Collection<Row> person = personToRows.get(row.get("mapped_ID"));
 			//This needs to be done because person to row map isn't updated after merge, it is only updated when the groups view is generated.
 			if(person.size()<=1){
@@ -469,8 +449,8 @@ public abstract class MergeManager {
 	
 	public final void updateUserIds(String []userRows, String userName, String email){
 			for(String id:userRows){
-				idToRow.get(id).set("user_name", userName);
-				idToRow.get(id).set("email", email);
+				idToRows.get(id).set("user_name", userName);
+				idToRows.get(id).set("email", email);
 			}
 		}
 

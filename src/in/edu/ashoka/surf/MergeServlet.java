@@ -45,7 +45,8 @@ public class MergeServlet extends HttpServlet {
 
         try{
             HttpSession session = request.getSession();
-            session.setMaxInactiveInterval(60*60);
+            session.setMaxInactiveInterval(-1); // never timeout
+
             //SETTING UP THE DATASET FOR MERGEMANAGER
             setUpDataset(request);
 			setUpAlgorithm(request);
@@ -235,7 +236,7 @@ public class MergeServlet extends HttpServlet {
 		//Initial Mapping by mergeManager
 		if(mergeManager.isFirstReading()){
 			mergeManager.initializeIds();
-			mergeManager.performInitialMapping();
+			recomputeId
 		}
 		else{
 		    mergeManager.load();

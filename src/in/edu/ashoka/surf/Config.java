@@ -21,6 +21,7 @@ public class Config {
     // replacements applied at a per-token level
 
     public static String admin = "hangal@ashoka.edu.in";
+    public static String ID_FIELD = "ID";
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{

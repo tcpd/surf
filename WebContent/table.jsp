@@ -1,16 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"
-import="in.edu.ashoka.surf.Row"
-import="in.edu.ashoka.surf.MergeManager"
-import="in.edu.ashoka.surf.Row"
+		 import="in.edu.ashoka.surf.Row"
 import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
 import="com.google.common.collect.Multimap"
 %>
 <%@ page import="edu.stanford.muse.util.Util" %>
+<%@ page import="in.edu.ashoka.surf.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
@@ -21,13 +20,9 @@ import="com.google.common.collect.Multimap"
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"   integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="   crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<!--  	 <link href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" type="text/css" rel="stylesheet" /> -->
-<!-- 	<script src="//code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script> -->
-<!-- 	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script> -->
-<!-- 	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script> -->
 	<script src="helper.js" type="text/javascript"></script>
 
-<title>Surf</title>
+	<title>Surf</title>
 </head>
 <body>
 
@@ -48,13 +43,12 @@ import="com.google.common.collect.Multimap"
 	   	filterParamNav = session.getAttribute("filterParamNav").toString();
 	   	filterValueNav = session.getAttribute("filterValueNav").toString();
 
-		ArrayList<Multimap<String, Row>> groupsList = (ArrayList<Multimap<String, Row>>)session.getAttribute("subList");
-		int[] progressData = (int[])session.getAttribute("progressData");	
+		ArrayList<Multimap<String, Row>> groupsList = (ArrayList<Multimap<String, Row>>) session.getAttribute("subList");
+
+		int[] progressData = (int[])session.getAttribute("progressData");
 		MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
 
 	%>
-	
-
 
 	<!-- Modal -->
 	<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -119,7 +113,8 @@ import="com.google.common.collect.Multimap"
 </div>
 </div>
 </div>
-<div>
+
+	<div>
 	<form method="post">
 		<nav class="navbar navbar-default navbar-fixed-top">
 			<div class="container-fluid">
@@ -164,6 +159,8 @@ import="com.google.common.collect.Multimap"
 					</ul>
 				</div>
 				<div style="width: 100%; height: 100%">
+
+				<!-- main table starts here -->
 				<table class="nav nav-pills nav-stacked table-header">
 					<thead>
 					<tr class="table-row">
@@ -198,9 +195,12 @@ import="com.google.common.collect.Multimap"
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 							
-	boolean newGroup=false, newPerson=false;
+	boolean newGroup, newPerson=false;
 	int gid = 0;
-	for(Multimap<String, Row> group:groupsList){
+	for(Multimap<String, Row> group:groupsList) {
+
+	    // render a group of records
+
 		newGroup=true;
 		//TRYING TO SORT data based on constituency and then year
 		final Multimap<String, Row> groupFinal = group;
@@ -239,7 +239,7 @@ import="com.google.common.collect.Multimap"
 				}*/
 				
 				if(group.get(key).size()>1){
-					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
+					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get(Config.ID_FIELD) + "\"/>";
 				}else{
 					unMerge = "";
 				}
@@ -370,8 +370,6 @@ import="com.google.common.collect.Multimap"
 	}
 }
 
-
-
 %>
 
 </tbody>
@@ -431,11 +429,10 @@ import="com.google.common.collect.Multimap"
 
 <script type="text/javascript">
 
-
-
 //CONSTRUCTS MAPS FROM FILTER PARAMETERS TO FILTER VALUES
 
-<% String[] filterParams = {"State", "PC_name", "Party"}; //Enter new parameters here
+<%
+String[] filterParams = {"State", "PC_name", "Party"}; //Enter new parameters here
 
 Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(filterParams);%>
 
@@ -471,9 +468,6 @@ for(var i = 0; i < values.length; i++) {
 	filterValue.appendChild(el);
 };
 
-</script>
-
-<script type="application/javascript">
 //CREATE VARIABLES TO BE USED AS LOADING VARIABLES
 var filterVariables = new Array();
 filterVariables[0]=('${algorithm}')

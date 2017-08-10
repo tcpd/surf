@@ -156,7 +156,7 @@ public class Tokenizer {
                 token = token.replaceAll("^KU$", "KUMAR");
 
             for (int j = 0; j < replacementPatterns.size(); j++) {
-                s = replacementPatterns.get(j).matcher(s).replaceAll(Config.replacements[2*j+1]);
+                token = replacementPatterns.get(j).matcher(token).replaceAll(Config.replacements[2*j+1]);
             }
 
             // ignore titles
@@ -170,7 +170,7 @@ public class Tokenizer {
             result.append(token);
             result.append(" ");
         }
-        return result.toString();
+        return result.toString().trim();
     }
 
     public static Map<String, String> canonicalizeDesi (Collection<String> list) {

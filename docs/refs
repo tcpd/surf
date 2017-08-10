@@ -18,3 +18,7 @@ http://dspace.bracu.ac.bd/xmlui/bitstream/handle/10361/312/A%20double%20metaphon
 
 Edit distance clustering:
 Efficient ways of doing edit distance clustering. see https://github.com/OpenRefine/EditDistanceClusterer
+
+Reconciliation with Wikidata.
+Guessing types:
+- https://github.com/OpenRefine/OpenRefine/blob/master/main/src/com/google/refine/commands/recon/GuessTypesOfColumnCommand.java

@@ -66,7 +66,7 @@ import="com.google.common.collect.Multimap"
 	      </div>
 	      <div class="modal-body">
 	       	<div class="filterForm">
-				<form class="form" role="filter" method="get" action="MergeServlet" onsubmit="${pageContext.request.contextPath}/MergeServlet">
+				<form class="form" role="filter" method="get" action="merge">
 					<div class="form-group">
 						Algorithm:
 						<select class="form-control" name="algorithm" id="algorithm">
@@ -179,7 +179,7 @@ import="com.google.common.collect.Multimap"
 						<!-- <th class="cell-table">ID</th>
                         <th>Person ID</th> -->
 						<th class="cell-table table-cell-comments">Comments</th>
-						<th class="cell-table table-cell-unmerge">UnMerge</th>
+						<th class="cell-table table-cell-unmerge">Unmerge</th>
 						<th class="cell-table table-cell-done">Done</th>
 					</tr>
 					</thead>
@@ -320,15 +320,15 @@ import="com.google.common.collect.Multimap"
 				<td class="cell-table table-cell-votes">
 					<%=Util.escapeHTML(row.get("Votes1"))%>
 				</td>
-				
+
 				<%-- <td class="cell-table">
 					<%=row.get("ID")%>
 				</td>
 				<td class="cell-table">
 					<%=row.get("mapped_ID")%>
 				</td> --%>
-				
-				
+
+
 				
 				<%-- <c:set var="tableData" scope="page" value="lolo"></c:set> --%>
 				<c:choose>

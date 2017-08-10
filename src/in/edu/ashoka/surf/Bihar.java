@@ -288,9 +288,7 @@ public class Bihar extends Object {
 		d.registerColumnAlias("Candidate_name", "Name");
 		d.registerColumnAlias("Candidate_sex", "Sex");
 		d.registerColumnAlias("Party_abbreviation", "Party");
-		d.registerColumnAlias("State_name", "State");
-		
-		
+		d.registerColumnAlias("State_name", "State
 		
 		//creates canonical tokens; adds them to the row
 		Tokenizer.setupDesiVersions(allRows, "PC_name");

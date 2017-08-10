@@ -20,6 +20,8 @@ Similarly, resource files should be read only through this class. Resource files
 public class Config {
     // replacements applied at a per-token level
 
+    public static String admin = "hangal@ashoka.edu.in";
+
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
             "[^A-Za-z\\s]", "",
@@ -71,7 +73,7 @@ public class Config {
             "SINH$", "SING",
 
             // remove an A at the end of a token, e.g. SHATRUGHAN vs SHATRUGHANA
-            "(.+)A", "\\\\1"
+            "(.+)A$", "\\\\1"
     };
 
     static String ignoreTokens[] = new String[] {"MR", "MRS", "PROF", "DR",

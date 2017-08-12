@@ -18,10 +18,11 @@ Some settings have a default.
 Similarly, resource files should be read only through this class. Resource files are not expected to change during one execution of epadd.
  */
 public class Config {
+    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
     // replacements applied at a per-token level
 
     public static String admin = "hangal@ashoka.edu.in";
-    public static String ID_FIELD = "ID";
+    public static String ID_FIELD = "ID", MERGE_FIELD = "Name";
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
@@ -74,7 +75,7 @@ public class Config {
             "SINH$", "SING",
 
             // remove an A at the end of a token, e.g. SHATRUGHAN vs SHATRUGHANA
-            "(.+)A$", "\\\\1"
+//            "(.+)A$", "\\1"
     };
 
     static String ignoreTokens[] = new String[] {"MR", "MRS", "PROF", "DR",
@@ -97,7 +98,6 @@ public class Config {
     public static String filterColumn = "Position"; // name of column on which filter can be set. (should be expandable to accommodate multiple columns)
     public static String[] filterColumnValues = new String[]{"1", "2", "3"}; // allowed values for filterColumn when set
 
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
     public static Map<String, String> keyToPath  = new LinkedHashMap<>(), keyToDescription = new LinkedHashMap<>();
 

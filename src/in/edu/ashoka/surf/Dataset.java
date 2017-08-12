@@ -86,6 +86,21 @@ public class Dataset implements Serializable{
         cColumnToDisplayName.put(cCol, col);
     }
 
+    //check whether reading the file for the first time, i.e. no id's have been assigned yet.
+    public boolean hasIds(){
+        Collection<Row> allRows = getRows();
+        for (Row row:allRows) {
+            if (!row.get(Config.ID_FIELD).equals(""))
+                return false;
+        }
+        return true;
+    }
+
+    //initialize the id's for each row
+    final public void initializeIds(){
+        SurfExcel.assignUnassignedIds(getRows());
+    }
+
     public void registerColumnAlias(String oldCol, String newCol) {
         warnIfColumnExists(newCol);
         if (!hasColumnName(oldCol)) {
@@ -180,6 +195,21 @@ public class Dataset implements Serializable{
     }
     
     public Collection<Row> getRows(){return rows;}
+
+    public int nCols(){
+        if (rows == null || rows.size() == 0)
+            return 0;
+        Row row = rows.iterator().next();
+        return row.nFields();
+    }
+
+    public Set<String> getColumnNames () {
+        if (rows == null || rows.size() == 0)
+            return new HashSet<>();
+
+        Row row = rows.iterator().next();
+        return row.getAllFieldNames();
+    }
 
     /** saves this dataset as a CSV  in the given file 
      * @throws IOException */

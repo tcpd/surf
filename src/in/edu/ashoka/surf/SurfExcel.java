@@ -93,7 +93,6 @@ public class SurfExcel {
         int totalComparisons = 0;
         // in order of stnames, check each name against all other stnames after it that share a token and have edit distance < ed, ignoring spaces.
         // only check with stnames after it, because we want to report a pair of stnames A and B only once (A-B, not B-A)
-        Map<String, String> childToParent = new LinkedHashMap<>();
         for (int i = 0; i < listStField.size(); i++) {
             String stField = listStField.get(i);
 
@@ -123,33 +122,17 @@ public class SurfExcel {
 
                 // now compare stname with stname1
                 {
-                    if (Math.abs(nonSpaceStField.length() - nonSpaceStField1.length()) > 1)
+                    if (Math.abs(nonSpaceStField.length() - nonSpaceStField1.length()) > ed)
                         continue; // optimization: don't bother to compute edit distance if the lengths differ by more than 1
 
                     if (Util1.editDistance(nonSpaceStField, nonSpaceStField1) <= ed) { // make sure to use the space-removed versions to compute edit distance
                         // ok, we found something that looks close enough
                         // out.println("  canonical: " + stname);
                         result.add(new Pair<String, String>(stField, stField1));
-
-                        // actually child can have multiple parents, but we just track one parent (the first one set) for now.
-                        if (childToParent.get(stField1) == null)
-                            childToParent.put(stField1, stField);
                     }
                 }
             }
         }
-
-        for (String val: fieldToRows.keySet()) {
-            Collection<Row> rowsForThisVal = fieldToRows.get(val);
-            String repVal = val;
-            // recursive walk up to find first parent
-            while (childToParent.get(repVal) != null)
-                repVal = childToParent.get(repVal);
-            for (Row r: rowsForThisVal)
-                r.set ("_est_" + field, repVal);
-        }
-
-        // now find clusters:
 
         out.println ("Similar pairs found: " + result.size());
         out.println ("list size: " + listStField.size() + ", total comparisons: " + totalComparisons + " average: " + ((float) totalComparisons)/listStField.size());

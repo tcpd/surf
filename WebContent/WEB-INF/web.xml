@@ -13,6 +13,24 @@
     <url-pattern>/table.jsp</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>select-op</servlet-name>
+    <jsp-file>/select-op.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>select-op</servlet-name>
+    <url-pattern>/select-op</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>read-dataset</servlet-name>
+    <jsp-file>/read-dataset.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>read-dataset</servlet-name>
+    <url-pattern>/read-dataset</url-pattern>
+  </servlet-mapping>
+
   <filter>
     <filter-name>LoggingFilter</filter-name>
     <filter-class>

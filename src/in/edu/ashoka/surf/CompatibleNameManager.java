@@ -1,10 +1,10 @@
 package in.edu.ashoka.surf;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import edu.stanford.muse.util.UnionFindSet;
+import in.edu.ashoka.surf.util.UnionFindSet;
 import edu.stanford.muse.util.Util;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,17 +12,13 @@ import java.util.stream.Collectors;
 public class CompatibleNameManager extends MergeManager{
 
 	boolean algorithmRun;
-	private String primaryFieldName, secondaryFieldName;
+	private String primaryFieldName;
 
-	public CompatibleNameManager(Dataset d) {
+	public CompatibleNameManager(Dataset d, String primaryFieldName) {
 		super(d);
 		algorithmRun = false;
-	}
-
-	void setFields(String primaryFieldName, String secondaryFieldName) {
-		this.primaryFieldName = primaryFieldName;
-		this.secondaryFieldName = secondaryFieldName;
-	}
+        this.primaryFieldName = primaryFieldName;
+    }
 
     // check that each token in x maps to a token in y
 	private static boolean canTokensMap (Collection<String> xTokens, Collection<String> yTokens) {
@@ -61,42 +57,53 @@ public class CompatibleNameManager extends MergeManager{
 	public void addSimilarCandidates() {
 		if(algorithmRun)
 			return;
+		String stField = "_st_" + primaryFieldName;
 
+		List<Row> rows = new ArrayList<>(d.getRows());
+		// setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
+		// since editDistance computation is expensive, we'll only compute it for pairs that have at least 1 token in common
+		Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
+		for (int i = 0; i < rows.size(); i++) {
+			String fieldVal = rows.get(i).get(stField);
+			StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
+			while (st.hasMoreTokens()) {
+				String tok = st.nextToken();
+				if (tok.length() < 3)
+					continue;
+				tokenToFieldIdx.put(tok, i);
+			}
+		}
 
-		// first split up all the rows into different clusters based on the secondary field.
-        // this will bunch up into clusters all rows which have the exact same secondary field
-		Multimap <String, Row> secondaryFieldToRows = SurfExcel.split (d.getRows(), secondaryFieldName);
-        listOfSimilarCandidates = new ArrayList<>();
-
-		// then for each cluster, do a compatibility check between primary fields of each pair of rows
-        // if they are compatible, put them in a union-find data structure to indicate that that pair should be merged
-		for (String secondaryField: secondaryFieldToRows.keySet()) {
-            UnionFindSet<Integer> ufs = new UnionFindSet<>();
-			List<Row> rows = new ArrayList<>(secondaryFieldToRows.get(secondaryField));
-
-			for (int i = 0; i < rows.size(); i++) {
-				for (int j = i+1; j < rows.size(); j++) {
-					if (compatibility (rows.get(i).get(primaryFieldName), rows.get(j).get(primaryFieldName)) > 0) {
-					    ufs.unify (i, j); // i and j are in the same group
-					}
+		UnionFindSet<Row> ufs = new UnionFindSet<>();
+		for (int i = 0; i < rows.size(); i++) {
+			// collect the indexes of the values that we should compare stField with, based on common tokens
+			Set<Integer> idxsToCompareWith = new LinkedHashSet<>();
+			{
+				StringTokenizer st = new StringTokenizer(stField, Tokenizer.DELIMITERS);
+				while (st.hasMoreTokens()) {
+					String tok = st.nextToken();
+					if (tok.length() < 3)
+						continue;
+					Collection<Integer> c = tokenToFieldIdx.get(tok);
+					for (Integer j: c)
+						if (j > i)
+							idxsToCompareWith.add(j);
 				}
 			}
 
-			List<List<Integer>> clusters = ufs.getClasses(); // this gives us equivalence classes of row#s that have been merged
-
-            // now translate the row#s back to the actual rows
-            for (List<Integer> cluster : clusters) {
-			    if (cluster.size() < 2)
-			        continue;
-
-			    List<Row> clusterRows = new ArrayList<>();
-                for (Integer I: cluster) {
-                    clusterRows.add(rows.get(I));
-                }
-                listOfSimilarCandidates.add (clusterRows);
-            }
+			for (int j : idxsToCompareWith) {
+				if (compatibility (rows.get(i).get(stField), rows.get(j).get(stField)) > 0) { // note: we could also compare primary field, not st field, to reduce noise
+					ufs.unify (rows.get(i), rows.get(j)); // i and j are in the same group
+				}
+			}
 		}
 
+		List<List<Row>> clusters = ufs.getClassesSortedByClassSize(); // this gives us equivalence classes of row#s that have been merged
+
+		// now translate the row#s back to the actual rows
+		for (List<Row> cluster : clusters) {
+			listOfSimilarCandidates.add (cluster);
+		}
 		algorithmRun = true;
 	}
 

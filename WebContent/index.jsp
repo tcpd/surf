@@ -4,6 +4,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql" %>
 <%@ taglib prefix="x" uri="http://java.sun.com/jsp/jstl/xml" %>
+<% 	session.setMaxInactiveInterval(-1); // never timeout %>
 
 <!DOCTYPE html>
 <html>
@@ -27,15 +28,7 @@
 <div class="logo" style="text-align:center">Surf</div>
 
 <div class="user-input">
-<form action="merge" method="get">
-	<div class="form-group">
-		<label for="userName">Username</label>
-		<input type="text" class="form-control" id="userName" name="userName">
-	</div>
-	<div class="form-group">
-		<label for="email">Email</label>
-		<input type="email" class="form-control" id="email" name="email">
-	</div>
+<form action="read-dataset" method="get">
 	<div class="form-group">
 		<label for="datasetKey">Dataset</label>
 		<select id="datasetKey" class="form-control selectpicker" name="datasetKey"> <!-- called state for historical reasons, TOFIX -->
@@ -44,22 +37,7 @@
 		<% } %>
 		</select>
 	</div>
-	<div class="form-group">
-		<label for="algorithm">Algorithm</label>
-		<select class="form-control selectpicker" id="algorithm" name="algorithm">
-			<option value="exactSameName">Exact Same Name</option>
-			<option value="exactSameNameWithConstituency">Exact Same Name with Constituency</option>
-			<option value="editDistance1">Approximate Name with Edit Distance 1</option>
-			<option value="editDistance2">Approximate Name with Edit Distance 2</option>
-			<option value="compatibleNames">Compatible names in same constituency</option>
-            <option value="dummyAllName">All names</option>
-		</select>
-		</label>
-	</div>
-	<div class="form-group">
-		<label for="algo-arg">Arguments for Algorithm (Advanced)</label>
-		<input type="text" class="form-control" id="algo-arg" name="algo-arg">
-	</div>
+
 	<div class="submit-button">
   <button type="submit" class="btn btn-default">Submit</button>
 </div>

@@ -1,9 +1,7 @@
 package in.edu.ashoka.surf;
 
 import java.io.PrintStream;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Row implements Comparable<Row> {
     private static PrintStream out = System.out;
@@ -104,6 +102,15 @@ public class Row implements Comparable<Row> {
         }
 
         fields.put(col, val);
+    }
+
+    /* returns # of columns in this row */
+    public int nFields () {
+        return this.fields.keySet().size();
+    }
+
+    public Set<String> getAllFieldNames () {
+        return fields.keySet();
     }
 
     public String getFields (String fields[], String separator) {

@@ -20,6 +20,7 @@ public class SimilarNameMergeManager extends MergeManager {
 	public void addSimilarCandidates() {
 		if(algorithmRun)
 			return;
+		/*
 		listOfSimilarCandidates = new ArrayList<>();
 		try {
 			Multimap<String, Multimap<String, Row>> resultMap = Bihar.getSimilarPairs(d.getRows(), d, distance);
@@ -40,5 +41,6 @@ public class SimilarNameMergeManager extends MergeManager {
 			e.printStackTrace();
 		}
 		algorithmRun = true;
+		*/
 	}
 }

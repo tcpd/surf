@@ -3,10 +3,11 @@ pageEncoding="UTF-8"
 		 import="in.edu.ashoka.surf.Row"
 import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
-import="com.google.common.collect.Multimap"
 %>
+
+<%@ page import="in.edu.ashoka.surf.Filter" %>
+<%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ page import="edu.stanford.muse.util.Util" %>
-<%@ page import="in.edu.ashoka.surf.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
@@ -17,7 +18,6 @@ import="com.google.common.collect.Multimap"
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="style.css">
-    <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"   integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="   crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script src="helper.js" type="text/javascript"></script>
@@ -26,28 +26,22 @@ import="com.google.common.collect.Multimap"
 </head>
 <body>
 
-   
+
+<!--
 <div id="loading" style="padding-top: 20%">
 	<img id="loading-image" src="loading.gif" alt="LOADING.."/>
 </div>
+-->
 
    <%
-   
-	   	String userName, email, algorithm, dataset, filterParam, filterParamNav, filterValueNav;
-	  	String [] filterValue;
-	  	
-	  	userName = session.getAttribute("userName").toString();
-	   	email = session.getAttribute("email").toString();
-	   	filterParam = session.getAttribute("filterParam").toString();
-	   	filterValue = (String [])session.getAttribute("filterValue");
-	   	filterParamNav = session.getAttribute("filterParamNav").toString();
-	   	filterValueNav = session.getAttribute("filterValueNav").toString();
+		List<Collection<Row>> groupsList = (List<Collection<Row>>) session.getAttribute("subList");
+		// rest of this code renders the groupsList
 
-		ArrayList<Multimap<String, Row>> groupsList = (ArrayList<Multimap<String, Row>>) session.getAttribute("subList");
+	   MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
+       String[] supplementaryColumns = new String[]{"Year", "Party", "Position", "Sex", "State", "Vote"}; // supplementary columns to display. These are emitted as is, without any special processing
 
-		int[] progressData = (int[])session.getAttribute("progressData");
-		MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
-
+       Filter filter = new Filter ("Position=1,2,3"); // just for testing
+       List<List<List<Row>>> rowsToShow = mergeManager.applyFilter (groupsList, filter);
 	%>
 
 	<!-- Modal -->
@@ -145,230 +139,108 @@ import="com.google.common.collect.Multimap"
 							</span>
 						</div>
 				</div>
-				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
-					<ul class="nav navbar-nav">
-						<ol class="breadcrumb">
-						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterParamNav %></a></li>
-						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterValueNav %></a></li>
-						</ol>
-						<li><div class="navbar-text"><%= progressData[3] %> Groups</div></li>
-						<li><div class="navbar-text"><%= progressData[1] %> Records</div></li>
-						<li><div class="navbar-text"><%= progressData[4] %> Records Reviewed</div></li>
-						<li><div class="navbar-text"><%= userName%></div></li>
-<!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
-					</ul>
-				</div>
-				<div style="width: 100%; height: 100%">
 
-				<!-- main table starts here -->
-				<table class="nav nav-pills nav-stacked table-header">
-					<thead>
-					<tr class="table-row">
-						<th class="cell-table table-cell-merge">Merge</th>
-						<th class="cell-table table-cell-name">Name</th>
-						<th class="cell-table table-cell-sex">Sex</th>
-						<th class="cell-table table-cell-year">Year</th>
-						<th class="cell-table table-cell-constituency">Constituency</th>
-						<th class="cell-table table-cell-party">Party</th>
-						<th class="cell-table table-cell-state">State</th>
-						<th class="cell-table table-cell-position">Position</th>
-						<th class="cell-table table-cell-votes">Votes</th>
-						<!-- <th class="cell-table">ID</th>
-                        <th>Person ID</th> -->
-						<th class="cell-table table-cell-comments">Comments</th>
-						<th class="cell-table table-cell-unmerge">Unmerge</th>
-						<th class="cell-table table-cell-done">Done</th>
-					</tr>
-					</thead>
-				</table>
-				</div>
-				<!-- /.navbar-collapse -->
-			</div><!-- /.container-fluid -->
-		</nav>
+            </div>
+        </nav>
 
+        <div style="min-width:1200px; width: 100%; height: 100%">
 
-		<div>
-			<div class="table-div table-responsive" id="table-container">
-				<table class="table">
+        <!-- main table starts here -->
+        <table class="table-header">
+            <thead>
+            <tr class="table-row">
+                <th class="cell-table">Merge</th>
+                <th class="cell-table">Name</th>
+                <th class="cell-table">Constituency</th>
+                <% for (String col: supplementaryColumns) { %>
+                    <th class="cell-table"><%=col%></th>
+                <% } %>
+                <th class="cell-table ">Comments</th>
+                <th class="cell-table ">Unmerge</th>
+                <th class="cell-table ">Done</th>
+            </tr>
+            </thead>
 					<tbody class="inside-table" id="table-body">
 <%
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 							
-	boolean newGroup, newPerson=false;
 	int gid = 0;
-	for(Multimap<String, Row> group:groupsList) {
+	for (List<List<Row>> groupRows: rowsToShow) {
 
-	    // render a group of records
+        // render a group of records
 
-		newGroup=true;
-		//TRYING TO SORT data based on constituency and then year
-		final Multimap<String, Row> groupFinal = group;
-		List<String> keyList = new ArrayList<String>(group.keySet());
-		if(((String)session.getAttribute("algorithm")).equals("search")){
-		    //Do nothing
-		}else{
-			keyList.sort(new Comparator<String>() {
-				@Override
-				public int compare(String s1, String s2) {
-					int result = groupFinal.get(s1).iterator().next().get("PC_name").toLowerCase().compareTo(
-							groupFinal.get(s2).iterator().next().get("PC_name").toLowerCase());
-					return result==0 ? (groupFinal.get(s1).iterator().next().get("Year").toLowerCase().compareTo(
-							groupFinal.get(s2).iterator().next().get("Year").toLowerCase())):result;
-				}
-			});
-		}
+        // first print 2 rows -- a separator and a menubar
+        %>
+        <tr class="table-row-new-group trow"></tr>
+        <tr>
+            <td colspan="7">
+                <button data-groupId="<%=gid%>" class="merge-button" type="button" id="merge-all" onclick="selectAllRowsInGroupForMerge('<%=gid%>')" >Select and merge all</button>
+            </td>
+            <td colspan="5">
+                <button data-groupId="<%=gid%>" class="done-button" style="float:right;" type="button" id="done-all" onclick="selectAllRowsInGroupForDone('<%=gid%>')">Mark as Done</button>
+                <button data-groupId="<%=gid%>" class="merge-till-here-button" style="float: right; margin-right: 10px" type="button" id="done-all-uptill" onclick="selectUpTillHereForDone('<%=gid%>')">Merge all groups above</button>
+            </td>
+        </tr>
 
+        <%
+        for (List<Row> rowsForThisId: groupRows) {
+            // print out all rows for this id.
 
-		//TILL HERE
-		for(String key:keyList){
-			newPerson=true;
-			for(Row row:group.get(key)){
-				String tableData = "";
-				String rowStyleData;
-				String unMerge;
-				String rowCompletionColor;
-				boolean isChildPerson = false;
-				if(mergeManager.isMappedToAnother(row.get("ID"))){
-					tableData = "<mapped dummy tag>";
-					isChildPerson = true;
-				} 
-				/*else {
-					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
-					pageContext.setAttribute("tableData","");	//same as above; used ny jstl
-				}*/
-				
-				if(group.get(key).size()>1){
-					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get(Config.ID_FIELD) + "\"/>";
-				}else{
-					unMerge = "";
+            boolean firstRowForThisId = true;
+		    for (Row row: rowsForThisId) {
+
+                String unmergeCheckboxHTML = "";
+                // if the id has more than 2 rows, the first row will include an option to unmerge it
+                if (rowsForThisId.size() > 1 && firstRowForThisId) {
+                    unmergeCheckboxHTML = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\"" + row.get(Config.ID_FIELD) + "\"/>"; // provide an option for this id to be broken up
+                }
+
+				String mergeCheckboxHTML = "";
+                // the first row of this id will always have a checkbox
+				if (firstRowForThisId) { // && groupRows.size() > 1){
+				    // the first row for every id will have a merge checkbox html
+                    mergeCheckboxHTML = "<input type=\"checkbox\" name=\"row\" value=\"" + row.get(Config.ID_FIELD) + "\"/>";
 				}
-				
-				if(row.get("is_done").equals("yes")){
-					rowCompletionColor = "row-done";
-				}else{
-					rowCompletionColor = "row-not-done";
-				}
-				
-				if(newGroup==true){
-					gid++;
-					String groupId = "name=\"g"+gid+"\"";
-					String groupValue = "g"+gid;
-					newGroup=false;
-					newPerson=false;
-					rowStyleData = "class=\"table-row-new-person trow\"";
-					pageContext.setAttribute("groupId",groupId);
-					pageContext.setAttribute("groupValue",groupValue);
-					//IF NEW GROUP, CREATE A HEADER FOR THE ROWS
-					%>
-						<tr <%=rowStyleData %>>
-							<td colspan="7">
-								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select and merge all</button>
-							</td>
-							<td colspan="5">
-								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Mark as Done</button>
-								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Merge all groups above</button>
-							</td>
-						</tr>
-					<%
-					rowStyleData = "class=\"table-row-same-person trow " + rowCompletionColor + " \"";
-					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("mapped_ID")+"\"/>";
-					isChildPerson = false;
-				}
-				else if(newPerson==true){
-					newPerson=false;
-					rowStyleData = "class=\"table-row-same-person trow "+rowCompletionColor+" \"";
-					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("mapped_ID")+"\"/>";
-					isChildPerson = false;
-				}
-				else{rowStyleData = "class=\""+rowCompletionColor+" \""; isChildPerson=true;}
-				pageContext.setAttribute("isChildPerson",isChildPerson);	//needed for jstl later on
+
+				// now print the actual row
+				// compute name and pc hover text
 				String hoverText = "ID: " + row.get("ID") + " Person ID: " + row.get("mapped_ID");
 				hoverText += " Canonical: " + Util.escapeHTML(row.get ("cname"));
 				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("tname"));
 				hoverText += " Sorted: " + Util.escapeHTML(row.get ("stname"));
+
 				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
+				String doneClass =  "yes".equals(row.get("is_done")) ? "row-done" : "row-not-done";
+				String href = "http://www.google.com/search?q=" + row.get("Name").replace(" ","+") + "+" + row.get("PC_name").replace(" ","+") + "+" + row.get("Year");
+				String pc_href = "https://www.google.co.in/maps/place/" + row.get("PC_name").replace(" ","+") + "," + row.get("State").replace("_","+");
+
+				String id = row.get(Config.ID_FIELD);
 			%>
 
-			<tr <%=rowStyleData %> ${groupId} title="<%=hoverText%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
-				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
-				<td class="cell-table table-cell-name">
-					<a href="http://www.google.com/search?q=<%=row.get("Name").replace(" ","+")+"+"+row.get("PC_name").replace(" ","+")+"+"+row.get("Year")%>" target="_blank">
-						<%=row.get("Name")%>
-					</a>
-				</td>
-				<td class="cell-table table-cell-sex">
-					<%=Util.escapeHTML(row.get("Sex"))%>
-				</td>
-				<td class="cell-table table-cell-year">
-					<%=Util.escapeHTML(row.get("Year"))%>
-				</td>
-				<td class="cell-table table-cell-constituency">
-					<a href="https://www.google.co.in/maps/place/<%=row.get("PC_name").replace(" ","+")+","+row.get("State").replace("_","+")%>" target="_blank">
-						<span title="<%=pcInfo%>"%><%=Util.escapeHTML(row.get("PC_name"))%></span>
-					</a>
-				</td>
-				<td class="cell-table table-cell-party">
-					<%=Util.escapeHTML(row.get("Party"))%>
-				</td>
-				<td class="cell-table table-cell-state">
-					<%=Util.escapeHTML(row.get("State"))%>
-				</td>
-				<td class="cell-table table-cell-position">
-					<%=Util.escapeHTML(row.get("Position"))%>
-				</td>
-				<td class="cell-table table-cell-votes">
-					<%=Util.escapeHTML(row.get("Votes1"))%>
-				</td>
+			<tr class="table-row-same-person trow <%=doneClass%>" data-id=<%=id%>>
 
-				<%-- <td class="cell-table">
-					<%=row.get("ID")%>
-				</td>
-				<td class="cell-table">
-					<%=row.get("mapped_ID")%>
-				</td> --%>
+				<td class="cell-table mergeCol table-cell-merge"><%=mergeCheckboxHTML%></td>
 
+				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get("Name"))%></a></td>
+				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("PC_name"))%></a></td>
 
-				
-				<%-- <c:set var="tableData" scope="page" value="lolo"></c:set> --%>
-				<c:choose>
-					<c:when test="${isChildPerson eq true }">
-						<td class="cell-table table-cell-comments" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
-						</td>
-						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
-						<td class="cell-table table-cell-done"></td>
-					</c:when>
-					<c:otherwise>
-						<td class="cell-table table-cell-comments" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
-							<div class="comment-box"><div style="padding:0.3em"><%=row.get("comments")%></div></div>
-						</td>
-						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
-						<c:out value="${tableData}"></c:out>
-						<td class="cell-table table-cell-done">
-							<%
-								String selected = row.get("is_done");
-								String selectedHTML;
-								if(selected==null||selected.equals("no")){
-									selectedHTML="";
-								}
-								else if(selected.equals("yes")){
-									selectedHTML="checked=\"checked\"";
-								}
-								else{
-									selectedHTML="";
-								}
-							%>
-							<input type="checkbox" id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')" <%=selectedHTML%>>
-						</input>
-						</td>
-					</c:otherwise>
-				</c:choose>
+                <%  for (String col: supplementaryColumns) { %>
+                    <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>
+                <% } %>
+                <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td>
+
+				<% if (firstRowForThisId) { %>
+					<td class="cell-table"><%=unmergeCheckboxHTML%></td>
+				<% } %>
+				<td class="cell-table "></td>
 			</tr>
 			
 			<%
-		}
-	}
-}
+				firstRowForThisId = false;
+			} // end row for this id
+		} // end id
+	} // end group
 
 %>
 
@@ -426,65 +298,6 @@ import="com.google.common.collect.Multimap"
 
 </div>
 </div>
-
-<script type="text/javascript">
-
-//CONSTRUCTS MAPS FROM FILTER PARAMETERS TO FILTER VALUES
-
-<%
-String[] filterParams = {"State", "PC_name", "Party"}; //Enter new parameters here
-
-Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(filterParams);%>
-
-var filterDataValues = {};
-<% for(int i = 0; i<filterParams.length; i++){ %>
-	filterDataValues["<%=filterParams[i]%>"] = new Array();
-<%}%>
-
-<%
-for(String key : filterData.keySet()){
-	for(String value:filterData.get(key)){
-		%>
-		filterDataValues["<%=key%>"].push("<%=value%>");
-		<%
-	}
-	
-}
-%>
-
-
-var values = new Array();
-
-//SETS DEFAULT FOR FILTERVALUE
-
-var filterValue = document.getElementById("filterValue");
-values = filterDataValues["State"]; //Default
-values.sort();
-for(var i = 0; i < values.length; i++) {
-	var opt = values[i];
-	var el = document.createElement("option");
-	el.textContent = opt;
-	el.value = opt;
-	filterValue.appendChild(el);
-};
-
-//CREATE VARIABLES TO BE USED AS LOADING VARIABLES
-var filterVariables = new Array();
-filterVariables[0]=('${algorithm}')
-filterVariables[1]=null
-filterVariables[2]=('${onlyWinners}')
-filterVariables[3]=(<%=(session.getAttribute("algo-arg").equals(""))?"\'\'":"'"+(String)session.getAttribute("algo-arg")+"'"%>);
-filterVariables[4]=('${comparatorType}')
-filterVariables[5]='${filterParam}'
-
-</script>
-
-<!-- //SCRIPT FOR HOVER POP OVER
-<script>
-$(document).ready(function(){
-    $('[data-toggle="popover"]').popover();   
-});
-</script> -->
 
 </body>
 </html>

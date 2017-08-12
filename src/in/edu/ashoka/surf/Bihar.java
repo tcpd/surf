@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
+import edu.stanford.muse.util.Pair;
 import edu.stanford.muse.util.Util;
 
 import java.io.IOException;
@@ -236,33 +237,10 @@ public class Bihar extends Object {
         return resultMap;
     }
     
-    public static Multimap<String, Multimap<String, Row>> getSimilarPairs (Collection<Row> allRows, Dataset d, int distance) throws IOException {
+    public static Pair<Row, Row> getSimilarPairs (Collection<Row> allRows, Dataset d, int distance) throws IOException {
         
-        //initRowFormat(allRows, d);
-
-        Collection<Row> mainCandidates = SurfExcel.filter (allRows, "Position", "1");
-        mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "2"));
-        mainCandidates.addAll(SurfExcel.filter (allRows, "Position", "3"));
-
         out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = "+distance+")");
-        SurfExcel.similarPairsForField(allRows, "Name", distance);
-        //Display.display2Level (SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), SurfExcel.stringLengthComparator), 3);
-        //Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.sort(SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2), comparator);
-        Multimap<String, Multimap<String, Row>> resultMap = SurfExcel.filter(SurfExcel.split(SurfExcel.split(allRows, "_est_Name"), "Name"), "min", 2);
-
-
-
-        //only show duplicates
-        /*List<String> list = new ArrayList<String>();
-        for(String key:resultMap.keySet()){
-        	if(resultMap.get(key).size()<2)
-        		list.add(key);
-        }
-        for(String key:list){
-        	resultMap.asMap().remove(key);
-        }*/
-        
-        return resultMap;
+        return null; //  SurfExcel.similarPairsForField(allRows, "Name", distance);
     }
 
     /** return canonical name -> {ids that map to that canonical name) */
@@ -288,7 +266,7 @@ public class Bihar extends Object {
 		d.registerColumnAlias("Candidate_name", "Name");
 		d.registerColumnAlias("Candidate_sex", "Sex");
 		d.registerColumnAlias("Party_abbreviation", "Party");
-		d.registerColumnAlias("State_name", "State
+		d.registerColumnAlias("State_name", "State");
 		
 		//creates canonical tokens; adds them to the row
 		Tokenizer.setupDesiVersions(allRows, "PC_name");

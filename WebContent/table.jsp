@@ -94,7 +94,7 @@ import="java.util.*"
     <div class="top-bar">
         <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
         <button class="btn btn-default" type="button">Filter</button>
-        <button class="btn btn-default" type="button">Save <i class="fa fa-spin fa-spinner"></i></button>
+        <button class="btn btn-default" type="button">Save <i style="display:none" class="save-spinner fa fa-spin fa-spinner"></i></button>
         <span>Across Groups <input type="Checkbox"></span>
         <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
             <button class="btn btn-default" type="button">Help</button>
@@ -182,7 +182,7 @@ import="java.util.*"
 
 			<tr class="<%=tr_class%> trow <%=doneClass%>" data-id=<%=id%>>
 
-				<td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
+                <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
 				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get("Name"))%></a></td>
 				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("PC_name"))%></a></td>
@@ -332,15 +332,15 @@ import="java.util.*"
 
         var post_data = {json: toJson(result)};
 
-        $('.save-spinner').show();
+        $('.save-spinner').fadeIn();
 
         $.ajax ({
             type: 'POST',
             url: 'ajax/save-dataset.jsp',
             datatype: 'json',
             data: post_data,
-            success: function () { $('.save-spinner').fadeOut();},
-            error: function () {}
+            success: function (o) { $('.save-spinner').fadeOut();},
+            error: function () { $('.save-spinner').fadeOut(); alert ('Warning: save failed!');}
         });
     }
 

@@ -13,6 +13,8 @@ import="java.util.*"
 <html>
 <head>
 	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+    <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
+    <link href="css/fonts/font-awesome/css/font-awesome.css" rel="stylesheet">
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -92,7 +94,7 @@ import="java.util.*"
     <div class="top-bar">
         <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
         <button class="btn btn-default" type="button">Filter</button>
-        <button class="btn btn-default" type="button">Save</button>
+        <button class="btn btn-default" type="button">Save <i class="fa fa-spin fa-spinner"></i></button>
         <span>Across Groups <input type="Checkbox"></span>
         <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
             <button class="btn btn-default" type="button">Help</button>
@@ -157,7 +159,7 @@ import="java.util.*"
                 // the first row of this id will always have a checkbox
 				if (firstRowForThisId) { // && groupRows.size() > 1){
 				    // the first row for every id will have a merge checkbox html
-                    mergeCheckboxHTML = "<input type=\"checkbox\" class=\"checkBox merge-checkbox\" name=\"row\" value=\"" + row.get(Config.ID_FIELD) + "\"/>";
+                    mergeCheckboxHTML = "<input data-id=\"" + row.get(Config.ID_FIELD) + "\" type=\"checkbox\" class=\"checkBox merge-checkbox\" name=\"row\" value=\"" + row.get(Config.ID_FIELD) + "\"/>";
 				}
 
 				// now print the actual row
@@ -313,10 +315,40 @@ import="java.util.*"
         }
     }
 
+    function save_handler () {
+        $groups = $('tbody'); // find the nearest tbody, which corresponds to a group
+        var result = [];
+        for (var i = 0; i < $groups.length; i++) {
+            var $group = $($groups[i]);
+            $checked = $('input.merge-checkbox:checked', $group);
+            if ($checked.length < 2) // 0 or 1 means the group was not touched, or only 1 box was checked
+                continue;
+            var resultForThisGroup = {groupId: $group.attr('data-groupId'), ids: []};
+            for (var j = 0; j < $checked.length; j++) {
+                resultForThisGroup.ids.push ($($checked[i]).attr('data-id'));
+            }
+            result.push (resultForThisGroup);
+        }
+
+        var post_data = {json: toJson(result)};
+
+        $('.save-spinner').show();
+
+        $.ajax ({
+            type: 'POST',
+            url: 'ajax/save-dataset.jsp',
+            datatype: 'json',
+            data: post_data,
+            success: function () { $('.save-spinner').fadeOut();},
+            error: function () {}
+        });
+    }
+
     $('.merge-button').click (merge_all_handler);
     $('.reviewed-button').click (group_reviewed_handler);
     $('.merge-till-here-button').click (merge_till_here_handler);
     $('.reviewed-till-here-button').click (reviewed_till_here_handler);
+    $('.save-button').click (save_handler);
     $('body').click (reviewed_till_here_handler);
 
 

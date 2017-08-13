@@ -25,9 +25,9 @@ import="java.util.*"
 <body>
 
 
-<div id="loading" style="padding-top: 20%">
-	<img src="loading.gif" alt="LOADING.."/>
-</div>
+    <div id="loading" style="padding-top: 20%">
+        <img src="loading.gif" alt="LOADING.."/>
+    </div>
 
 	<!-- Modal -->
 	<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -40,22 +40,6 @@ import="java.util.*"
 	      <div class="modal-body">
 	       	<div class="filterForm">
 				<form class="form" role="filter" method="get" action="merge">
-					<div class="form-group">
-						Algorithm:
-						<select class="form-control" name="algorithm" id="algorithm">
-								<option value="exactSameName">Exact Same Name</option>
-								<option value="exactSameNameWithConstituency">Exact Same Name with Constituency</option>
-								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
-								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
-								<option value="compatibleNames">Compatible names in same constituency</option>
-								<option value="search">Search</option>
-								<option value="dummyAllName">All names</option>
-						</select>
-					</div>
-					<div class="form-group">
-						Arguments for Algorithm:
-						<input type="text" class="form-control" id="algo-arg" name="algo-arg">
-					</div>
 					<div class="form-group">
 						Filter:
 						<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
@@ -70,7 +54,7 @@ import="java.util.*"
 						</select>
 					</div>
 					<div class=form-group>
-						Choose only Winners:
+						Show only Winners:
 						<select id="onlyWinners" class="form-control" name="onlyWinners">
 							<option value="false">No</option>
 							<option value="true">Yes</option>
@@ -95,47 +79,25 @@ import="java.util.*"
 
 
 <%
-    List<Collection<Row>> groupsList = (List<Collection<Row>>) session.getAttribute("subList");
-    // rest of this code renders the groupsList
-
     MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
-    String[] supplementaryColumns = new String[]{"Year", "Party", "Position", "Sex", "State", "Vote"}; // supplementary columns to display. These are emitted as is, without any special processing
 
     Filter filter = new Filter ("Position=1,2,3"); // just for testing
-    List<List<List<Row>>> rowsToShow = mergeManager.applyFilter (groupsList, filter);
+    List<List<List<Row>>> rowsToShow = mergeManager.applyFilter (mergeManager.listOfSimilarCandidates, filter);
+    int currentPage = 0;
+    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
+
 %>
 
-	<div>
-	<form method="post">
     <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-        <span class="logo" style="font-size:30px">Surf</span>
+    <div class="top-bar">
+        <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
+        <button class="btn btn-default" type="button">Filter</button>
+        <button class="btn btn-default" type="button">Save</button>
+        <span>Across Groups <input type="Checkbox"></span>
+        <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
+            <button class="btn btn-default" type="button">Help</button>
+        </div>
     </div>
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton" onclick="$('#loading').fadeIn()"/>
-    <input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Force Merge" id="forceMergeButton"/>
-    <button type="button" onclick="loadFilterSettings()" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
-            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-            Settings
-    </button>
-    <input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Reset" id="resetButton" onclick="return resetButtonPressed()"/>
-    <!adding search bar>
-    <div class="col-sm-3 col-md-3 pull-right">
-            <div class="input-group">
-                <input type="text" style="margin-right:0em; cursor:auto; height:35px;" class="form-control btn btn-default navbar-btn navbar-right" placeholder="Search Name..." name="searchValue" id="searchValue">
-                <span class="input-group-btn">
-                    <button style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" type="button" id="searchButton"><i class="glyphicon glyphicon-search"></i></button>
-                </span>
-            </div>
-    </div>
-
-    <div style="min-width:1200px; width: 100%; height: 100%">
 
         <!-- main table starts here -->
         <table class="table-header">
@@ -144,7 +106,7 @@ import="java.util.*"
                 <th class="cell-table"></th>
                 <th class="cell-table">Name</th>
                 <th class="cell-table">Constituency</th>
-                <% for (String col: supplementaryColumns) { %>
+                <% for (String col: Config.supplementaryColumns) { %>
                     <th class="cell-table"><%=col%></th>
                 <% } %>
                 <th class="cell-table ">Comments</th>
@@ -156,7 +118,8 @@ import="java.util.*"
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 							
-	int gid = 0;
+	int gid = currentPage * Config.groupsPerPage;
+	boolean firstGroup = true;
 	for (List<List<Row>> groupRows: rowsToShow) {
 
         // render a group of records in a tbody (tables can have multiple tbody's)
@@ -166,12 +129,12 @@ import="java.util.*"
         <tr class="toolbar-row">
             <td colspan="20">
                 <button data-groupId="<%=gid%>" class="merge-button" type="button" id="merge-all" >Merge all</button>
-                <button data-groupId="<%=gid%>" class="reviewed-button" type="button" id="done-all">Mark as Reviewed</button>
+                <button data-groupId="<%=gid%>" class="reviewed-button" type="button" id="done-all">Mark as reviewed</button>
 
-                <% if (gid > 0) { // don't show "till above" buttons for first group %>
+                <% if (!firstGroup) { // don't show "till above" buttons for first group %>
 
-                    <button data-groupId="<%=gid%>" class="merge-till-here-button" style="float: right; margin-right: 10px" type="button">Merge till here</button>
                     <button data-groupId="<%=gid%>" class="reviewed-till-here-button" style="float: right; margin-right: 10px" type="button">Mark reviewed till here</button>
+                    <button data-groupId="<%=gid%>" class="merge-till-here-button" style="float: right; margin-right: 10px" type="button">Merge till here</button>
                 <% } %>
 
             </td>
@@ -222,7 +185,7 @@ import="java.util.*"
 				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get("Name"))%></a></td>
 				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("PC_name"))%></a></td>
 
-                <%  for (String col: supplementaryColumns) { %>
+                <%  for (String col: Config.supplementaryColumns) { %>
                     <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>
                 <% } %>
                 <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td>
@@ -238,6 +201,7 @@ import="java.util.*"
 			} // end row for this id
 		} // end id
         gid++;
+        firstGroup = false;
         %>
         </tbody>
         <%
@@ -304,13 +268,24 @@ import="java.util.*"
     function merge_all_handler (e) {
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
-        $('input.merge-checkbox', $group).prop('checked', true); // set all checkboxes to true
+        if ($target.text() == 'Merge all') {
+            $('input.merge-checkbox', $group).prop('checked', true); // set all checkboxes to true
+            $target.text('Unmerge all');
+        } else {
+            $('input.merge-checkbox', $group).prop('checked', false); // set all checkboxes to true
+            $target.text('Merge all');
+        }
     }
 
     function group_reviewed_handler (e) {
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
         $group.toggleClass ('reviewed'); // set all checkboxes to true
+        if ($target.text() == 'Mark as reviewed') {
+            $target.text('Mark as unreviewed');
+        } else {
+            $target.text('Mark as reviewed');
+        }
     }
 
     function merge_till_here_handler (e) {
@@ -322,17 +297,28 @@ import="java.util.*"
     }
 
     function reviewed_till_here_handler (e) {
+        var text1 = 'Mark reviewed till here', text2 = 'Mark unreviewed till here';
+
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
         var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
-        $group.addClass ('reviewed'); // set all checkboxes to true
-        $groups.addClass ('reviewed'); // set all checkboxes to true
+        if ($target.text() == text1) {
+            $group.addClass('reviewed'); // set all checkboxes to true
+            $groups.addClass('reviewed'); // set all checkboxes to true
+            $target.text(text2);
+        } else {
+            $group.removeClass('reviewed'); // set all checkboxes to true
+            $groups.removeClass('reviewed'); // set all checkboxes to true
+            $target.text(text1);
+        }
     }
 
     $('.merge-button').click (merge_all_handler);
     $('.reviewed-button').click (group_reviewed_handler);
     $('.merge-till-here-button').click (merge_till_here_handler);
     $('.reviewed-till-here-button').click (reviewed_till_here_handler);
+    $('body').click (reviewed_till_here_handler);
+
 
 </script>
 </body>

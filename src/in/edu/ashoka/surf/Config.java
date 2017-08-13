@@ -23,6 +23,7 @@ public class Config {
 
     public static String admin = "hangal@ashoka.edu.in";
     public static String ID_FIELD = "ID", MERGE_FIELD = "Name";
+    public static int groupsPerPage = 100;
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
@@ -91,12 +92,7 @@ public class Config {
     static boolean removeSuccessiveSameCharacters = true;
 
     // these will be customized per dataset, or even by the user at run time
-    public static String[] columnsToDisplay = new String[]{"Name", "Sex", "Year", "Constituency", "Party", "State", "Position", "Votes"}; // State can probably be taken out for AE, and put in only for GE
-    public static String mappedIdColumn = "pid"; // name of column into which output id's will be written
-    public static String primaryColumn = "Name"; // name of primary column that is being merged
-    public static String secondaryColumn = "AC_no"; // name of secondary column by which fields can be grouped (may or may not be visible on screen)
-    public static String filterColumn = "Position"; // name of column on which filter can be set. (should be expandable to accommodate multiple columns)
-    public static String[] filterColumnValues = new String[]{"1", "2", "3"}; // allowed values for filterColumn when set
+    public static String[] supplementaryColumns = new String[]{"Year", "Party", "Position", "Sex", "State", "Vote"}; // supplementary columns to display. These are emitted as is, without any special processing
 
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
     public static Map<String, String> keyToPath  = new LinkedHashMap<>(), keyToDescription = new LinkedHashMap<>();

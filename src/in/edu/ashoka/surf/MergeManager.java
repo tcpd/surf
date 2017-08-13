@@ -32,7 +32,7 @@ public abstract class MergeManager {
             mergeManager = new EditDistanceMergeManager(d, Config.MERGE_FIELD, editDistance);
         }
 
-		if(algo.equals("exactSameName")){
+		else if(algo.equals("exactSameName")){
 			mergeManager = new ExactSameNameMergeManager(d);
 		}
 		else if(algo.equals("editDistance1")){

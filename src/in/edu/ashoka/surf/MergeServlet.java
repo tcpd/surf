@@ -61,29 +61,7 @@ public class MergeServlet extends HttpServlet {
 				}
 			}
 
-            List<Collection<Row>> groupsList = mergeManager.listOfSimilarCandidates;
-
-            // Filter if necessary
-            // groupsList = mergeManager.doFilter();
-
             //set defaults
-            int page = 1;
-            int groupsPerPage = 100;
-
-            if (request.getParameter("page") != null){
-                page = Integer.parseInt(request.getParameter("page"));
-            }
-
-            List<Collection<Row>> subList = new ArrayList<>();
-            for (int i = groupsPerPage * (page-1); i < groupsList.size() && i < groupsPerPage * (page); i++) {
-                subList.add (groupsList.get(i));
-            }
-
-            int noOfPages = (int) Math.ceil(groupsList.size() * 1.0/groupsPerPage);
-            session.setAttribute("subList", subList);
-            session.setAttribute("noOfPages", noOfPages);
-            session.setAttribute("currentPage", page);
-
             request.getRequestDispatcher("/table.jsp").forward(request, response);
         } catch (IOException e){
             request.getSession().invalidate();

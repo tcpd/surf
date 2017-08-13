@@ -7,14 +7,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1802474-0326-4c22-b49a-ab380f77a67b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/util/Timers.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/helper.js" afterPath="$PROJECT_DIR$/WebContent/helper.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/style.css" afterPath="$PROJECT_DIR$/WebContent/style.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/table.jsp" afterPath="$PROJECT_DIR$/WebContent/table.jsp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/EditDistanceMergeManager.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/EditDistanceMergeManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/LoggingFilter.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/LoggingFilter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/Tokenizer.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/Tokenizer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java" afterPath="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java" />
     </list>
     <ignored path="er.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,26 +35,25 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="MergeServlet.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java">
+      <file leaf-file-name="table.jsp" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/WebContent/table.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="202">
-              <caret line="83" column="57" lean-forward="true" selection-start-line="83" selection-start-column="57" selection-end-line="83" selection-end-column="57" />
-              <folding />
+            <state relative-caret-position="-1264">
+              <caret line="123" column="0" lean-forward="true" selection-start-line="123" selection-start-column="0" selection-end-line="123" selection-end-column="0" />
+              <folding>
+                <element signature="n#style#0;n#span#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="table.jsp" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/WebContent/table.jsp">
+      <file leaf-file-name="Config.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="277">
-              <caret line="328" column="31" lean-forward="true" selection-start-line="328" selection-start-column="31" selection-end-line="328" selection-end-column="31" />
-              <folding>
-                <element signature="n#div#0;n#div#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="false" />
-                <element signature="n#style#0;n#button#2;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#div#2;n#form#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#button#3;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#div#2;n#form#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
-              </folding>
+            <state relative-caret-position="270">
+              <caret line="25" column="42" lean-forward="true" selection-start-line="25" selection-start-column="42" selection-end-line="26" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -64,8 +61,8 @@
       <file leaf-file-name="style.css" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/WebContent/style.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="324">
-              <caret line="84" column="0" lean-forward="true" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
+            <state relative-caret-position="163">
+              <caret line="16" column="36" lean-forward="false" selection-start-line="16" selection-start-column="36" selection-end-line="16" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -74,8 +71,8 @@
       <file leaf-file-name="EditDistanceMergeManager.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/EditDistanceMergeManager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="292">
-              <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+            <state relative-caret-position="135">
+              <caret line="9" column="35" lean-forward="true" selection-start-line="9" selection-start-column="35" selection-end-line="9" selection-end-column="35" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -120,18 +117,8 @@
       <file leaf-file-name="MergeManager.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="185">
-              <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PlainSocketImpl.java" pinned="false" current-in-tab="false">
-        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/src.zip!/java/net/PlainSocketImpl.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="327">
-              <caret line="95" column="16" lean-forward="false" selection-start-line="95" selection-start-column="16" selection-end-line="95" selection-end-column="16" />
+            <state relative-caret-position="-2507">
+              <caret line="34" column="13" lean-forward="false" selection-start-line="34" selection-start-column="13" selection-end-line="34" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -148,17 +135,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>username</find>
-      <find>sortOr</find>
-      <find>getComparator</find>
-      <find>alphabet</find>
-      <find>filterParam</find>
-      <find>loadDa</find>
-      <find>target</find>
-      <find>&quot;_st</find>
-      <find>similar</find>
-      <find>surfexcel.</find>
-      <find>hasIds</find>
       <find>initia</find>
       <find>_j</find>
       <find>class=&quot;ta</find>
@@ -171,13 +147,24 @@
       <find>timer</find>
       <find>timer :</find>
       <find>loading-image</find>
-      <find>timer:</find>
       <find>merge-checkbox</find>
       <find>selectAllRowsInGroupForMerge</find>
       <find>table-cell</find>
       <find>done</find>
       <find>preven</find>
       <find>selectAll</find>
+      <find>supplm</find>
+      <find>save</find>
+      <find>supplem</find>
+      <find>across gro</find>
+      <find>navbar</find>
+      <find>logo</find>
+      <find>top-bar</find>
+      <find>age</find>
+      <find>s</find>
+      <find>sublist</find>
+      <find>timer:</find>
+      <find>page</find>
     </findStrings>
     <replaceStrings>
       <replace>groupToRender</replace>
@@ -222,18 +209,18 @@
         <option value="$PROJECT_DIR$/WebContent/WEB-INF/web.xml" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Row.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Dataset.java" />
-        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java" />
         <option value="$PROJECT_DIR$/WebContent/read-dataset.jsp" />
         <option value="$PROJECT_DIR$/WebContent/select-op.jsp" />
-        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java" />
-        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/util/Timers.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Tokenizer.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/LoggingFilter.java" />
         <option value="$PROJECT_DIR$/WebContent/helper.js" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/EditDistanceMergeManager.java" />
         <option value="$PROJECT_DIR$/WebContent/style.css" />
+        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java" />
+        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java" />
         <option value="$PROJECT_DIR$/WebContent/table.jsp" />
+        <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" />
       </list>
     </option>
   </component>
@@ -1196,12 +1183,12 @@
       <workItem from="1501935493217" duration="3866000" />
       <workItem from="1502178601844" duration="30512000" />
       <workItem from="1502381390084" duration="7320000" />
-      <workItem from="1502522900460" duration="46193000" />
+      <workItem from="1502522900460" duration="52379000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="131357000" />
+    <option name="totallyTimeSpent" value="137543000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1453" y="23" width="1920" height="1053" extended-state="0" />
@@ -1219,7 +1206,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.12619808" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.40790844" sideWeight="0.49427754" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40790844" sideWeight="0.49427754" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32778355" sideWeight="0.4914163" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1268,7 +1255,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298647" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298647" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.11927582" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.11927582" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32778355" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -1318,7 +1305,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java</url>
-          <line>121</line>
+          <line>99</line>
           <properties />
           <option name="timeStamp" value="49" />
         </line-breakpoint>
@@ -1537,8 +1524,8 @@
         <state relative-caret-position="243">
           <caret line="205" column="37" lean-forward="false" selection-start-line="205" selection-start-column="23" selection-end-line="205" selection-end-column="37" />
           <folding>
-            <element signature="e#3637#3638#0" expanded="true" />
-            <element signature="e#3693#3694#0" expanded="true" />
+            <element signature="e#3637#3638#0" expanded="false" />
+            <element signature="e#3693#3694#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1630,14 +1617,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="77" column="2" lean-forward="false" selection-start-line="77" selection-start-column="2" selection-end-line="77" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/rt.jar!/sun/reflect/NativeMethodAccessorImpl.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
@@ -1675,7 +1654,7 @@
         <state relative-caret-position="180">
           <caret line="417" column="0" lean-forward="false" selection-start-line="417" selection-start-column="0" selection-end-line="417" selection-end-column="0" />
           <folding>
-            <element signature="e#15459#15460#0" expanded="true" />
+            <element signature="e#15459#15460#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1688,26 +1667,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/Tokenizer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="367">
           <caret line="136" column="0" lean-forward="false" selection-start-line="135" selection-start-column="0" selection-end-line="136" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="83" column="57" lean-forward="true" selection-start-line="83" selection-start-column="57" selection-end-line="83" selection-end-column="57" />
           <folding />
         </state>
       </provider>
@@ -1732,16 +1695,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/EditDistanceMergeManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="292">
-          <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/WebContent/helper.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2872">
@@ -1752,20 +1705,53 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/WebContent/style.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="84" column="0" lean-forward="true" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
+        <state relative-caret-position="163">
+          <caret line="16" column="36" lean-forward="false" selection-start-line="16" selection-start-column="36" selection-end-line="16" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2507">
+          <caret line="34" column="13" lean-forward="false" selection-start-line="34" selection-start-column="13" selection-end-line="34" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/EditDistanceMergeManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="35" lean-forward="true" selection-start-line="9" selection-start-column="35" selection-end-line="9" selection-end-column="35" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="349">
+          <caret line="63" column="0" lean-forward="false" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="25" column="42" lean-forward="true" selection-start-line="25" selection-start-column="42" selection-end-line="26" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/WebContent/table.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="277">
-          <caret line="328" column="31" lean-forward="true" selection-start-line="328" selection-start-column="31" selection-end-line="328" selection-end-column="31" />
+        <state relative-caret-position="-1264">
+          <caret line="123" column="0" lean-forward="true" selection-start-line="123" selection-start-column="0" selection-end-line="123" selection-end-column="0" />
           <folding>
-            <element signature="n#div#0;n#div#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#style#0;n#button#2;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#div#2;n#form#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#button#3;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#div#2;n#form#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>

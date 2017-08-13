@@ -304,50 +304,6 @@ function populateDropdown() {
 }
 
 
-//SCRIPT FOR HIGHLIGHTING AND CHECKING ROWS
-//Select all person rows of a person on click
-$(document).ready(function () {
-    $("tr td:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:last-child)").on("click", function (event) {
-        temp = $(event.target).parents("tr")[0];
-        //color the current row
-        $(temp).toggleClass("success");
-        //if checkbox wasn't clicked look for it and click it
-        if(event.target.type!=="checkbox" &&
-            temp.firstElementChild!=null &&
-            temp.firstElementChild.firstElementChild!=null &&
-            temp.firstElementChild.firstElementChild.type==="checkbox") {
-            var checkboxValue = $(temp.firstElementChild.firstElementChild).prop("checked");
-            $(temp.firstElementChild.firstElementChild).prop("checked", !checkboxValue);
-        }
-        //attempt to color previous rows
-        while(temp.previousElementSibling!=null){
-            if(temp.previousElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
-                $(temp.previousElementSibling).toggleClass("success");
-                //Look for checkbox
-                if(temp.previousElementSibling.firstElementChild!=null &&
-                    temp.previousElementSibling.firstElementChild.firstElementChild!=null &&
-                    temp.previousElementSibling.firstElementChild.firstElementChild.type==="checkbox") {
-                    var checkboxValue = $(temp.previousElementSibling.firstElementChild.firstElementChild).prop("checked");
-                    $(temp.previousElementSibling.firstElementChild.firstElementChild).prop("checked", !checkboxValue);
-                }
-                temp = temp.previousElementSibling;
-            }else
-                break;
-        }
-        //reset temp
-        temp = $(event.target).parents("tr")[0];
-        //attempt to color next rows
-        while(temp.nextElementSibling!=null){
-            if(temp.nextElementSibling.getAttribute("data-personid")==temp.getAttribute("data-personid")){
-                $(temp.nextElementSibling).toggleClass("success");
-                temp = temp.nextElementSibling;
-            }else
-                break;
-        }
-    })
-});
-
-
 //LOADING SCRIPT
 $(window).on("load",function(){
     $('#loading').fadeOut();
@@ -380,11 +336,6 @@ $(window).on("load", function () {
         $("#loading").fadeIn();
         resetScroll();
     });
-});
-//Load value on the search bar
-$(window).on("load", function(){
-    if(filterVariables[0]=="search")
-            $("#searchValue").val(filterVariables[3]);
 });
 
 //Adjust table height

@@ -7,9 +7,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1802474-0326-4c22-b49a-ab380f77a67b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/WebContent/ajax/save-dataset.jsp" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/WebContent/css/main.css" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/WebContent/css/jquery.dataTables.css" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/WebContent/css/jquery.qtip.min.css" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/WebContent/style.css" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/index.jsp" afterPath="$PROJECT_DIR$/WebContent/index.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/read-dataset.jsp" afterPath="$PROJECT_DIR$/WebContent/read-dataset.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/select-op.jsp" afterPath="$PROJECT_DIR$/WebContent/select-op.jsp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebContent/table.jsp" afterPath="$PROJECT_DIR$/WebContent/table.jsp" />
     </list>
     <ignored path="er.iws" />
@@ -36,12 +40,32 @@
       <file leaf-file-name="table.jsp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/WebContent/table.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="96" column="92" lean-forward="true" selection-start-line="96" selection-start-column="92" selection-end-line="96" selection-end-column="92" />
+            <state relative-caret-position="190">
+              <caret line="20" column="53" lean-forward="false" selection-start-line="20" selection-start-column="53" selection-end-line="20" selection-end-column="53" />
               <folding>
                 <element signature="n#style#0;n#span#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="select-op.jsp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/WebContent/select-op.jsp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="183">
+              <caret line="19" column="0" lean-forward="true" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.jsp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/WebContent/index.jsp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="54">
+              <caret line="18" column="53" lean-forward="false" selection-start-line="18" selection-start-column="53" selection-end-line="18" selection-end-column="53" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -59,8 +83,8 @@
       <file leaf-file-name="read-dataset.jsp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/WebContent/read-dataset.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="735">
-              <caret line="49" column="20" lean-forward="false" selection-start-line="49" selection-start-column="20" selection-end-line="49" selection-end-column="20" />
+            <state relative-caret-position="180">
+              <caret line="12" column="53" lean-forward="false" selection-start-line="12" selection-start-column="53" selection-end-line="12" selection-end-column="53" />
               <folding />
             </state>
           </provider>
@@ -71,16 +95,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="270">
               <caret line="25" column="42" lean-forward="false" selection-start-line="25" selection-start-column="42" selection-end-line="26" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="style.css" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/WebContent/style.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="163">
-              <caret line="16" column="36" lean-forward="false" selection-start-line="16" selection-start-column="36" selection-end-line="16" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -144,7 +158,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>initia</find>
       <find>_j</find>
       <find>class=&quot;ta</find>
       <find>target=</find>
@@ -174,6 +187,7 @@
       <find>timer:</find>
       <find>page</find>
       <find>save</find>
+      <find>style</find>
     </findStrings>
     <replaceStrings>
       <replace>groupToRender</replace>
@@ -214,12 +228,9 @@
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/NewEditDistanceMergeManager.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/CompatibleNameManager.java" />
         <option value="$PROJECT_DIR$/WebContent/begin-merge.jsp" />
-        <option value="$PROJECT_DIR$/WebContent/index.jsp" />
         <option value="$PROJECT_DIR$/WebContent/WEB-INF/web.xml" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Row.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Dataset.java" />
-        <option value="$PROJECT_DIR$/WebContent/read-dataset.jsp" />
-        <option value="$PROJECT_DIR$/WebContent/select-op.jsp" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/util/Timers.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Tokenizer.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/LoggingFilter.java" />
@@ -230,6 +241,9 @@
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/MergeServlet.java" />
         <option value="$PROJECT_DIR$/src/in/edu/ashoka/surf/Config.java" />
         <option value="$PROJECT_DIR$/WebContent/ajax/save-dataset.jsp" />
+        <option value="$PROJECT_DIR$/WebContent/index.jsp" />
+        <option value="$PROJECT_DIR$/WebContent/read-dataset.jsp" />
+        <option value="$PROJECT_DIR$/WebContent/select-op.jsp" />
         <option value="$PROJECT_DIR$/WebContent/table.jsp" />
       </list>
     </option>
@@ -1229,12 +1243,12 @@
       <workItem from="1501935493217" duration="3866000" />
       <workItem from="1502178601844" duration="30512000" />
       <workItem from="1502381390084" duration="7320000" />
-      <workItem from="1502522900460" duration="54967000" />
+      <workItem from="1502522900460" duration="55136000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="140131000" />
+    <option name="totallyTimeSpent" value="140300000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1453" y="23" width="1920" height="1053" extended-state="0" />
@@ -1715,22 +1729,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/WebContent/select-op.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="174">
-          <caret line="47" column="0" lean-forward="true" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/WebContent/index.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="26" column="0" lean-forward="true" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/in/edu/ashoka/surf/EditDistanceMergeManager.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="283">
@@ -1738,14 +1736,6 @@
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/WebContent/read-dataset.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="735">
-          <caret line="49" column="20" lean-forward="false" selection-start-line="49" selection-start-column="20" selection-end-line="49" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1762,10 +1752,34 @@
         <state />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/WebContent/index.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="18" column="53" lean-forward="false" selection-start-line="18" selection-start-column="53" selection-end-line="18" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WebContent/read-dataset.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="53" lean-forward="false" selection-start-line="12" selection-start-column="53" selection-end-line="12" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WebContent/select-op.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="183">
+          <caret line="19" column="0" lean-forward="true" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/WebContent/table.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="96" column="92" lean-forward="true" selection-start-line="96" selection-start-column="92" selection-end-line="96" selection-end-column="92" />
+        <state relative-caret-position="190">
+          <caret line="20" column="53" lean-forward="false" selection-start-line="20" selection-start-column="53" selection-end-line="20" selection-end-column="53" />
           <folding>
             <element signature="n#style#0;n#span#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#div#2;n#body#0;n#html#0;n#!!top" expanded="true" />

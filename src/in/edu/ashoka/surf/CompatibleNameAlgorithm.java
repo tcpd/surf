@@ -9,15 +9,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /* A class that performs loose merging on a dataset based on a primaryField, but only when the secondaryField is exactly the same. */
-public class CompatibleNameManager extends MergeManager{
+public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
-	boolean algorithmRun;
-	private String primaryFieldName;
+    private String primaryFieldName;
 
-	public CompatibleNameManager(Dataset d, String primaryFieldName) {
+	public CompatibleNameAlgorithm(Dataset d, String primaryFieldName) {
 		super(d);
-		algorithmRun = false;
-        this.primaryFieldName = primaryFieldName;
+	    this.primaryFieldName = primaryFieldName;
     }
 
     // check that each token in x maps to a token in y
@@ -54,12 +52,10 @@ public class CompatibleNameManager extends MergeManager{
 	}
 
 	@Override
-	public void addSimilarCandidates() {
-		if(algorithmRun)
-			return;
+	public void run() {
 		String stField = "_st_" + primaryFieldName;
 
-		List<Row> rows = new ArrayList<>(d.getRows());
+		List<Row> rows = new ArrayList<>(dataset.getRows());
 		// setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
 		// since editDistance computation is expensive, we'll only compute it for pairs that have at least 1 token in common
 		Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
@@ -102,9 +98,8 @@ public class CompatibleNameManager extends MergeManager{
 
 		// now translate the row#s back to the actual rows
 		for (List<Row> cluster : clusters) {
-			listOfSimilarCandidates.add (cluster);
+			classes.add (cluster);
 		}
-		algorithmRun = true;
 	}
 
 	public static void main (String args[]) {

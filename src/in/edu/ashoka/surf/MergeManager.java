@@ -2,67 +2,90 @@ package in.edu.ashoka.surf;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Timers;
+import in.edu.ashoka.surf.util.UnionFindSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public abstract class MergeManager {
+/** class that takes care of merging. calls a MergeAlgorithm to generate initial clusters, then tracks manual merges by a user. */
+public class MergeManager {
 
     public static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
 	Dataset d;
-    String arguments;
     public List<Collection<Row>> listOfSimilarCandidates; // these are the groups
     private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
+    private MergeAlgorithm algorithm;
 
-    static final int WINNER_POSITION_CAP = 3;
+    // a small class to represent operations made on this dataset.
+    // op is the operation to run: merge, or unmerge
+    // the merge or unmerge is run on the given ids.
+    // groupId is currently not needed.
+    public static class MergeCommand {
+        String op;
+        String groupId; // not needed and not used currently
+        String[] ids;
+    }
 
     /** create a new mergeManager with the given algorithm and arguments */
-    public static MergeManager getManager(Dataset d, String algo, String arguments){
-		MergeManager mergeManager = null;
-        if (algo.equals("editDistance")){
+    public MergeManager(Dataset dataset, String algo, String arguments) {
+        this.d = dataset;
+        if (!d.hasColumnName("__comments"))
+            d.addToActualColumnName("__comments");
+        if (!d.hasColumnName("__reviewed"))
+            d.addToActualColumnName("__reviewed");
+        computeIdToRows(d.getRows());
+
+        Tokenizer.setupDesiVersions(dataset.getRows(), Config.MERGE_FIELD);
+
+        if (algo.equals("editDistance")) {
             int editDistance = 1;
             try {
                 editDistance = Integer.parseInt(arguments);
             } catch (Exception e) {
                 Util.print_exception(e, log);
             }
-            mergeManager = new EditDistanceMergeManager(d, Config.MERGE_FIELD, editDistance);
+            algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance); // run e.d. on the _st_ version of the field
+        } else if (algo.equals("dummyAllName")) {
+            algorithm = new MergeAlgorithm(dataset) {
+                @Override
+                public void run() {
+                    classes = new ArrayList<>();
+                    classes.add(new ArrayList<>(d.getRows())); // just one class, with all the rows in it
+                }
+            };
+        } else if (algo.equals("compatibleNames")) {
+            CompatibleNameAlgorithm cnm = new CompatibleNameAlgorithm(d, Config.MERGE_FIELD);
+            algorithm = cnm;
+        }
+    }
+
+    private void mergeBasedOnAlgorithmAndIds() {
+        Timers.unionFindTimer.reset();
+        Timers.unionFindTimer.start();
+
+        UnionFindSet<Row> ufs = new UnionFindSet<>();
+
+        // do unification, the criteria are based on one of 2 factors
+        // same id, or same cluster according to the merge algorithm
+
+        for (String id: idToRows.keySet()) {
+            ufs.unifyAllElementsOfCollection (idToRows.get(id));
         }
 
-		else if(algo.equals("exactSameName")){
-			mergeManager = new ExactSameNameMergeManager(d);
-		}
-		else if(algo.equals("editDistance1")){
-			mergeManager = new SimilarNameMergeManager(d, 1);	//TESTING
-		}
-		else if(algo.equals("editDistance2")){
-			mergeManager = new SimilarNameMergeManager(d, 2);	//TESTING
-		}
-		else if(algo.equals("dummyAllName")){
-			mergeManager = new DummyMergeManager(d);
-		}
-		else if(algo.equals("exactSameNameWithConstituency")){
-			mergeManager = new ExactSameNameWithConstituencyMergeManager(d);
-		} else if(algo.equals("compatibleNames")){
-			CompatibleNameManager cnm = new CompatibleNameManager(d, "cand1");
-			mergeManager = cnm;
-		}
-		else if(algo.equals("search")){
-			mergeManager = new SearchMergeManager(d, arguments);
-		}
-		return mergeManager;
-	}
+        for (Collection<Row> cluster : algorithm.classes) {
+            ufs.unifyAllElementsOfCollection(cluster);
+        }
 
-    protected MergeManager(Dataset d){
-    	this.d = d;
-        if(!d.hasColumnName("__comments"))
-		    d.addToActualColumnName("__comments");
-        if(!d.hasColumnName("__reviewed"))
-		    d.addToActualColumnName("__reviewed");
-		computeIdToRows (d.getRows());
+        Timers.unionFindTimer.stop();
+        Timers.log.info ("Time for union-find: " + Timers.unionFindTimer.toString());
+        listOfSimilarCandidates = (List) ufs.getClassesSortedByClassSize();
     }
 
     private void computeIdToRows (Collection<Row> rows) {
@@ -70,8 +93,42 @@ public abstract class MergeManager {
             idToRows.put (r.get(Config.ID_FIELD), r);
     }
 
-	//add candiates which will be judged based on their group
-	abstract public void addSimilarCandidates();
+    public void run() {
+        algorithm.run();
+        mergeBasedOnAlgorithmAndIds();
+    }
+
+    /** applies the given merge/unmerge commands on the dataset */
+    public void applyUpdatesAndSave(MergeCommand[] commands) throws IOException {
+        for (MergeCommand command: commands) {
+            if ("merge".equalsIgnoreCase(command.op)) {
+                // we have to merge all the ids in command.ids
+                // the id of the first will be put into firstId, and copied to all the other rows with that id
+                String firstId = null;
+                for (String id : command.ids) {
+                    if (firstId == null) {
+                        firstId = id;
+                        continue;
+                    }
+
+                    log.info("Merging id " + id + " into " + firstId);
+                    Collection<Row> rowsForThisId = idToRows.get(id);
+                    for (Row row : rowsForThisId)
+                        row.set(Config.ID_FIELD, firstId); // we wipe out the old id for this row
+                }
+            } else if ("unmerge".equalsIgnoreCase(command.op)) {
+                // create unique id's for all rows
+                for (String id : command.ids) {
+                    Collection<Row> rowsForThisId = idToRows.get(id);
+                    for (Row row : rowsForThisId) {
+
+                    }
+                }
+            }
+        }
+
+        d.save();
+    }
 
 	/** for each element in list,
 	 *  the ids in each sub-list are merged.
@@ -94,10 +151,6 @@ public abstract class MergeManager {
 		}
 	}
 
-	final public void save(String filePath) throws IOException{
-		d.save(filePath);
-	}
-
 	final public void evaluateConfidence(){
 		for(Collection<Row> group:listOfSimilarCandidates){
 			//Evaluate confidence for the current group
@@ -111,25 +164,6 @@ public abstract class MergeManager {
 		}
 	}
 
-	//returns a list of group of similar named groups
-	final public List<Collection<Row>> doFilter() {
-        List<Collection<Row>> result = new ArrayList<>();
-
-        for (Collection<Row> groupOfRows:listOfSimilarCandidates) {
-		    boolean includeGroup = false;
-            for (Row r: groupOfRows) {
-                String pc_no = r.get("PC_no");
-                if ("1".equals (pc_no) || "2".equals (pc_no) || "3".equals (pc_no)) {
-                    includeGroup = true;
-                    break;
-                }
-            }
-            if (includeGroup)
-                result.add (groupOfRows);
-        }
-		return result;
-	}
-
 	public void sort(String sortOrder){
 		Comparator<Collection<Row>> comparator;
 		if ("confidence".equals (sortOrder)) {
@@ -140,44 +174,6 @@ public abstract class MergeManager {
 			comparator = SurfExcel.alphabeticalComparartor;
 
 		listOfSimilarCandidates.sort(comparator);
-	}
-
-
-	int [] getListCount(ArrayList<Multimap<String,Row>> groupLists){
-		int [] statusCount = new int[5];
-		if(listOfSimilarCandidates==null){
-			System.out.println("0");
-			return null;
-		}
-		int i=0;
-		int j=0;
-		int k=0;
-		System.out.println("total number of groups:" + groupLists.size());
-		for(Multimap mp:groupLists){
-			//System.out.println("Unique person identified: "+mp.keySet().size());
-			i+=mp.keySet().size();
-			j+=mp.values().size();
-			for (Row row:(Collection<Row>)mp.values()){
-				if(row.get("is_done").equals("yes"))
-					k++;
-			}
-		}
-		//System.out.println("Unique person identified: " + i);
-		//System.out.println("Unique rows identified: " + j);
-		//System.out.println("Redundency removed:  "+(j-i));
-		statusCount[0] = i;
-		statusCount[1] = j;
-		statusCount[2] = j-i;
-		statusCount[3] = groupLists.size();
-		statusCount[4] = k;	//rows reviewed
-		return statusCount;
-		
-	}
-
-	public void resetIsDone(){
-		for(Row row:d.getRows()){
-            row.set("is_done", "no");
-		}
 	}
 
 	/** returns a collection of groups. under each group is a bunch of ids. under each id has a bunch of rows.
@@ -234,23 +230,5 @@ public abstract class MergeManager {
 		}
 
 		return result;
-	}
-
-	public Map<String,Set<String>> getAttributesDataSet(String [] attributes){
-		Map<String,Set<String>> attributeMap = new HashMap<>();
-		
-		for(String attribute:attributes){
-			Set<String> valueSet = new HashSet<>();
-			for(Row row:d.getRows()){
-				valueSet.add(row.get(attribute));
-			}
-			attributeMap.put(attribute, valueSet);
-		}
-		
-		return attributeMap; 
-	}
-
-	public final void setArguments(String arguments){
-		this.arguments = arguments;
 	}
 }

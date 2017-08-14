@@ -14,11 +14,12 @@ import="java.util.*"
 <head>
 	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
     <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
-    <link href="css/fonts/font-awesome/css/font-awesome.css" rel="stylesheet">
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
+
     <script src="js/jquery-1.12.1.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
@@ -93,10 +94,13 @@ import="java.util.*"
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="top-bar">
         <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
+
         <button class="btn btn-default" type="button">Filter</button>
-        <button class="btn btn-default" type="button">Save <i style="display:none" class="save-spinner fa fa-spin fa-spinner"></i></button>
-        <span>Across Groups <input type="Checkbox"></span>
+
+        <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input type="Checkbox"></span>
+
         <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
+            <button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button>
             <button class="btn btn-default" type="button">Help</button>
         </div>
     </div>
@@ -112,31 +116,31 @@ import="java.util.*"
                     <th class="cell-table"><%=col%></th>
                 <% } %>
                 <th class="cell-table ">Comments</th>
-                <th class="cell-table ">Unmerge</th>
-                <th class="cell-table ">Done</th>
             </tr>
             </thead>
 <%
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
-							
-	int gid = currentPage * Config.groupsPerPage;
 	boolean firstGroup = true;
-	for (List<List<Row>> groupRows: rowsToShow) {
+	int startGid = currentPage * Config.groupsPerPage;
+	int endGid = Math.max (((currentPage+1) * Config.groupsPerPage), rowsToShow.size()); // endgid is not inclusive
 
+    // we'll show groups from startGid to endGid
+	for (int gid = startGid; gid < endGid; gid++) {
+        List<List<Row>> groupRows = rowsToShow.get(gid);
         // render a group of records in a tbody (tables can have multiple tbody's)
 
         %>
         <tbody data-groupId="<%=gid%>" class="inside-table" id="table-body">
         <tr class="toolbar-row">
-            <td colspan="20">
-                <button data-groupId="<%=gid%>" class="merge-button" type="button" id="merge-all" >Merge all</button>
+            <td colspan="20"> <!-- 20 just to be safe -- we just want it at extreme right -->
+                <button data-groupId="<%=gid%>" class="select-button" type="button" id="select-all" >Select all</button>
                 <button data-groupId="<%=gid%>" class="reviewed-button" type="button" id="done-all">Mark as reviewed</button>
 
                 <% if (!firstGroup) { // don't show "till above" buttons for first group %>
 
                     <button data-groupId="<%=gid%>" class="reviewed-till-here-button" style="float: right; margin-right: 10px" type="button">Mark reviewed till here</button>
-                    <button data-groupId="<%=gid%>" class="merge-till-here-button" style="float: right; margin-right: 10px" type="button">Merge till here</button>
+                    <button data-groupId="<%=gid%>" class="select-till-here-button" style="float: right; margin-right: 10px" type="button">Select till here</button>
                 <% } %>
 
             </td>
@@ -149,25 +153,19 @@ import="java.util.*"
             boolean firstRowForThisId = true;
 		    for (Row row: rowsForThisId) {
 
-                String unmergeCheckboxHTML = "";
-                // if the id has more than 2 rows, the first row will include an option to unmerge it
-                if (rowsForThisId.size() > 1 && firstRowForThisId) {
-                    unmergeCheckboxHTML = "<input type=\"checkbox\" class=\"checkBox unmerge-checkbox\" name=\"demerges\" value=\"" + row.get(Config.ID_FIELD) + "\"/>"; // provide an option for this id to be broken up
-                }
-
 				String mergeCheckboxHTML = "";
                 // the first row of this id will always have a checkbox
 				if (firstRowForThisId) { // && groupRows.size() > 1){
 				    // the first row for every id will have a merge checkbox html
-                    mergeCheckboxHTML = "<input data-id=\"" + row.get(Config.ID_FIELD) + "\" type=\"checkbox\" class=\"checkBox merge-checkbox\" name=\"row\" value=\"" + row.get(Config.ID_FIELD) + "\"/>";
+                    mergeCheckboxHTML = "<input data-id=\"" + row.get(Config.ID_FIELD) + "\" type=\"checkbox\" class=\"checkBox select-checkbox\" name=\"row\" value=\"" + row.get(Config.ID_FIELD) + "\"/>";
 				}
 
 				// now print the actual row
 				// compute name and pc hover text
 				String hoverText = "ID: " + row.get(Config.ID_FIELD);
-				hoverText += " Canonical: " + Util.escapeHTML(row.get ("cname"));
-				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("tname"));
-				hoverText += " Sorted: " + Util.escapeHTML(row.get ("stname"));
+                hoverText += " Effective: " + Util.escapeHTML(row.get ("st" + Config.MERGE_FIELD));
+				hoverText += " (Indianized: " + Util.escapeHTML(row.get ("c" + Config.MERGE_FIELD));
+				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("t" + Config.MERGE_FIELD)) + ")";
 
 				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
 				String doneClass =  "yes".equals(row.get("is_done")) ? "row-done" : "row-not-done";
@@ -184,7 +182,7 @@ import="java.util.*"
 
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
-				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get("Name"))%></a></td>
+				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD))%></a></td>
 				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("PC_name"))%></a></td>
 
                 <%  for (String col: Config.supplementaryColumns) { %>
@@ -192,9 +190,6 @@ import="java.util.*"
                 <% } %>
                 <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td>
 
-				<% if (firstRowForThisId) { %>
-					<td class="cell-table unmerge-checkbox"><%=unmergeCheckboxHTML%></td>
-				<% } %>
 				<td class="cell-table "></td>
 			</tr>
 			
@@ -202,7 +197,6 @@ import="java.util.*"
 				firstRowForThisId = false;
 			} // end row for this id
 		} // end id
-        gid++;
         firstGroup = false;
         %>
         </tbody>
@@ -267,15 +261,17 @@ import="java.util.*"
 
 <script>
     $(document).ready(function() { $('#loading').hide();});
-    function merge_all_handler (e) {
+    function select_all_handler (e) {
+        var text1 = 'Select all', text2 = 'Unselect all';
+
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
-        if ($target.text() == 'Merge all') {
-            $('input.merge-checkbox', $group).prop('checked', true); // set all checkboxes to true
-            $target.text('Unmerge all');
+        if ($target.text() == text1) {
+            $('input.select-checkbox', $group).prop('checked', true); // set all checkboxes to true
+            $target.text(text2);
         } else {
-            $('input.merge-checkbox', $group).prop('checked', false); // set all checkboxes to true
-            $target.text('Merge all');
+            $('input.select-checkbox', $group).prop('checked', false); // set all checkboxes to true
+            $target.text(text1);
         }
     }
 
@@ -290,12 +286,12 @@ import="java.util.*"
         }
     }
 
-    function merge_till_here_handler (e) {
+    function select_till_here_handler (e) {
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
         var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
-        $('input.merge-checkbox', $group).prop('checked', true); // set all checkboxes to true
-        $('input.merge-checkbox', $groups).prop('checked', true); // set all checkboxes to true
+        $('input.select-checkbox', $group).prop('checked', true); // set all checkboxes to true
+        $('input.select-checkbox', $groups).prop('checked', true); // set all checkboxes to true
     }
 
     function reviewed_till_here_handler (e) {
@@ -315,42 +311,59 @@ import="java.util.*"
         }
     }
 
-    function save_handler () {
+    function save_handler (e) {
+        var op = ($(e.target).hasClass('merge-button')) ? 'merge' : 'unmerge';
+        var $spinner = ($(e.target).hasClass('merge-button')) ? $('.merge-spinner') : $('unmerge-spinner');
+
         $groups = $('tbody'); // find the nearest tbody, which corresponds to a group
-        var result = [];
-        for (var i = 0; i < $groups.length; i++) {
-            var $group = $($groups[i]);
-            $checked = $('input.merge-checkbox:checked', $group);
-            if ($checked.length < 2) // 0 or 1 means the group was not touched, or only 1 box was checked
-                continue;
-            var resultForThisGroup = {groupId: $group.attr('data-groupId'), ids: []};
+        var commands = [];
+        var across_groups =  $('.across-groups').is(':checked');
+
+        if (across_groups || op == 'unmerge') {
+            // if across_groups there will be a single command, merging all the id's regardless of group
+            // if unmerge also, there will be a single command with all the ids to be broken up
+            var command = {op:op, groupId: 'none', ids: []}; // if merging across groups, groupId doesn't matter.
+            $checked = $('input.select-checkbox:checked');
             for (var j = 0; j < $checked.length; j++) {
-                resultForThisGroup.ids.push ($($checked[i]).attr('data-id'));
+                command.ids.push($($checked[j]).attr('data-id'));
             }
-            result.push (resultForThisGroup);
+            commands[0] = command;
+        } else {
+            for (var i = 0; i < $groups.length; i++) {
+                var $group = $($groups[i]);
+                var commandForThisGroup = {op: op, groupId: $group.attr('data-groupId'), ids: []}; // groupId is not directly used but we keep it anyway for future use
+
+                $checked = $('input.select-checkbox:checked', $group);
+                if ($checked.length < 2)
+                    continue; // no id, or 1 id checked, in either case it doesn't matter.
+
+                for (var j = 0; j < $checked.length; j++) {
+                    commandForThisGroup.ids.push($($checked[j]).attr('data-id'));
+                }
+                commands.push(commandForThisGroup);
+            }
         }
 
-        var post_data = {json: toJson(result)};
+        var post_data = {json: JSON.stringify(commands)};
 
-        $('.save-spinner').fadeIn();
+        $spinner.fadeIn();
 
         $.ajax ({
             type: 'POST',
-            url: 'ajax/save-dataset.jsp',
+            url: 'ajax/save-dataset',
             datatype: 'json',
             data: post_data,
-            success: function (o) { $('.save-spinner').fadeOut();},
-            error: function () { $('.save-spinner').fadeOut(); alert ('Warning: save failed!');}
+            success: function (o) { $spinner.fadeOut();},
+            error: function () { $spinner.fadeOut(); alert ('Warning: save failed!');}
         });
     }
 
-    $('.merge-button').click (merge_all_handler);
+    $('.select-button').click (select_all_handler);
     $('.reviewed-button').click (group_reviewed_handler);
-    $('.merge-till-here-button').click (merge_till_here_handler);
+    $('.select-till-here-button').click (select_till_here_handler);
     $('.reviewed-till-here-button').click (reviewed_till_here_handler);
-    $('.save-button').click (save_handler);
-    $('body').click (reviewed_till_here_handler);
-
+    $('.merge-button').click (save_handler);
+    $('.unmerge-button').click (save_handler);
 
 </script>
 </body>

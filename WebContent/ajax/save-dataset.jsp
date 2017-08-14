@@ -1,16 +1,40 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: hangal
-  Date: 8/13/17
-  Time: 5:11 PM
-  To change this template use File | Settings | File Templates.
---%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>Title</title>
-</head>
-<body>
+<%@page language="java" contentType="application/json; charset=UTF-8"%>
+<%@page trimDirectiveWhitespaces="true"%>
+<%@page language="java" import="edu.stanford.muse.webapp.JSPHelper"%>
+<%@page import="org.json.JSONObject"%>
+<%
+    String json = request.getParameter ("json");
+    GsonBuilder gson = new GsonBuilder();
+    gson.create().
+%>
+<%@page language="java" contentType="application/json; charset=UTF-8"%>
+<%@page trimDirectiveWhitespaces="true"%>
+<%@page language="java" import="edu.stanford.muse.webapp.JSPHelper"%>
+<%@page import="org.json.JSONObject"%><%@ page import="com.google.gson.GsonBuilder"%>
+<%
 
-</body>
-</html>
+        if (!session.isNew()) {
+                session.removeAttribute("userKey");
+                session.removeAttribute("emailDocs");
+                session.removeAttribute("archive");
+                session.removeAttribute("cacheDir");
+                // cache dir?
+
+                session.removeAttribute("museEmailFetcher");
+                session.removeAttribute("statusProvider");
+
+                JSPHelper.log.info ("session invalidated");
+        //      session.invalidate();
+        }
+        else
+        {
+                JSPHelper.log.info ("session already invalidated");
+                out.println ("session already invalidated");
+        }
+
+        JSONObject result = new JSONObject();
+        result.put("status", 0);
+        result.put("message", "Session ended");
+        out.println (result.toString());
+//      session.removeAttribute("mode");
+%>

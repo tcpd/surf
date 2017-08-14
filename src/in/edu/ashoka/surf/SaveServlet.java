@@ -1,7 +1,11 @@
 package in.edu.ashoka.surf;
 
-import java.io.IOException;
-import java.util.*;
+import com.google.common.collect.Multimap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sun.scenario.effect.Merge;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -9,61 +13,44 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.*;
 
-import com.google.common.collect.Multimap;
-import com.sun.scenario.effect.Merge;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+/**
+ * Servlet implementation class MergeServlet
+ */
+public class SaveServlet extends HttpServlet {
+	public static Log log = LogFactory.getLog(Config.class);
 
-public class MergeServlet extends HttpServlet {
-	public static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeServlet.class);
 	private static final long serialVersionUID = 1L;
+	public final static long START_TIME = System.currentTimeMillis();
 
-    public MergeServlet() {
+
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public SaveServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
-
-	/**
-	 * runs the algorithm and puts up a new mergemanager in the session
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        try {
-        	// set up a new merge manager and then forward to table.jsp
-            HttpSession session = request.getSession();
-            MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");
-            Dataset dataset = (Dataset) session.getAttribute("dataset");
-			if (mergeManager == null) {
-				mergeManager = new MergeManager(dataset, request.getParameter("algorithm"), request.getParameter("algo-arg"));
-				session.setAttribute("mergeManager", mergeManager);
-				mergeManager.run();
-
-				// further split by split column if specified
-				String splitColumn = request.getParameter("splitColumn");
-				if (splitColumn.length() > 0) {
-					List<Collection<Row>> result = new ArrayList<>();
-					List<Collection<Row>> groupsList = mergeManager.listOfSimilarCandidates;
-					for (Collection<Row> group : groupsList) {
-						Multimap<String, Row> splitGroups = SurfExcel.split (group, splitColumn);
-						for (String key: splitGroups.keySet())
-							result.add (splitGroups.get(key));
-					}
-					mergeManager.listOfSimilarCandidates = result;
-				}
-			}
-			response.getOutputStream().print ("{status: 0}");
-        } catch (IOException e){
-			response.getOutputStream().print("{status: 1, message: " + e.getClass().getName() + "}"); // TODO: add detailed error message
-        }
-	}
 
     /**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		doGet(request, response);
+		HttpSession session = request.getSession();
+		Dataset dataset = (Dataset) session.getAttribute("dataset");
+		MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		Gson gson = gsonBuilder.create();
+		try {
+			MergeManager.MergeCommand[] commands = gson.fromJson(request.getParameter("json"), MergeManager.MergeCommand[].class);
+			mergeManager.applyUpdatesAndSave(commands);
+			response.getOutputStream().print("{status: 0}");
+		} catch (Exception e) {
+			response.getOutputStream().print("{status: 1, message: " + e.getClass().getName() + "}"); // TODO: add detailed error message
+		}
 	}
 
 	public void destroy() {
@@ -71,6 +58,15 @@ public class MergeServlet extends HttpServlet {
 		Dataset.destroyTimer();
 	}
 
+	//Handles button pressed action for both save as well as force merge button
+	private boolean saveButtonPressed(HttpServletRequest request){
+		return (request.getParameter("submit")!=null && (request.getParameter("submit").equals("Save")||(request.getParameter("submit").equals("Force MergeServlet"))));
+	}
+
+	private boolean resetButtonPressed(HttpServletRequest request){
+		return (request.getParameter("submit")!=null && request.getParameter("submit").equals("Reset"));
+	}
+	
 	private boolean updateTable(HttpServletRequest request){
 		boolean shouldSave=false;
 		String [] userRows = request.getParameterValues("row");

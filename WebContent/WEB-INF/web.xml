@@ -10,7 +10,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>table</servlet-name>
-    <url-pattern>/table.jsp</url-pattern>
+    <url-pattern>/table</url-pattern>
   </servlet-mapping>
 
   <servlet>
@@ -31,7 +31,27 @@
     <url-pattern>/read-dataset</url-pattern>
   </servlet-mapping>
 
-  <filter>
+  <servlet>
+    <servlet-name>save-dataset</servlet-name>
+    <servlet-class>in.edu.ashoka.surf.SaveServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>run-merge</servlet-name>
+    <url-pattern>/ajax/run-merge</url-pattern>
+  </servlet-mapping>
+
+    <servlet>
+        <servlet-name>run-merge</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.MergeServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>save-dataset</servlet-name>
+        <url-pattern>/ajax/save-dataset</url-pattern>
+    </servlet-mapping>
+
+    <filter>
     <filter-name>LoggingFilter</filter-name>
     <filter-class>
       edu.stanford.muse.webapp.LoggingFilter

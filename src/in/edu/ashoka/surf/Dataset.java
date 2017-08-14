@@ -13,7 +13,8 @@ import org.apache.commons.csv.CSVRecord;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-
+import org.apache.commons.io.FileExistsException;
+import org.apache.commons.io.FileUtils;
 
 
 public class Dataset implements Serializable{
@@ -21,6 +22,8 @@ public class Dataset implements Serializable{
     static final long TIME_INTERVAL_BETWEEN_BACKUPS = 1000*60*60*4;
     long saveTimeOfBackedUpFile = 0;
     long saveTime = 0;
+    String filename;
+
 	public static String NEW_LINE_SEPARATOR = "\n";
     Collection<Row> rows;
     Collection<String> actualColumnName;
@@ -118,7 +121,7 @@ public class Dataset implements Serializable{
                 if(!datasetMap.containsKey(filename)){
                     datasetMap.put(filename, new Dataset(filename));
                     //CREATE ALL NECESSARY TOKENS AND FORMATTING
-                    Bihar.initRowFormat(datasetMap.get(filename).getRows(),datasetMap.get(filename));
+//                    Bihar.initRowFormat(datasetMap.get(filename).getRows(),datasetMap.get(filename));
                 }
             }
         }
@@ -133,7 +136,7 @@ public class Dataset implements Serializable{
             @Override
             public void run() {
                 try{
-                    if((saveTime>saveTimeOfBackedUpFile))
+                    if((saveTime > saveTimeOfBackedUpFile))
                         performBackup(new File(filename));
                 }catch (IOException e){
                     System.err.println("file backup failed");
@@ -166,6 +169,7 @@ public class Dataset implements Serializable{
             allRows.add(r);
         }
         this.rows = allRows;
+        this.filename = filename;
     }
 
     private void checkFilesForFailure(String filename) throws IOException{
@@ -211,18 +215,23 @@ public class Dataset implements Serializable{
         return row.getAllFieldNames();
     }
 
+    /** save to original file this dataset was loaded from */
+    synchronized public void save() throws IOException {
+        save(this.filename);
+    }
+
     /** saves this dataset as a CSV  in the given file 
      * @throws IOException */
     synchronized public void save(String file) throws IOException {
         saveTime = System.currentTimeMillis();
     	
-    	CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
-        //File csvFile = new File(file);
-
         //FIRST WRITE TO A NEW FILE
         String fileWithSuffixNew = file + ".new";
         Writer fileWriter = new FileWriter(fileWithSuffixNew);
+
+        CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
         CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat);
+
         List<String> columnList = new ArrayList<>(actualColumnName);
         csvFilePrinter.printRecord(columnList);
         
@@ -242,17 +251,13 @@ public class Dataset implements Serializable{
         String fileWithSuffixOld = file + ".old";
         File existingFile = new File(file);
         File suffixFile = new File(fileWithSuffixOld);
-        if(!existingFile.canWrite() || !existingFile.renameTo(suffixFile))
-            throw new IOException("failed to rename existing file to old file");
+        FileUtils.copyFile(existingFile, suffixFile);
 
         //RENAME THE NEW FILE TO EXISTING FILE
         suffixFile = new File(fileWithSuffixNew);
-        if(!suffixFile.canWrite()||!suffixFile.renameTo(new File(file))){
-            throw new IOException("failed to rename new file to existing file");
-        }
-
-        //PERFORM BACKUP
-        //performBackup(new File(file));
+        FileUtils.copyFile(suffixFile, new File(file));
+        if(!FileUtils.deleteQuietly(suffixFile))
+            throw new FileExistsException("failed to delete .new file");
     }
 
     /*

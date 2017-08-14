@@ -8,13 +8,14 @@
 <meta charset="UTF-8">
 <title>Surf</title>
 	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+    <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 
-	<script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+	<script src="js/jquery-1.12.1.min.js"></script>
 	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="js/selectpicker.js"></script>
 
@@ -32,7 +33,6 @@
 <div class="logo" style="text-align:center">Surf</div>
 
 <div class="user-input">
-<form action="merge" method="get">
 
 	<div class="form-group">
 		<label for="algorithm">Algorithm for clustering <%=mergeCol%></label>
@@ -71,9 +71,46 @@
 
 
 	<div class="submit-button">
-  <button type="submit" class="btn btn-default">Continue</button>
+        <button type="submit" class="btn btn-default run-button">Run algorithm <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button>
 </div>
-</form>
-</div>						
+<script>
+    /** collects all input fields on the page, and makes an object out of them with the field names as property names */
+    var collect_input_fields = function() {
+        var result = {};
+        $('input,select').each (function() {  // select field is needed for accounttype
+            if ($(this).attr('type') == 'button') { return; } // ignore buttons (usually #gobutton)
+            if ($(this).attr('type') == 'checkbox') {
+                if ($(this).is(':checked'))
+                {
+                    result[this.name] = 'on';
+                    epadd.log ('checkbox ' + this.name + ' is on');
+                }
+                else
+                    epadd.log ('checkbox ignored');
+            }
+            else {
+                result[this.name] = this.value;
+            }
+        });
+
+        return result;
+    };
+
+    $('.run-button').click (function() {
+        var $spinner = $('.spinner');
+        $spinner.fadeIn();
+
+        $.ajax ({
+            type: 'POST',
+            url: 'ajax/run-merge',
+            datatype: 'json',
+            data: collect_input_fields(),
+            success: function (o) { window.location = 'table?page=0'},
+            error: function () { $spinner.fadeOut(); alert ('Warning: Run algorithm failed!');}
+        });
+    })
+</script>
+
+</div>
 </body>
 </html>

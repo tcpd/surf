@@ -4,6 +4,8 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import edu.stanford.muse.util.Util;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -13,6 +15,7 @@ import java.util.Set;
  * e.g. "Position" = {"1", "2", "3"}
  */
 public class Filter {
+    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Filter.class);
 
     private SetMultimap<String, String> colNameToAllowedValues = LinkedHashMultimap.create();
 
@@ -47,6 +50,8 @@ public class Filter {
                 colNameToAllowedValues.put(col, allowedVal);
             }
         }
+
+        log.info ("Parsed filter spec: " + this);
     }
 
     /** returns whether the row passes the given filter. if the filter is empty, always returns true. */

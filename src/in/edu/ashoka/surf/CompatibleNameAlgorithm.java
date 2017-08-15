@@ -52,15 +52,15 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 	}
 
 	@Override
-	public void run() {
-		String stField = "_st_" + primaryFieldName;
+	public List<Collection<Row>> run() {
+		String field = "_c_" + primaryFieldName; // we run it on the canon version of the name, not the tokenized, cecause that causes too many merges
 
 		List<Row> rows = new ArrayList<>(dataset.getRows());
 		// setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
 		// since editDistance computation is expensive, we'll only compute it for pairs that have at least 1 token in common
 		Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
 		for (int i = 0; i < rows.size(); i++) {
-			String fieldVal = rows.get(i).get(stField);
+			String fieldVal = rows.get(i).get(field);
 			StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
 			while (st.hasMoreTokens()) {
 				String tok = st.nextToken();
@@ -72,10 +72,12 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
 		UnionFindSet<Row> ufs = new UnionFindSet<>();
 		for (int i = 0; i < rows.size(); i++) {
-			// collect the indexes of the values that we should compare stField with, based on common tokens
+            String fieldVal = rows.get(i).get(field);
+
+            // collect the indexes of the values that we should compare stField with, based on common tokens
 			Set<Integer> idxsToCompareWith = new LinkedHashSet<>();
 			{
-				StringTokenizer st = new StringTokenizer(stField, Tokenizer.DELIMITERS);
+				StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
 				while (st.hasMoreTokens()) {
 					String tok = st.nextToken();
 					if (tok.length() < 3)
@@ -88,7 +90,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 			}
 
 			for (int j : idxsToCompareWith) {
-				if (compatibility (rows.get(i).get(stField), rows.get(j).get(stField)) > 0) { // note: we could also compare primary field, not st field, to reduce noise
+				if (compatibility (rows.get(i).get(field), rows.get(j).get(field)) > 0) { // note: we could also compare primary field, not st field, to reduce noise
 					ufs.unify (rows.get(i), rows.get(j)); // i and j are in the same group
 				}
 			}
@@ -97,9 +99,11 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 		List<List<Row>> clusters = ufs.getClassesSortedByClassSize(); // this gives us equivalence classes of row#s that have been merged
 
 		// now translate the row#s back to the actual rows
+        classes = new ArrayList<>();
 		for (List<Row> cluster : clusters) {
 			classes.add (cluster);
 		}
+		return classes;
 	}
 
 	public static void main (String args[]) {

@@ -4,10 +4,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import edu.tsinghua.dbgroup.EditDistanceClusterer;
 import in.edu.ashoka.surf.util.Timers;
-import in.edu.ashoka.surf.util.UnionFindSet;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by hangal on 8/12/17.
@@ -24,12 +22,12 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
         Collection<Row> allRows = dataset.getRows();
 
         // set up desi versions of the given field. we'll perform edit distance computation on this version of the given field, not the original one.
-        this.fieldName = fieldName; // this is hardcoded for now
+        this.fieldName = fieldName;
         this.editDistance = editDistance;
     }
 
     @Override
-    public void run() {
+    public List<Collection<Row>> run() {
 
         Collection<Row> allRows = dataset.getRows();
 
@@ -57,5 +55,8 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
             cluster.stream().forEach (s -> { rowsForThisCluster.addAll (fieldValueToRows.get(s)); });
             classes.add (rowsForThisCluster);
         }
+        return classes;
     }
+
+    public String toString() { return "Edit distance " + editDistance; }
 }

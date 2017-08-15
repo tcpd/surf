@@ -302,4 +302,8 @@ public class Dataset implements Serializable{
             d.timer.cancel();
         }
     }
+
+    public String toString() {
+        return "Dataset with " + getRows().size() + " rows and " + nCols() + " columns read from " + filename;
+    }
 }

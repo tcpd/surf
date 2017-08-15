@@ -5,9 +5,15 @@ import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
 %>
 <%@ page import="edu.stanford.muse.util.Util" %>
-<%@ page import="in.edu.ashoka.surf.Filter" %>
 <%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<%
+    int currentPage = 0;
+    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
+    MergeManager.View view = (MergeManager.View) session.getAttribute("view");
+    List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
+%>
 
 <!DOCTYPE html>
 <html>
@@ -22,74 +28,44 @@ import="java.util.*"
 
     <script src="js/jquery-1.12.1.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="js/selectpicker.js"></script>
 
 	<title>Surf</title>
 </head>
 <body>
-
-
-    <div id="loading" style="padding-top: 20%">
-        <img src="loading.gif" alt="LOADING.."/>
+<!-- Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Settings Menu</h4>
+            </div>
+            <div class="modal-body">
+                <div class="filterForm">
+                    <form class="form" role="filter" method="get" action="merge">
+                        <label for="algo-arg">Filter</label>
+                        <input type="text" class="form-control" id="algo-arg" name="algo-arg">
+                        <br/>
+                        <div class="form-group">
+                            <label for="sortOrder">Sort order for groups</label>
+                            <select class="form-control selectpicker" id="sortOrder" name="sortOrder">
+                                <option value="nameLength">Long names first</option>
+                                <option value="largestGroupFirst">Largest group first</option>
+                                <option value="alpha">Alphabetical</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" onclick="saveFilterSettings()" id="settingsSubmit" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-	<!-- Modal -->
-	<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-	  <div class="modal-dialog" role="document">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title" id="myModalLabel">Settings Menu</h4>
-	      </div>
-	      <div class="modal-body">
-	       	<div class="filterForm">
-				<form class="form" role="filter" method="get" action="merge">
-					<div class="form-group">
-						Filter:
-						<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
-							<option value="State" id="Primary">State</option>
-							<option value="Party" >Party</option>
-							<option value="PC_name" >Constituencies</option>
-						</select>
-					</div>
-					<div class="form-group">
-						<select multiple class="form-control" id="filterValue" name="filterValue">
-							<option value="All Records">All Records</option>
-						</select>
-					</div>
-					<div class=form-group>
-						Show only Winners:
-						<select id="onlyWinners" class="form-control" name="onlyWinners">
-							<option value="false">No</option>
-							<option value="true">Yes</option>
-						</select>
-					</div>
-					<div class=form-group>
-						Sort Order:
-						<select id="comparatorType" class="form-control" name="comparatorType">
-							<option value="confidence">By Confidence</option>
-							<option value="alphabetical">Alphabetical</option>
-						</select>
-					</div>
-				<div class="modal-footer">
-					<button type="submit" onclick="saveFilterSettings()" id="settingsSubmit" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
-	      		</div>
-   		</form>
-    </div>
-  </div>
-</div>
-</div>
 </div>
 
 
-<%
-    MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
-
-    Filter filter = new Filter ("Position=1,2,3"); // just for testing
-    List<List<List<Row>>> rowsToShow = mergeManager.applyFilter (mergeManager.listOfSimilarCandidates, filter);
-    int currentPage = 0;
-    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
-
-%>
 
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="top-bar">
@@ -97,7 +73,9 @@ import="java.util.*"
 
         <button class="btn btn-default" type="button">Filter</button>
 
-        <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input type="Checkbox"></span>
+        <button class="btn btn-default" type="button">Sort</button>
+
+        <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span>
 
         <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
             <button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button>
@@ -106,7 +84,7 @@ import="java.util.*"
     </div>
 
         <!-- main table starts here -->
-        <table class="table-header">
+        <table class="table-header" style="border-collapse: collapse">
             <thead>
             <tr class="table-row">
                 <th class="cell-table"></th>
@@ -123,11 +101,11 @@ import="java.util.*"
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 	boolean firstGroup = true;
 	int startGid = currentPage * Config.groupsPerPage;
-	int endGid = Math.max (((currentPage+1) * Config.groupsPerPage), rowsToShow.size()); // endgid is not inclusive
+	int endGid = Math.max (((currentPage+1) * Config.groupsPerPage), groupsToShow.size()); // endgid is not inclusive
 
     // we'll show groups from startGid to endGid
 	for (int gid = startGid; gid < endGid; gid++) {
-        List<List<Row>> groupRows = rowsToShow.get(gid);
+        List<List<Row>> groupRows = groupsToShow.get(gid);
         // render a group of records in a tbody (tables can have multiple tbody's)
 
         %>
@@ -150,9 +128,9 @@ import="java.util.*"
         for (List<Row> rowsForThisId: groupRows) {
             // print out all rows for this id.
 
-            boolean firstRowForThisId = true;
-		    for (Row row: rowsForThisId) {
-
+		    for (int i = 0; i < rowsForThisId.size(); i++) {
+                boolean firstRowForThisId = (i == 0), lastRowForThisid = (i == rowsForThisId.size() - 1);
+                Row row = rowsForThisId.get(i);
 				String mergeCheckboxHTML = "";
                 // the first row of this id will always have a checkbox
 				if (firstRowForThisId) { // && groupRows.size() > 1){
@@ -166,24 +144,24 @@ import="java.util.*"
                 hoverText += " Effective: " + Util.escapeHTML(row.get ("st" + Config.MERGE_FIELD));
 				hoverText += " (Indianized: " + Util.escapeHTML(row.get ("c" + Config.MERGE_FIELD));
 				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("t" + Config.MERGE_FIELD)) + ")";
-
 				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
-				String doneClass =  "yes".equals(row.get("is_done")) ? "row-done" : "row-not-done";
 				String href = "http://www.google.com/search?q=" + row.get("Name").replace(" ","+") + "+" + row.get("PC_name").replace(" ","+") + "+" + row.get("Year");
-				String pc_href = "https://www.google.co.in/maps/place/" + row.get("PC_name").replace(" ","+") + "," + row.get("State").replace("_","+");
+				String pc_href = "https://www.google.co.in/maps/place/" + row.get("acname").replace(" ","+") + "," + row.get("statename").replace("_","+");
+                hoverText = Util.escapeHTML(hoverText);
+                pcInfo = Util.escapeHTML(pcInfo);
 
 				String id = row.get(Config.ID_FIELD);
 				String tr_class = "";
-				if (!firstRowForThisId)
+				if (!lastRowForThisid)
 				    tr_class = "merged-row";
 			%>
 
-			<tr class="<%=tr_class%> trow <%=doneClass%>" data-id=<%=id%>>
+			<tr class="<%=tr_class%> trow" data-id=<%=id%>>
 
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
 				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD))%></a></td>
-				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("PC_name"))%></a></td>
+				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("acname"))%></a></td>
 
                 <%  for (String col: Config.supplementaryColumns) { %>
                     <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>
@@ -206,16 +184,13 @@ import="java.util.*"
 %>
 
 </table>
-</div>
-</div>
-</form>
 
 <div id="page-block">
-	
+
 	<!-- Page Navigation bar here -->
 	<nav aria-label="Page navigation">
   	<ul class="pagination pre-margin">
-  	
+
   	<!-- Listing previous page url here-->
   	<c:if test="${currentPage != 1}">
 	    <li class="page-item" onclick="resetScroll(); $('#loading').fadeIn();">
@@ -225,7 +200,7 @@ import="java.util.*"
 	 	</a>
 	    </li>
     </c:if>
-    
+
     <!-- Listing page numbers here -->
     <c:forEach begin="1" end="${noOfPages}" var="i">
 				<c:choose>
@@ -240,9 +215,9 @@ import="java.util.*"
 					<a class="page-link" href="merge?page=${i}">${i}</a>
 				</li>
 	</c:forEach>
-    
+
     <!-- Listing next page url here -->
-    
+
     <c:if test="${currentPage lt noOfPages}">
 				<li class="page-item" onclick="resetScroll(); $('#loading').fadeIn()">
       			<a class="page-link" href="merge?page=${currentPage + 1}" aria-label="Next">
@@ -251,12 +226,11 @@ import="java.util.*"
       			</a>
     			</li>
 	</c:if>
-    
-    
+
+
   </ul>
 </nav>
 
-</div>
 </div>
 
 <script>
@@ -313,21 +287,22 @@ import="java.util.*"
 
     function save_handler (e) {
         var op = ($(e.target).hasClass('merge-button')) ? 'merge' : 'unmerge';
-        var $spinner = ($(e.target).hasClass('merge-button')) ? $('.merge-spinner') : $('unmerge-spinner');
+        var $spinner = ($(e.target).hasClass('merge-button')) ? $('.merge-spinner') : $('.unmerge-spinner');
 
         $groups = $('tbody'); // find the nearest tbody, which corresponds to a group
         var commands = [];
         var across_groups =  $('.across-groups').is(':checked');
 
-        if (across_groups || op == 'unmerge') {
+        if (across_groups || op === 'unmerge') {
             // if across_groups there will be a single command, merging all the id's regardless of group
             // if unmerge also, there will be a single command with all the ids to be broken up
             var command = {op:op, groupId: 'none', ids: []}; // if merging across groups, groupId doesn't matter.
-            $checked = $('input.select-checkbox:checked');
+            $checked = $('input.select-checkbox:checked'); // gather checked checkboxes anywhere on the page
             for (var j = 0; j < $checked.length; j++) {
                 command.ids.push($($checked[j]).attr('data-id'));
             }
             commands[0] = command;
+            $('.across-groups').prop ('checked', false); // deliberately set it to false immediately after, we're worried about accidental merges across groups. across-groups should be the exception rather than the rule.
         } else {
             for (var i = 0; i < $groups.length; i++) {
                 var $group = $($groups[i]);
@@ -353,7 +328,7 @@ import="java.util.*"
             url: 'ajax/save-dataset',
             datatype: 'json',
             data: post_data,
-            success: function (o) { $spinner.fadeOut();},
+            success: function (o) { if (o && o.status == 0) { alert ('Ok, save worked'); } else { alert ('Save failed!'); } $spinner.fadeOut();},
             error: function () { $spinner.fadeOut(); alert ('Warning: save failed!');}
         });
     }
@@ -364,6 +339,7 @@ import="java.util.*"
     $('.reviewed-till-here-button').click (reviewed_till_here_handler);
     $('.merge-button').click (save_handler);
     $('.unmerge-button').click (save_handler);
+    $('.filter-button').click (function() { $('#filterModal').modal();});
 
 </script>
 </body>

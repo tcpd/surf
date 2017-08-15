@@ -15,8 +15,8 @@ abstract public class MergeAlgorithm {
     public List<Collection<Row>> classes; // these are the groups
     Dataset dataset;
 
-    /** after run(), the field classes should be set up with the groups of merges */
-    abstract public void run();
+    /** after run(), returns the groups of merged rows. the field classes should also be set up with the same */
+    abstract public List<Collection<Row>> run();
 
     MergeAlgorithm (Dataset dataset) {
         this.dataset = dataset;

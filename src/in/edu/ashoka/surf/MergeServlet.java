@@ -12,9 +12,11 @@ import javax.servlet.http.HttpSession;
 
 import com.google.common.collect.Multimap;
 import com.sun.scenario.effect.Merge;
+import edu.stanford.muse.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/* servlet called when a new algorithm is first run */
 public class MergeServlet extends HttpServlet {
 	public static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeServlet.class);
 	private static final long serialVersionUID = 1L;
@@ -25,42 +27,30 @@ public class MergeServlet extends HttpServlet {
     }
 
 	/**
-	 * runs the algorithm and puts up a new mergemanager in the session
+	 * runs the algorithm and puts up a new mergemanager in the session. assumes dataset is already in the session.
+	 * uses the request params algorithm, algo-arg, splitColumn, filterSpec, sortOrder.
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         try {
-        	// set up a new merge manager and then forward to table.jsp
+        	// set up a new merge manager first
             HttpSession session = request.getSession();
-            MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");
             Dataset dataset = (Dataset) session.getAttribute("dataset");
-			if (mergeManager == null) {
-				mergeManager = new MergeManager(dataset, request.getParameter("algorithm"), request.getParameter("algo-arg"));
-				session.setAttribute("mergeManager", mergeManager);
-				mergeManager.run();
+			MergeManager mergeManager = new MergeManager(dataset, request.getParameter("algorithm"), request.getParameter("algo-arg"));
+			session.setAttribute("mergeManager", mergeManager);
 
-				// further split by split column if specified
-				String splitColumn = request.getParameter("splitColumn");
-				if (splitColumn.length() > 0) {
-					List<Collection<Row>> result = new ArrayList<>();
-					List<Collection<Row>> groupsList = mergeManager.listOfSimilarCandidates;
-					for (Collection<Row> group : groupsList) {
-						Multimap<String, Row> splitGroups = SurfExcel.split (group, splitColumn);
-						for (String key: splitGroups.keySet())
-							result.add (splitGroups.get(key));
-					}
-					mergeManager.listOfSimilarCandidates = result;
-				}
-			}
+			// split by column
+			mergeManager.splitByColumn(request.getParameter ("splitColumn"));
+
+            // we have to merge based on ids to honor existing merges that may already have been done on the dataset
+			MergeManager.View view = mergeManager.getView(request.getParameter ("filterSpec"), request.getParameter ("sortOrder"));
+			session.setAttribute ("view", view);
+
 			response.getOutputStream().print ("{status: 0}");
         } catch (IOException e){
 			response.getOutputStream().print("{status: 1, message: " + e.getClass().getName() + "}"); // TODO: add detailed error message
         }
 	}
 
-    /**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		doGet(request, response);
@@ -71,49 +61,8 @@ public class MergeServlet extends HttpServlet {
 		Dataset.destroyTimer();
 	}
 
-	private boolean updateTable(HttpServletRequest request){
-		boolean shouldSave=false;
-		String [] userRows = request.getParameterValues("row");
-		
-		//Collect comment related information & Collect completion related information
-		
-		Map<String,String[]> parameterMap = request.getParameterMap();
-		
-		Map<String,String> commentMap = new HashMap<String,String>();
-		Map<String,String> isDoneMap = new HashMap<String,String>();
-		for(String name:parameterMap.keySet()){
-			if(name.contains("commentParam")){
-					commentMap.put(name.substring(12),parameterMap.get(name)[0]);	//strip the key value before storing
-				}
-			
-			if(name.contains("isDone")){
-				isDoneMap.put(name.substring(7),parameterMap.get(name)[0]);	//strip the key value before storing
-			}
-		}
-		
-		MergeManager mergeManager = (MergeManager)request.getSession().getAttribute("mergeManager");
-		
-		if(userRows!=null && userRows.length>0){
-			//isdone needs to be updated too on merge
-			for(String row:userRows){
-				isDoneMap.put(row, "on");
-			}
-			shouldSave = true;
-		}
-		
-		//check whether rows have been marked for demerge; if yes,call the demerge method
-		String [] rowsToBeDemerged = request.getParameterValues("demerges");
-		//testing deMerge; Remove later
-		//rowsToBeDemerged = new String[]{"26827","31908", "63686", "70245", "8576", "31906", "26815"};
-		if(rowsToBeDemerged!=null){
-			shouldSave = true;
-		}
-		
-		//returns true if save needs to be done
-		return shouldSave;
-	}
-
-	/* if the request param datasetKey is present, loads the dataset and puts it in the session, otherwise does nothing. */
+	/* if the request param datasetKey is present, loads the dataset and puts it in the session, otherwise does nothing.
+	 * no reason this method is in this class, it could be anywhere */
 	public static Dataset loadDataset(HttpServletRequest request) throws IOException{
 	    String datasetKey = request.getParameter ("datasetKey");
 	    if (datasetKey != null) {

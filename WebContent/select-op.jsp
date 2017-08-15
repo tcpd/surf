@@ -1,6 +1,7 @@
 <%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ page import="in.edu.ashoka.surf.*" %>
 <%@ page import="edu.stanford.muse.util.Util" %>
+<%@ page import="javax.management.RuntimeMBeanException" %>
 
 <!DOCTYPE html>
 <html>
@@ -42,7 +43,7 @@
             <option value="dummyAllName">All names</option>
 		</select>
         <br/>
-        <label for="algo-arg">Arguments for Algorithm (Advanced)</label>
+        <label for="algo-arg">Arguments for Algorithm</label>
         <input type="text" class="form-control" id="algo-arg" name="algo-arg">
     </div>
 
@@ -60,18 +61,22 @@
         </select>
     </div>
 
-	<div class=form-group>
-		<label for="comparatorType">Results Order</label>
-		<select id="comparatorType" class="form-control selectpicker" name="comparatorType">
-			<option value="confidence">By Confidence</option>
-			<option value="alphabetical">Alphabetical</option>
-		</select>
-	</div>
+    <div class=form-group>
+        <label for="filterSpec">Filter</label>
+        <input id="filterSpec" name="filterSpec" type="text" class="form-control">
+    </div>
 
-
+    <div class="form-group">
+        <label for="sortOrder">Sort order for groups</label>
+        <select class="form-control selectpicker" id="sortOrder" name="sortOrder">
+            <option value="stringLength">Long strings first</option>
+            <option value="groupSize">Largest group first</option>
+            <option value="approxAlpha">Approximately alphabetical</option>
+        </select>
+    </div>
 
 	<div class="submit-button">
-        <button type="submit" class="btn btn-default run-button">Run algorithm <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button>
+        <button type="submit" class="btn btn-default run-button">Run algorithm <i style="display:none" class="spinner fa fa-spin fa-spinner"></i></button>
 </div>
 <script>
     /** collects all input fields on the page, and makes an object out of them with the field names as property names */

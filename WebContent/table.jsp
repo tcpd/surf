@@ -324,12 +324,19 @@ import="java.util.*"
         $spinner.fadeIn();
 
         $.ajax ({
-            type: 'POST',
-            url: 'ajax/save-dataset',
-            datatype: 'json',
-            data: post_data,
-            success: function (o) { if (o && o.status == 0) { alert ('Ok, save worked'); } else { alert ('Save failed!'); } $spinner.fadeOut();},
-            error: function () { $spinner.fadeOut(); alert ('Warning: save failed!');}
+                type: 'POST',
+                url: 'ajax/do-commands',
+                datatype: 'json',
+                data: post_data,
+                success: function() {
+                    $spinner.fadeOut();
+                    if (o && o.status == 0) {
+                        // could perhaps display a toast here
+                    } else {
+                        alert('Save failed!');
+                    }
+                },
+            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: save failed! ' + textStatus + ' ' + jqXHR.responseText);}
         });
     }
 

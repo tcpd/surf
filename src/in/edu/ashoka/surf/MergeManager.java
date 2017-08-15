@@ -19,7 +19,7 @@ public class MergeManager {
     /** a view is a filtered and sorted view on top of this mergemanager's results */
     public class View {
         public final List<List<List<Row>>> viewGroups; // these are the groups
-        String filterSpec, sortOrder;
+        public final String filterSpec, sortOrder;
         public View (String filterSpec, String sortOrder, List<List<List<Row>>> viewGroups) {
             this.filterSpec = filterSpec;
             this.sortOrder = sortOrder;
@@ -31,7 +31,7 @@ public class MergeManager {
     private List<Collection<Row>> listOfSimilarCandidates; // these are the groups
     private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
     private MergeAlgorithm algorithm;
-    static View lastView; // currently we assume only 1 view
+    public static View lastView; // currently we assume only 1 view
 
     // a small class to represent operations made on this dataset.
     // op is the operation to run: merge, or unmerge

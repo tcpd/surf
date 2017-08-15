@@ -29,7 +29,9 @@ public class SaveServlet extends HttpServlet {
     /** on receiving merge commands, this servlet calls mergemanager with the commands, and updates the view in the session accordingly */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		HttpSession session = request.getSession();
+        response.setContentType("application/json");
+
+        HttpSession session = request.getSession();
 		MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");
 		try {
 			// parse the merge commands in json format

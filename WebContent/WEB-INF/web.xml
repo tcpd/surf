@@ -32,8 +32,8 @@
   </servlet-mapping>
 
   <servlet>
-    <servlet-name>save-dataset</servlet-name>
-    <servlet-class>in.edu.ashoka.surf.SaveServlet</servlet-class>
+    <servlet-name>run-merge</servlet-name>
+    <servlet-class>in.edu.ashoka.surf.MergeServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
@@ -47,13 +47,13 @@
   </error-page>
 
     <servlet>
-        <servlet-name>run-merge</servlet-name>
-        <servlet-class>in.edu.ashoka.surf.MergeServlet</servlet-class>
+        <servlet-name>do-commands</servlet-name>
+      <jsp-file>/ajax/do-commands.jsp</jsp-file>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>save-dataset</servlet-name>
-        <url-pattern>/ajax/save-dataset</url-pattern>
+        <servlet-name>do-commands</servlet-name>
+        <url-pattern>/ajax/do-commands</url-pattern>
     </servlet-mapping>
 
     <filter>

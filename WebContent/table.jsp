@@ -9,10 +9,12 @@ import="java.util.*"
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%
-    int currentPage = 0;
+    int currentPage = 1;
     try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
     MergeManager.View view = (MergeManager.View) session.getAttribute("view");
     List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
+
+    int numPages = (int) Math.ceil(((double) groupsToShow.size()) / Config.groupsPerPage);
 %>
 
 <!DOCTYPE html>
@@ -100,8 +102,8 @@ import="java.util.*"
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 	boolean firstGroup = true;
-	int startGid = currentPage * Config.groupsPerPage;
-	int endGid = Math.max (((currentPage+1) * Config.groupsPerPage), groupsToShow.size()); // endgid is not inclusive
+	int startGid = (currentPage-1) * Config.groupsPerPage; // the currentPage as shown to the user in the URL and the bottom nav always starts from 1, not 0. so we adjust for it.
+	int endGid = Math.min (((currentPage) * Config.groupsPerPage), groupsToShow.size()); // endgid is not inclusive
 
     // we'll show groups from startGid to endGid
 	for (int gid = startGid; gid < endGid; gid++) {
@@ -191,42 +193,31 @@ import="java.util.*"
 	<nav aria-label="Page navigation">
   	<ul class="pagination pre-margin">
 
-  	<!-- Listing previous page url here-->
-  	<c:if test="${currentPage != 1}">
-	    <li class="page-item" onclick="resetScroll(); $('#loading').fadeIn();">
-		<a class="page-link" href="merge?page=${currentPage - 1}" aria-label="Previous">
-		<span aria-hidden="true">&laquo;</span>
-		<span class="sr-only">Previous</span>
-	 	</a>
-	    </li>
-    </c:if>
+    <% if (currentPage > 1) { %>
+        <li class="page-item">
+            <a class="page-link" href="table?page=<%=currentPage-1%>" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="sr-only">Previous</span>
+            </a>
+        </li>
+    <% } %>
 
     <!-- Listing page numbers here -->
-    <c:forEach begin="1" end="${noOfPages}" var="i">
-				<c:choose>
-					<c:when test="${currentPage eq i}">
-						<c:set var="pageIsActive" value="page-item active"></c:set>
-					</c:when>
-					<c:otherwise>
-						<c:set var="pageIsActive" value="page-item"></c:set>
-					</c:otherwise>
-				</c:choose>
-				<li class="${pageIsActive}" onclick="resetScroll(); $('#loading').fadeIn();">
-					<a class="page-link" href="merge?page=${i}">${i}</a>
-				</li>
-	</c:forEach>
+    <% for (int i = 1 ; i <= numPages; i++) {
+            String pageClass = (currentPage == i) ? "page-item active" : "page-item"; %>
+            <li class="<%=pageClass%>">
+                <a class="page-link" href="table?page=<%=(i)%>"><%=i%></a>
+            </li>
+    <% } %>
 
-    <!-- Listing next page url here -->
-
-    <c:if test="${currentPage lt noOfPages}">
-				<li class="page-item" onclick="resetScroll(); $('#loading').fadeIn()">
-      			<a class="page-link" href="merge?page=${currentPage + 1}" aria-label="Next">
-        		<span aria-hidden="true">&raquo;</span>
-        		<span class="sr-only">Next</span>
-      			</a>
-    			</li>
-	</c:if>
-
+    <% if (currentPage < numPages) { %>
+        <li class="page-item">
+            <a class="page-link" href="table?page=<%=currentPage+1%>" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+                <span class="sr-only">Next</span>
+            </a>
+        </li>
+    <% } %>
 
   </ul>
 </nav>

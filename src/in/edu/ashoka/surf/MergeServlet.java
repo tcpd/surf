@@ -15,6 +15,7 @@ import com.sun.scenario.effect.Merge;
 import edu.stanford.muse.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.google.gson.JsonObject;
 
 /* servlet called when a new algorithm is first run */
 public class MergeServlet extends HttpServlet {
@@ -31,6 +32,7 @@ public class MergeServlet extends HttpServlet {
 	 * uses the request params algorithm, algo-arg, splitColumn, filterSpec, sortOrder.
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        JsonObject result = new JsonObject();
         try {
         	// set up a new merge manager first
             HttpSession session = request.getSession();
@@ -45,9 +47,10 @@ public class MergeServlet extends HttpServlet {
 			MergeManager.View view = mergeManager.getView(request.getParameter ("filterSpec"), request.getParameter ("sortOrder"));
 			session.setAttribute ("view", view);
 
-			response.getOutputStream().print ("{status: 0}");
-        } catch (IOException e){
-			response.getOutputStream().print("{status: 1, message: " + e.getClass().getName() + "}"); // TODO: add detailed error message
+            result.addProperty ("status", 0);
+        } catch (Exception e){
+            result.addProperty ("status", 1);
+            result.addProperty ("message", e.getClass().getName() + "}"); // TODO: add detailed error message
         }
 	}
 

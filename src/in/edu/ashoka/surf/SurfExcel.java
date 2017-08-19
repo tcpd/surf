@@ -422,7 +422,7 @@ public class SurfExcel {
         return result;
     }
 
-    /*This method tries to generate values for ID & mapped_ID*/
+    /*This method tries to generate values for ID */
 	public static void assignUnassignedIds(Collection<Row> allRows) {
 		// any row which doesn't have an id assigned to it. Should be assigned one here. Each row is assigned a unique number
 

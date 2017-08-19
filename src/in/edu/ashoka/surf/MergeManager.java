@@ -25,13 +25,15 @@ public class MergeManager {
             this.sortOrder = sortOrder;
             this.viewGroups = viewGroups;
         }
+
+        public String toString() { return "View: #groups " + viewGroups + " filterSpec = " + filterSpec + " sortOrder = " + sortOrder + " ";}
     }
 
 	private Dataset d;
     private List<Collection<Row>> groups; // these are the groups
     private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
     private MergeAlgorithm algorithm;
-    public static View lastView; // currently we assume only 1 view
+    public View lastView; // currently we assume only 1 view
 
     // a small class to represent operations made on this dataset.
     // op is the operation to run: merge, or unmerge
@@ -234,4 +236,8 @@ public class MergeManager {
 
 		return result;
 	}
+
+	public String toString() {
+	    return "Merge manager # of groups: " + (listOfSimilarCandidates != null ? listOfSimilarCandidates.size() : "(merge not run)" + " last view: " + lastView);
+    }
 }

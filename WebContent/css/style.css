@@ -75,7 +75,7 @@ body{
 
 }
 
-.reviewed1 {
+.reviewed {
     background: repeating-linear-gradient(
             to right,
             #f6ba52,
@@ -85,7 +85,7 @@ body{
     );
 }
 
-.reviewed {
+.reviewed1 {
     background-color: #f6ba52;
 }
 

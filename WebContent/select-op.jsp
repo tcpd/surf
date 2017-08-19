@@ -110,7 +110,7 @@
             url: 'ajax/run-merge',
             datatype: 'json',
             data: collect_input_fields(),
-            success: function (o) { window.location = 'table?page=0'},
+            success: function (o) { if (o && o.status == 0) { window.location = 'table?page=1'; } else { alert ('Warning: error ' + o);} $spinner.fadeOut();},
             error: function () { $spinner.fadeOut(); alert ('Warning: Run algorithm failed!');}
         });
     })

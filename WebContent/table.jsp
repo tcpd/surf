@@ -8,13 +8,6 @@ import="java.util.*"
 <%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<%
-    int currentPage = 0;
-    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
-    MergeManager.View view = (MergeManager.View) session.getAttribute("view");
-    List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
-%>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,17 +15,40 @@ import="java.util.*"
     <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!--	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+
     <link rel="stylesheet" type="text/css" href="css/main.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 
-    <script src="js/jquery-1.12.1.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+    <script type="text/javascript"> if (!window.jQuery) {document.write('<script type="text/javascript" src="js/jquery-1.12.1.min.js"><\/script>');}</script>
+
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript"> if (!(typeof $().modal == 'function')) { document.write('<script type="text/javascript" src="js/bootstrap-3.1.1.min.js"><\/script>'); }</script>
+
     <script src="js/selectpicker.js"></script>
 
 	<title>Surf</title>
 </head>
 <body>
+<%
+    int currentPage = 1;
+    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
+    MergeManager.View view = (MergeManager.View) session.getAttribute("view");
+    if (view == null) {
+        out.println ("Sorry, no view has been set up in the session");
+        return;
+    }
+    List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
+
+    int numPages = (int) Math.ceil(((double) groupsToShow.size()) / Config.groupsPerPage);
+%>
+
+
 <!-- Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -43,21 +59,23 @@ import="java.util.*"
             </div>
             <div class="modal-body">
                 <div class="filterForm">
-                    <form class="form" role="filter" method="get" action="merge">
-                        <label for="algo-arg">Filter</label>
-                        <input type="text" class="form-control" id="algo-arg" name="algo-arg">
-                        <br/>
-                        <div class="form-group">
-                            <label for="sortOrder">Sort order for groups</label>
-                            <select class="form-control selectpicker" id="sortOrder" name="sortOrder">
-                                <option value="nameLength">Long names first</option>
-                                <option value="largestGroupFirst">Largest group first</option>
-                                <option value="alpha">Alphabetical</option>
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" onclick="saveFilterSettings()" id="settingsSubmit" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
-                        </div>
+                    <input type="hidden" name="filterOnly"/>
+                    <div class=form-group>
+                        <label for="filterSpec">Filter</label>
+                        <input id="filterSpec" name="filterSpec" type="text" class="filterSpec form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sortOrder">Sort order for groups</label>
+                        <select class="form-control selectpicker sortOrder" id="sortOrder" name="sortOrder">
+                            <option value="stringLength">Long strings first</option>
+                            <option value="groupSize">Largest group first</option>
+                            <option value="approxAlpha">Approximately alphabetical</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default filter-submit-button" style="margin:0 auto; display:table;">OK</button>
+                    </div>
                     </form>
                 </div>
             </div>
@@ -71,9 +89,7 @@ import="java.util.*"
     <div class="top-bar">
         <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
 
-        <button class="btn btn-default" type="button">Filter</button>
-
-        <button class="btn btn-default" type="button">Sort</button>
+        <button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button>
 
         <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span>
 
@@ -100,8 +116,8 @@ import="java.util.*"
 							
     //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
 	boolean firstGroup = true;
-	int startGid = currentPage * Config.groupsPerPage;
-	int endGid = Math.max (((currentPage+1) * Config.groupsPerPage), groupsToShow.size()); // endgid is not inclusive
+	int startGid = (currentPage-1) * Config.groupsPerPage; // the currentPage as shown to the user in the URL and the bottom nav always starts from 1, not 0. so we adjust for it.
+	int endGid = Math.min (((currentPage) * Config.groupsPerPage), groupsToShow.size()); // endgid is not inclusive
 
     // we'll show groups from startGid to endGid
 	for (int gid = startGid; gid < endGid; gid++) {
@@ -191,42 +207,31 @@ import="java.util.*"
 	<nav aria-label="Page navigation">
   	<ul class="pagination pre-margin">
 
-  	<!-- Listing previous page url here-->
-  	<c:if test="${currentPage != 1}">
-	    <li class="page-item" onclick="resetScroll(); $('#loading').fadeIn();">
-		<a class="page-link" href="merge?page=${currentPage - 1}" aria-label="Previous">
-		<span aria-hidden="true">&laquo;</span>
-		<span class="sr-only">Previous</span>
-	 	</a>
-	    </li>
-    </c:if>
+    <% if (currentPage > 1) { %>
+        <li class="page-item">
+            <a class="page-link" href="table?page=<%=currentPage-1%>" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="sr-only">Previous</span>
+            </a>
+        </li>
+    <% } %>
 
     <!-- Listing page numbers here -->
-    <c:forEach begin="1" end="${noOfPages}" var="i">
-				<c:choose>
-					<c:when test="${currentPage eq i}">
-						<c:set var="pageIsActive" value="page-item active"></c:set>
-					</c:when>
-					<c:otherwise>
-						<c:set var="pageIsActive" value="page-item"></c:set>
-					</c:otherwise>
-				</c:choose>
-				<li class="${pageIsActive}" onclick="resetScroll(); $('#loading').fadeIn();">
-					<a class="page-link" href="merge?page=${i}">${i}</a>
-				</li>
-	</c:forEach>
+    <% for (int i = 1 ; i <= numPages; i++) {
+            String pageClass = (currentPage == i) ? "page-item active" : "page-item"; %>
+            <li class="<%=pageClass%>">
+                <a class="page-link" href="table?page=<%=(i)%>"><%=i%></a>
+            </li>
+    <% } %>
 
-    <!-- Listing next page url here -->
-
-    <c:if test="${currentPage lt noOfPages}">
-				<li class="page-item" onclick="resetScroll(); $('#loading').fadeIn()">
-      			<a class="page-link" href="merge?page=${currentPage + 1}" aria-label="Next">
-        		<span aria-hidden="true">&raquo;</span>
-        		<span class="sr-only">Next</span>
-      			</a>
-    			</li>
-	</c:if>
-
+    <% if (currentPage < numPages) { %>
+        <li class="page-item">
+            <a class="page-link" href="table?page=<%=currentPage+1%>" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+                <span class="sr-only">Next</span>
+            </a>
+        </li>
+    <% } %>
 
   </ul>
 </nav>
@@ -264,8 +269,10 @@ import="java.util.*"
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
         var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
-        $('input.select-checkbox', $group).prop('checked', true); // set all checkboxes to true
-        $('input.select-checkbox', $groups).prop('checked', true); // set all checkboxes to true
+        $('input.select-button', $group).text('checked', true);
+
+        $('input.select-button', $groups).prop('checked', true);
+        $('input.select-checkbox', $group).prop('checked', true);
     }
 
     function reviewed_till_here_handler (e) {
@@ -274,13 +281,19 @@ import="java.util.*"
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
         var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
+
+        // remember to set each group's button. if we're marking a group as reviewed, then it's .reviewed-button should provide the opposite option, i.e. to unreview
         if ($target.text() == text1) {
-            $group.addClass('reviewed'); // set all checkboxes to true
-            $groups.addClass('reviewed'); // set all checkboxes to true
+            $group.addClass('reviewed');
+            $('.reviewed-button', $group).text ('Mark as unreviewed');
+            $groups.addClass('reviewed');
+            $('.reviewed-button', $groups).text ('Mark as unreviewed');
             $target.text(text2);
         } else {
-            $group.removeClass('reviewed'); // set all checkboxes to true
-            $groups.removeClass('reviewed'); // set all checkboxes to true
+            $group.removeClass('reviewed');
+            $('.reviewed-button', $group).text ('Mark as reviewed');
+            $groups.removeClass('reviewed');
+            $('.reviewed-button', $groups).text ('Mark as reviewed');
             $target.text(text1);
         }
     }
@@ -340,6 +353,30 @@ import="java.util.*"
         });
     }
 
+    function filter_submit_handler (e) {
+        var post_data = {filterOnly: true, filterSpec: $('.filterSpec').val(), sortOrder: $('#sortOrder').val()};
+
+        var $spinner = $('.filter-spinner');
+        $spinner.fadeIn();
+
+        $.ajax ({
+            type: 'POST',
+            url: 'ajax/run-merge',
+            datatype: 'json',
+            data: post_data,
+            success: function(o) {
+                $spinner.fadeOut();
+                if (o && o.status == 0) {
+                    // could perhaps display a toast here
+                } else {
+                    alert('Filter failed!');
+                }
+                window.location = 'table?page=1';
+            },
+            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: filter failed! ' + textStatus + ' ' + jqXHR.responseText);}
+        });
+    }
+
     $('.select-button').click (select_all_handler);
     $('.reviewed-button').click (group_reviewed_handler);
     $('.select-till-here-button').click (select_till_here_handler);
@@ -347,6 +384,7 @@ import="java.util.*"
     $('.merge-button').click (save_handler);
     $('.unmerge-button').click (save_handler);
     $('.filter-button').click (function() { $('#filterModal').modal();});
+    $('.filter-submit-button').click (filter_submit_handler);
 
 </script>
 </body>

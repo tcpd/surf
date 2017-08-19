@@ -28,7 +28,7 @@ public class MergeManager {
     }
 
 	private Dataset d;
-    private List<Collection<Row>> listOfSimilarCandidates; // these are the groups
+    private List<Collection<Row>> groups; // these are the groups
     private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
     private MergeAlgorithm algorithm;
     public static View lastView; // currently we assume only 1 view
@@ -77,49 +77,51 @@ public class MergeManager {
         }
 
         // this is where the groups are generated
-        listOfSimilarCandidates = algorithm.run();
+        groups = algorithm.run();
+        // if the dataset already had some id's the same, merge them
+        updateMergesBasedOnIds();
     }
 
-    /** will split listOfSimilarCandidates into new groups based on the split column */
+    /** will split groups into new groups based on the split column */
     public void splitByColumn (String splitColumn) {
         // further split by split column if specified
         if (Util.nullOrEmpty(splitColumn))
             return;
 
         List<Collection<Row>> result = new ArrayList<>();
-        List<Collection<Row>> groupsList = this.listOfSimilarCandidates;
+        List<Collection<Row>> groupsList = this.groups;
         for (Collection<Row> group : groupsList) {
             Multimap<String, Row> splitGroups = SurfExcel.split(group, splitColumn);
             for (String key : splitGroups.keySet())
                 result.add(splitGroups.get(key));
         }
-        this.listOfSimilarCandidates = result;
+        this.groups = result;
     }
 
-    /** updates listOfSimilarCandidates based on id's as well as existing listOfSimilarCandidates.
+    /** updates groups based on id's as well as existing groups.
      * MUST be called after id's are changed */
     public void updateMergesBasedOnIds() {
         Timers.unionFindTimer.reset();
         Timers.unionFindTimer.start();
 
-        int initialClusters = listOfSimilarCandidates.size();
+        int initialClusters = groups.size();
         UnionFindSet<Row> ufs = new UnionFindSet<>();
 
         // do unification, the criteria are based on one of 2 factors
-        // same id, or same cluster according to listOfSimilarCandidates
+        // same id, or same cluster according to groups
 
         for (String id: idToRows.keySet()) {
             ufs.unifyAllElementsOfCollection (idToRows.get(id));
         }
 
-        for (Collection<Row> cluster : listOfSimilarCandidates) {
+        for (Collection<Row> cluster : groups) {
             ufs.unifyAllElementsOfCollection(cluster);
         }
 
         Timers.unionFindTimer.stop();
         Timers.log.info ("Time for union-find: " + Timers.unionFindTimer.toString());
-        listOfSimilarCandidates = (List) ufs.getClassesSortedByClassSize();
-        log.info ("initial # of groups " + initialClusters + ", after merging by id, we have " + listOfSimilarCandidates.size() + " groups");
+        groups = (List) ufs.getClassesSortedByClassSize();
+        log.info ("initial # of groups " + initialClusters + ", after merging by id, we have " + groups.size() + " groups");
     }
 
     private void computeIdToRows (Collection<Row> rows) {
@@ -158,7 +160,7 @@ public class MergeManager {
                 for (String id : command.ids) {
                     Collection<Row> rowsForThisId = idToRows.get(id);
                     for (Row row : rowsForThisId) {
-                        // break the cluster, give each of these rows a new id, and put them in a new cluster in listOfSimilarCandidates
+                        // break the cluster, give each of these rows a new id, and put them in a new cluster in groups
                     }
                 }
             }
@@ -176,7 +178,7 @@ public class MergeManager {
         return view;
     }
 
-    /** returns a collection of groups after filtering listOfSimilarCandidates by the given filter.
+    /** returns a collection of groups after filtering groups by the given filter.
      * under each group is a bunch of ids. under each id has a bunch of rows.
 	 * that's why it returns a List of List of List of Rows.
 	 * it is assumed that:
@@ -187,7 +189,7 @@ public class MergeManager {
 
 		List<List<List<Row>>> result = new ArrayList<>();
 
-		for (Collection<Row> rowCollection: listOfSimilarCandidates) {
+		for (Collection<Row> rowCollection: groups) {
 			List<Row> group = new ArrayList<>(rowCollection); // convert collection to list
 
 			// will this group be shown? yes, if ANY of the rows in this group matches the filter. otherwise move on to the next group.

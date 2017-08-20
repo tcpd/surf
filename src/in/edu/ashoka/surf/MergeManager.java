@@ -123,6 +123,9 @@ public class MergeManager {
         Timers.unionFindTimer.stop();
         Timers.log.info ("Time for union-find: " + Timers.unionFindTimer.toString());
         groups = (List) ufs.getClassesSortedByClassSize();
+
+        // recompute id -> rows map
+        computeIdToRows(d.getRows());
         log.info ("initial # of groups " + initialClusters + ", after merging by id, we have " + groups.size() + " groups");
     }
 
@@ -176,7 +179,7 @@ public class MergeManager {
         Comparator<List<List<Row>>> comparator = GroupOrdering.getComparator (sortOrder);
         Collections.sort (postFilterGroups, comparator);
         View view = new View(filterSpec, sortOrder, postFilterGroups);
-        MergeManager.lastView = view;
+        this.lastView = view;
         return view;
     }
 
@@ -238,6 +241,6 @@ public class MergeManager {
 	}
 
 	public String toString() {
-	    return "Merge manager # of groups: " + (listOfSimilarCandidates != null ? listOfSimilarCandidates.size() : "(merge not run)" + " last view: " + lastView);
+	    return "Merge manager # of groups: " + (groups != null ? groups.size() : "(merge not run)" + " last view: " + lastView);
     }
 }

@@ -93,7 +93,7 @@ public class Dataset implements Serializable{
     public boolean hasIds(){
         Collection<Row> allRows = getRows();
         for (Row row:allRows) {
-            if (!row.get(Config.ID_FIELD).equals(""))
+            if (row.get(Config.ID_FIELD).equals(""))
                 return false;
         }
         return true;

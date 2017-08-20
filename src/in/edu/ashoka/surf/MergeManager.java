@@ -20,10 +20,29 @@ public class MergeManager {
     public class View {
         public final List<List<List<Row>>> viewGroups; // these are the groups
         public final String filterSpec, sortOrder;
+        private int nIds, nRowsInGroups;
+
         public View (String filterSpec, String sortOrder, List<List<List<Row>>> viewGroups) {
             this.filterSpec = filterSpec;
             this.sortOrder = sortOrder;
             this.viewGroups = viewGroups;
+
+            nRowsInGroups = 0;
+            Set<String> idsSeen = new LinkedHashSet<>();
+            for (List<List<Row>> rowsForThisGroup: viewGroups) {
+                for (List<Row> rowsForThisId: rowsForThisGroup)
+                    for (Row row: rowsForThisId) {
+                        idsSeen.add(row.get(Config.ID_FIELD));
+                        nRowsInGroups++;
+                    }
+            }
+            nIds = idsSeen.size();
+        }
+
+        public String description() {
+            return  MergeManager.this.d.description + " Algorithm: " + MergeManager.this.algorithm.toString() + "\n"
+                        + Util.commatize(viewGroups.size()) + " groups with " + Util.commatize(nRowsInGroups) + " rows (of " + Util.commatize(MergeManager.this.d.getRows().size())
+                    + ") with " + Util.commatize(nIds) + " unique ids";
         }
 
         public String toString() { return "View: #groups " + viewGroups + " filterSpec = " + filterSpec + " sortOrder = " + sortOrder + " ";}
@@ -57,7 +76,7 @@ public class MergeManager {
         Tokenizer.setupDesiVersions(dataset.getRows(), Config.MERGE_FIELD);
 
         if (algo.equals("editDistance")) {
-            int editDistance = 1;
+            int editDistance = Config.DEFAULT_EDIT_DISTANCE;
             try {
                 editDistance = Integer.parseInt(arguments);
             } catch (NumberFormatException e) {

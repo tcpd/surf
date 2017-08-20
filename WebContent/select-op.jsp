@@ -64,6 +64,7 @@
     <div class=form-group>
         <label for="filterSpec">Filter</label>
         <input id="filterSpec" name="filterSpec" type="text" class="form-control">
+        <span style="font-size:90%;color:gray">Example: Position=1,2,3;Sex=M;Cand1=/GANDHI/</span>
     </div>
 
     <div class="form-group">

@@ -76,6 +76,7 @@ public class MergeServlet extends HttpServlet {
 	    if (datasetKey != null) {
 			String path = Config.keyToPath.get(datasetKey);
             Dataset d = Dataset.getDataset(path);
+            d.description = Config.keyToDescription.get(datasetKey);
             log.info ("Dataset read from path " + path + " with " + d.getRows().size() + " rows");
             HttpSession session = request.getSession();
             session.setAttribute("dataset", d);

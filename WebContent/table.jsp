@@ -46,6 +46,9 @@ import="java.util.*"
     List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
 
     int numPages = (int) Math.ceil(((double) groupsToShow.size()) / Config.groupsPerPage);
+
+    String description = view.description();
+
 %>
 
 
@@ -55,7 +58,7 @@ import="java.util.*"
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Settings Menu</h4>
+                <h4 class="modal-title" id="myModalLabel">Filter and Sort</h4>
             </div>
             <div class="modal-body">
                 <div class="filterForm">
@@ -63,6 +66,7 @@ import="java.util.*"
                     <div class=form-group>
                         <label for="filterSpec">Filter</label>
                         <input id="filterSpec" name="filterSpec" type="text" class="filterSpec form-control">
+                        <span style="font-size:90%;color:gray">Example: Position=1,2,3;Sex=M;Cand1=/GANDHI/</span>
                     </div>
 
                     <div class="form-group">
@@ -89,11 +93,11 @@ import="java.util.*"
     <div class="top-bar">
         <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
 
-        <button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button>
-
-        <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span>
+        <div style="display:inline-block;margin-top:5px;margin-left:30px"><%=Util.escapeHTML(description).replaceAll ("\n", "<br/>\n")%></div>
 
         <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
+            <button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button>
+            <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span>
             <button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button>
             <button class="btn btn-default" type="button">Help</button>
         </div>

@@ -1,7 +1,6 @@
 package in.edu.ashoka.surf;
 
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import edu.stanford.muse.util.Util;
 import org.apache.commons.logging.Log;
@@ -9,15 +8,18 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
- * A filter is an object that contains a list of column_name -> { allowed values in that column}.
- * e.g. "Position" = {"1", "2", "3"}
+ * A filter is an object that contains a list of column_name -> { allowed values (or regexes) in that column}. e.g.
+ * Position=1,2,3;Sex=M;Name=/Mo.*di/,Shah
+ * will match records with all of the following: 1) Position = 1 or 2 or 3, 2) Sex = M and 3) Name matching regex Mo.*di or (exactly) Shah
  */
 public class Filter {
     public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Filter.class);
 
     private SetMultimap<String, String> colNameToAllowedValues = LinkedHashMultimap.create();
+    private SetMultimap<String, Pattern> colNameToAllowedRegexPatterns = LinkedHashMultimap.create();
 
     /**
      *
@@ -47,7 +49,13 @@ public class Filter {
                 allowedVal = allowedVal.trim();
                 if (allowedVal.length() == 0)
                     continue;
-                colNameToAllowedValues.put(col, allowedVal);
+
+                if (allowedVal.startsWith("/") && allowedVal.endsWith("/") && allowedVal.length() >= 3) {
+                    String patternString = allowedVal.substring (1, allowedVal.length()-1); // strip the leading and trailing /
+                    colNameToAllowedRegexPatterns.put (col, Pattern.compile(patternString));
+                } else {
+                    colNameToAllowedValues.put(col, allowedVal.toLowerCase());
+                }
             }
         }
 
@@ -56,11 +64,26 @@ public class Filter {
 
     /** returns whether the row passes the given filter. if the filter is empty, always returns true. */
     public boolean passes (Row r) {
+        outer:
         for (String colName: colNameToAllowedValues.keySet()) {
             Set<String> allowedValues = colNameToAllowedValues.get(colName);
-            if (!allowedValues.contains (r.get(colName)))
+            String fieldVal = r.get(colName).toLowerCase();
+            if (!allowedValues.contains (fieldVal)) {
+                // fieldVal doesn't match values directly. try patterns
+                // if any pattern matches, this column is fine, go to the next
+                // otherwise return false right away
+                Set<Pattern> allowedPattern = colNameToAllowedRegexPatterns.get(colName);
+                if (allowedPattern != null) {
+                    for (Pattern p: allowedPattern) {
+                        if (p.matcher(fieldVal).find()) {
+                            continue outer; // go to next col, this one matches
+                        }
+                    }
+                }
                 return false;
+            }
         }
+        // no column had an objection, we match and return true
         return true;
     }
 
@@ -79,6 +102,7 @@ public class Filter {
     public static void main (String args[]) {
         Filter f = new Filter ("Pos=1");
         Filter f1 = new Filter ("Pos=1,2,3,2,,;State=Gujarat,Maharashtra");
-        Filter f2 = new Filter ("Pos=1,2,3; col2"); // should throw an exception
+        Filter f2 = new Filter ("Pos=1,2,3; Cand1=/MODI/,SHAH"); // will regex match MODI and exact match SHAH
+        Filter f3 = new Filter ("Pos=1,2,3; col2"); // should throw an exception
     }
 }

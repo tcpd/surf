@@ -24,6 +24,7 @@ public class Config {
     public static String admin = "hangal@ashoka.edu.in";
     public static String ID_FIELD = "ID", MERGE_FIELD = "Name";
     public static int groupsPerPage = 100;
+    public static int DEFAULT_EDIT_DISTANCE = 2;
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
@@ -92,7 +93,7 @@ public class Config {
     static boolean removeSuccessiveSameCharacters = true;
 
     // these will be customized per dataset, or even by the user at run time
-    public static String[] supplementaryColumns = new String[]{"Year", "Party", "Position", "Sex", "State", "Vote"}; // supplementary columns to display. These are emitted as is, without any special processing
+    public static String[] supplementaryColumns = new String[]{"Year", "Party", "Position", "Sex", "Statename", "Votes1"}; // supplementary columns to display. These are emitted as is, without any special processing
 
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
     public static Map<String, String> keyToPath  = new LinkedHashMap<>(), keyToDescription = new LinkedHashMap<>();

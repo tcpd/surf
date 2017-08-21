@@ -40,7 +40,7 @@
 		<select class="form-control selectpicker" id="algorithm" name="algorithm">
             <option value="editDistance">Edit distance</option>
 			<option value="compatibleNames">Compatible names</option>
-            <option value="dummyAllName">All names</option>
+            <option value="allNames">All names</option>
 		</select>
         <br/>
         <label for="algo-arg">Arguments for Algorithm</label>

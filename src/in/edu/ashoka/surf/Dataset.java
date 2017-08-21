@@ -6,10 +6,7 @@ import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.*;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -230,7 +227,7 @@ public class Dataset implements Serializable{
         Writer fileWriter = new FileWriter(fileWithSuffixNew);
 
         CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
-        CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat);
+        CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat.withQuoteMode(QuoteMode.NON_NUMERIC));
 
         List<String> columnList = new ArrayList<>(actualColumnName);
         csvFilePrinter.printRecord(columnList);

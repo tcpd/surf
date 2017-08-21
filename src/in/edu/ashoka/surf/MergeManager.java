@@ -83,7 +83,7 @@ public class MergeManager {
                 Util.print_exception(e, log);
             }
             algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance); // run e.d. on the _st_ version of the field
-        } else if (algo.equals("dummyAllName")) {
+        } else if (algo.equals("allNames")) {
             algorithm = new MergeAlgorithm(dataset) {
                 @Override
                 public List<Collection<Row>> run() {
@@ -91,6 +91,7 @@ public class MergeManager {
                     classes.add(new ArrayList<>(d.getRows())); // just one class, with all the rows in it
                     return classes;
                 }
+                public String toString() { return "Dummy merge"; }
             };
         } else if (algo.equals("compatibleNames")) {
             CompatibleNameAlgorithm cnm = new CompatibleNameAlgorithm(d, Config.MERGE_FIELD);

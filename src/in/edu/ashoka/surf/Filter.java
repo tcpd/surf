@@ -2,6 +2,7 @@ package in.edu.ashoka.surf;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import edu.stanford.muse.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A filter is an object that contains a list of column_name -> { allowed values (or regexes) in that column}. e.g.
@@ -18,8 +20,8 @@ import java.util.regex.Pattern;
 public class Filter {
     public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Filter.class);
 
-    private SetMultimap<String, String> colNameToAllowedValues = LinkedHashMultimap.create();
-    private SetMultimap<String, Pattern> colNameToAllowedRegexPatterns = LinkedHashMultimap.create();
+    private SetMultimap<String, String> colNameToAllowedValues = LinkedHashMultimap.create(); // normalized to lower case
+    private SetMultimap<String, Pattern> colNameToAllowedRegexPatterns = LinkedHashMultimap.create(); // pattenrs are case-insensitive
 
     /**
      *
@@ -52,20 +54,21 @@ public class Filter {
 
                 if (allowedVal.startsWith("/") && allowedVal.endsWith("/") && allowedVal.length() >= 3) {
                     String patternString = allowedVal.substring (1, allowedVal.length()-1); // strip the leading and trailing /
-                    colNameToAllowedRegexPatterns.put (col, Pattern.compile(patternString));
+                    colNameToAllowedRegexPatterns.put (col, Pattern.compile(patternString, Pattern.CASE_INSENSITIVE));
                 } else {
                     colNameToAllowedValues.put(col, allowedVal.toLowerCase());
                 }
             }
         }
 
-        log.info ("Parsed filter spec: " + this);
+        log.info ("Parsed filter spec: " + filterSpec);
     }
 
     /** returns whether the row passes the given filter. if the filter is empty, always returns true. */
     public boolean passes (Row r) {
+        Set<String> allCols = Sets.union(colNameToAllowedValues.keySet(), colNameToAllowedRegexPatterns.keySet());
         outer:
-        for (String colName: colNameToAllowedValues.keySet()) {
+        for (String colName: allCols) {
             Set<String> allowedValues = colNameToAllowedValues.get(colName);
             String fieldVal = r.get(colName).toLowerCase();
             if (!allowedValues.contains (fieldVal)) {
@@ -87,6 +90,7 @@ public class Filter {
         return true;
     }
 
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
@@ -94,6 +98,14 @@ public class Filter {
             sb.append (colName + "=");
             Set<String> allowedValues = colNameToAllowedValues.get(colName);
             sb.append(String.join (",", allowedValues));
+            sb.append (";");
+        }
+
+        sb.append ("\nRegex patterns: ");
+        for (String colName: colNameToAllowedRegexPatterns.keySet()) {
+            sb.append (colName + "=");
+            Set<Pattern> allowedPatterns = colNameToAllowedRegexPatterns.get(colName);
+            sb.append(String.join (",", allowedPatterns.stream().map (p -> p.toString()).collect (Collectors.toSet())));
             sb.append (";");
         }
         return sb.toString();

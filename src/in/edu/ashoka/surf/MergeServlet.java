@@ -35,11 +35,8 @@ public class MergeServlet extends HttpServlet {
             if (request.getParameter ("filterOnly") == null) {
                 // set up a new merge manager first
                 Dataset dataset = (Dataset) session.getAttribute("dataset");
-                MergeManager mergeManager = new MergeManager(dataset, request.getParameter("algorithm"), request.getParameter("algo-arg"));
+                MergeManager mergeManager = new MergeManager(dataset, request.getParameter("algorithm"), request.getParameter("algo-arg"), request.getParameter("splitColumn"));
                 session.setAttribute("mergeManager", mergeManager);
-
-                // split by column
-                mergeManager.splitByColumn(request.getParameter("splitColumn"));
 
                 // call this last, because we should ALWAYS merge based on id's even if it doesn't honor splitColumn
                 mergeManager.updateMergesBasedOnIds();

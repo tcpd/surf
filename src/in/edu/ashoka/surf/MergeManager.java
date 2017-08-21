@@ -40,8 +40,9 @@ public class MergeManager {
         }
 
         public String description() {
-            return  MergeManager.this.d.description + " Algorithm: " + MergeManager.this.algorithm.toString() + "\n"
-                        + Util.commatize(viewGroups.size()) + " groups with " + Util.commatize(nRowsInGroups) + " rows (of " + Util.commatize(MergeManager.this.d.getRows().size())
+            return  MergeManager.this.d.description + " Algorithm: " + MergeManager.this.algorithm.toString() +
+                    (!Util.nullOrEmpty(MergeManager.this.splitColumn) ? " (further split by " + splitColumn : "") + "\n"
+                    + Util.commatize(viewGroups.size()) + " groups with " + Util.commatize(nRowsInGroups) + " rows (of " + Util.commatize(MergeManager.this.d.getRows().size())
                     + ") with " + Util.commatize(nIds) + " unique ids";
         }
 
@@ -52,6 +53,7 @@ public class MergeManager {
     private List<Collection<Row>> groups; // these are the groups
     private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
     private MergeAlgorithm algorithm;
+    private String splitColumn;
     public View lastView; // currently we assume only 1 view
 
     // a small class to represent operations made on this dataset.
@@ -64,8 +66,9 @@ public class MergeManager {
         String[] ids;
     }
 
-    /** create a new mergeManager with the given algorithm and arguments, and runs the algorithm and stores the (initial) groups */
-    public MergeManager(Dataset dataset, String algo, String arguments) {
+    /** create a new mergeManager with the given algorithm and arguments, and runs the algorithm and stores the (initial) groups.
+     * further splits by splitColumn if it's not null or empty */
+    public MergeManager(Dataset dataset, String algo, String arguments, String splitColumn) {
         this.d = dataset;
         if (!d.hasColumnName("__comments"))
             d.addToActualColumnName("__comments");
@@ -102,6 +105,9 @@ public class MergeManager {
         groups = algorithm.run();
         // if the dataset already had some id's the same, merge them
         updateMergesBasedOnIds();
+        this.splitColumn = splitColumn;
+        if (!Util.nullOrEmpty(splitColumn))
+            splitByColumn (splitColumn);
     }
 
     /** will split groups into new groups based on the split column */

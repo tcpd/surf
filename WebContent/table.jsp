@@ -153,8 +153,8 @@ import="java.util.*"
 				hoverText += " (Indianized: " + Util.escapeHTML(row.get ("c" + Config.MERGE_FIELD));
 				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("t" + Config.MERGE_FIELD)) + ")";
 				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
-				String href = "http://www.google.com/search?q=" + row.get(Config.MERGE_FIELD).replace(" ","+") + "+" + row.get("acname").replace(" ","+") + "+" + row.get("Year");
-				String pc_href = "https://www.google.co.in/maps/place/" + row.get("acname").replace(" ","+") + "," + row.get("statename").replace("_","+");
+				String href = "http://www.google.com/search?q=" + row.get(Config.MERGE_FIELD).replace(" ","+") + "+" + row.get("Constituency").replace(" ","+") + "+" + row.get("Year");
+				String pc_href = "https://www.google.co.in/maps/place/" + row.get("Constituency").replace(" ","+") + "," + row.get("statename").replace("_","+");
                 hoverText = Util.escapeHTML(hoverText);
                 pcInfo = Util.escapeHTML(pcInfo);
 
@@ -169,7 +169,7 @@ import="java.util.*"
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
 				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD))%></a></td>
-				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("acname"))%></a></td>
+				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency"))%></a></td>
 
                 <%  for (String col: Config.supplementaryColumns) { %>
                     <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>
@@ -261,9 +261,7 @@ import="java.util.*"
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
         var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
-        $('input.select-button', $group).text('checked', true);
-
-        $('input.select-button', $groups).prop('checked', true);
+        $('input.select-checkbox', $groups).prop('checked', true);
         $('input.select-checkbox', $group).prop('checked', true);
     }
 

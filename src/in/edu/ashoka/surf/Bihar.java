@@ -258,6 +258,7 @@ public class Bihar extends Object {
 		//file specific aliases
 		d.registerColumnAlias("Cand1", "Candidate_name");
 		d.registerColumnAlias("AC_name", "PC_Name");
+        d.registerColumnAlias("Constituency", "PC_Name");
 		d.registerColumnAlias("Sex1", "Candidate_sex");
 		d.registerColumnAlias("Party1", "Party_abbreviation");
 		d.registerColumnAlias("AC_No", "PC_number");

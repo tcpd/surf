@@ -42,10 +42,10 @@ public class MergeManager {
         private int nIds, nRowsInGroups;
 
         // there are controls with respect to filter
-        public GroupViewControl groupFilter;
+        public GroupViewControl groupViewControl;
 
         // controls with respect to algorithm's grouping. which groups to show?
-        public RowViewControl rowFilter;
+        public RowViewControl rowViewControl;
 
         // both controls above have to be satisfied
         // use cases:
@@ -70,13 +70,13 @@ public class MergeManager {
             }
             nIds = idsSeen.size();
 
-            this.groupFilter = groupFilter;
-            this.rowFilter = rowFilter;
+            this.groupViewControl = groupFilter;
+            this.rowViewControl = rowFilter;
         }
 
         public String description() {
             return  MergeManager.this.d.description + " Algorithm: " + MergeManager.this.algorithm.toString() +
-                    (!Util.nullOrEmpty(MergeManager.this.splitColumn) ? " (further split by " + splitColumn : "") + "\n"
+                    (!Util.nullOrEmpty(MergeManager.this.splitColumn) ? " (further split by " + splitColumn : ")") + "\n"
                     + Util.commatize(viewGroups.size()) + " groups with " + Util.commatize(nRowsInGroups) + " rows (of " + Util.commatize(MergeManager.this.d.getRows().size())
                     + ") with " + Util.commatize(nIds) + " unique ids";
         }
@@ -244,7 +244,7 @@ public class MergeManager {
         return view;
     }
 
-    View getView (String filterSpec, String groupViewControlSpec, String rowViewControlSpec, String sortOrder) {
+    public View getView (String filterSpec, String groupViewControlSpec, String rowViewControlSpec, String sortOrder) {
         return getView (filterSpec, GroupViewControl.valueOf(groupViewControlSpec), RowViewControl.valueOf(rowViewControlSpec), sortOrder);
     }
 
@@ -281,7 +281,7 @@ public class MergeManager {
 
 			// ok, this group is to be shown. sort the rows in this group data based on sortColumns
 			{
-				String[] sortColumns = new String[]{"PC_name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
+				String[] sortColumns = new String[]{"Constituency", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
 
 				Comparator c = (Comparator<Row>) (r1, r2) -> {
                     for (String col : sortColumns) {

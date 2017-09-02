@@ -32,9 +32,22 @@
                 int nRows = dataset.getRows().size();
                 int nCols = 0;
                 if (nRows > 0) {
-                    nCols = dataset.getRows().iterator().next().nFields();
-                }
+                    Row sampleRow = dataset.getRows().iterator().next();
+                    nCols = sampleRow.nFields();
+                    // specific hacks for election datasets
+                    if (sampleRow.getAllFieldNames().contains("Cand1"))
+                        dataset.registerColumnAlias("Cand1", "Name");
+                    else if (sampleRow.getAllFieldNames().contains("Cand"))
+                        dataset.registerColumnAlias("Cand", "Name");
 
+                    if (sampleRow.getAllFieldNames().contains("AC_name"))
+                        dataset.registerColumnAlias("AC_name", "Constituency");
+                    else if (sampleRow.getAllFieldNames().contains("PC_name"))
+                        dataset.registerColumnAlias("PC_name", "Constituency");
+
+                    if (sampleRow.getAllFieldNames().contains("Votes1"))
+                        dataset.registerColumnAlias("Votes1", "Votes");
+                }
         %>
                 Dataset with <%=nRows%> rows and <%=nCols%> columns loaded.<br/>
                 <% if (!dataset.hasIds()) {

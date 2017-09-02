@@ -101,7 +101,7 @@ import="java.util.*"
                 <% for (String col: Config.supplementaryColumns) { %>
                     <th class="cell-table"><%=col%></th>
                 <% } %>
-                <th class="cell-table ">Comments</th>
+<!--                <th class="cell-table ">Comments</th> -->
             </tr>
             </thead>
 <%
@@ -162,6 +162,8 @@ import="java.util.*"
 				String tr_class = "";
 				if (!lastRowForThisid)
 				    tr_class = "merged-row";
+				if (firstRowForThisId)
+				    tr_class += " first-row-for-id";
 			%>
 
 			<tr class="<%=tr_class%> trow" data-id=<%=id%>>
@@ -174,7 +176,7 @@ import="java.util.*"
                 <%  for (String col: Config.supplementaryColumns) { %>
                     <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>
                 <% } %>
-                <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td>
+<!--                <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td> -->
 
 				<td class="cell-table "></td>
 			</tr>
@@ -372,6 +374,23 @@ import="java.util.*"
             error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: filter failed! ' + textStatus + ' ' + jqXHR.responseText);}
         });
     }
+
+    $('.trow').click (function(e) {
+        $row = $(e.target).closest('.trow');
+        if ($(e.target).is('a')) {
+            alert ('returning ' + e.target);
+            return;
+        }
+
+        if ($row.hasClass('first-row-for-id'))
+            $row_with_checkbox = $row;
+        else
+            $row_with_checkbox = $($row.siblings('.first-row-for-id')[0]);
+        $checkbox = $('input.select-checkbox', $row_with_checkbox);
+        $checkbox.prop('checked', !$checkbox.prop ('checked'));
+        e.stopPropagation();
+        return false;
+    });
 
     $('.select-button').click (select_all_handler);
     $('.reviewed-button').click (group_reviewed_handler);

@@ -6,10 +6,7 @@ import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.*;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -22,6 +19,8 @@ public class Dataset implements Serializable{
     static final long TIME_INTERVAL_BETWEEN_BACKUPS = 1000*60*60*4;
     long saveTimeOfBackedUpFile = 0;
     long saveTime = 0;
+    String filename;
+
 	public static String NEW_LINE_SEPARATOR = "\n";
     Collection<Row> rows;
     Collection<String> actualColumnName;
@@ -87,6 +86,21 @@ public class Dataset implements Serializable{
         cColumnToDisplayName.put(cCol, col);
     }
 
+    //check whether reading the file for the first time, i.e. no id's have been assigned yet.
+    public boolean hasIds(){
+        Collection<Row> allRows = getRows();
+        for (Row row:allRows) {
+            if (row.get(Config.ID_FIELD).equals(""))
+                return false;
+        }
+        return true;
+    }
+
+    //initialize the id's for each row
+    final public void initializeIds(){
+        SurfExcel.assignUnassignedIds(getRows());
+    }
+
     public void registerColumnAlias(String oldCol, String newCol) {
         warnIfColumnExists(newCol);
         if (!hasColumnName(oldCol)) {
@@ -104,7 +118,7 @@ public class Dataset implements Serializable{
                 if(!datasetMap.containsKey(filename)){
                     datasetMap.put(filename, new Dataset(filename));
                     //CREATE ALL NECESSARY TOKENS AND FORMATTING
-                    Bihar.initRowFormat(datasetMap.get(filename).getRows(),datasetMap.get(filename));
+//                    Bihar.initRowFormat(datasetMap.get(filename).getRows(),datasetMap.get(filename));
                 }
             }
         }
@@ -119,7 +133,7 @@ public class Dataset implements Serializable{
             @Override
             public void run() {
                 try{
-                    if((saveTime>saveTimeOfBackedUpFile))
+                    if((saveTime > saveTimeOfBackedUpFile))
                         performBackup(new File(filename));
                 }catch (IOException e){
                     System.err.println("file backup failed");
@@ -152,6 +166,7 @@ public class Dataset implements Serializable{
             allRows.add(r);
         }
         this.rows = allRows;
+        this.filename = filename;
     }
 
     private void checkFilesForFailure(String filename) throws IOException{
@@ -188,18 +203,38 @@ public class Dataset implements Serializable{
     
     public Collection<Row> getRows(){return rows;}
 
+    public int nCols(){
+        if (rows == null || rows.size() == 0)
+            return 0;
+        Row row = rows.iterator().next();
+        return row.nFields();
+    }
+
+    public Set<String> getColumnNames () {
+        if (rows == null || rows.size() == 0)
+            return new HashSet<>();
+
+        Row row = rows.iterator().next();
+        return row.getAllFieldNames();
+    }
+
+    /** save to original file this dataset was loaded from */
+    synchronized public void save() throws IOException {
+        save(this.filename);
+    }
+
     /** saves this dataset as a CSV  in the given file 
      * @throws IOException */
     synchronized public void save(String file) throws IOException {
         saveTime = System.currentTimeMillis();
     	
-    	CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
-        //File csvFile = new File(file);
-
         //FIRST WRITE TO A NEW FILE
         String fileWithSuffixNew = file + ".new";
         Writer fileWriter = new FileWriter(fileWithSuffixNew);
-        CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat);
+
+        CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
+        CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat.withQuoteMode(QuoteMode.NON_NUMERIC));
+
         List<String> columnList = new ArrayList<>(actualColumnName);
         csvFilePrinter.printRecord(columnList);
         
@@ -226,9 +261,6 @@ public class Dataset implements Serializable{
         FileUtils.copyFile(suffixFile, new File(file));
         if(!FileUtils.deleteQuietly(suffixFile))
             throw new FileExistsException("failed to delete .new file");
-
-        //PERFORM BACKUP
-        //performBackup(new File(file));
     }
 
     /*
@@ -274,4 +306,7 @@ public class Dataset implements Serializable{
         }
     }
 
+    public String toString() {
+        return "Dataset with " + getRows().size() + " rows and " + nCols() + " columns read from " + filename;
+    }
 }

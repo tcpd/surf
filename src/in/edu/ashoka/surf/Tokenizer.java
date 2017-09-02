@@ -9,17 +9,21 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 
 import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Timers;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Tokenizer {
+    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Tokenizer.class);
+
     static String DELIMITERS = " -.,;:/'\\t<>\"`()@1234567890";
 
-    private static List<Pattern> replacementPatterns;
+    private static Map<Pattern, String> patternToReplacement = new LinkedHashMap<>(); // VERY IMP: should be linked hashmap so the replacements are applied in order!
     static {
         // precompile patterns for performance. the patterns to be replaced
-        // // replacements is an array 2X the size of replacementPatterns.
-        replacementPatterns = new ArrayList<>();
         for (int i = 0; i < Config.replacements.length; i += 2) {
-            replacementPatterns.add(Pattern.compile(Config.replacements[i]));
+            Pattern p = Pattern.compile(Config.replacements[i]);
+            patternToReplacement.put (p, Config.replacements[i+1]);
         }
     }
 
@@ -41,7 +45,7 @@ public class Tokenizer {
                         tokens.add(token);
             }
         }
-       // out.println("single word keys: " + nSingleWordKeys + " total tokens: " + tokens.size() + " unique: " + tokens.elementSet().size());
+        log.info ("single word keys: " + nSingleWordKeys + " total tokens: " + tokens.size() + " unique: " + tokens.elementSet().size());
         return tokens;
     }
 
@@ -93,31 +97,43 @@ public class Tokenizer {
         String stfield = "_st_" + field;
 
         // compute and set cfield for all rows
-        for (Row r: allRows) {
-            String val = r.get(field);
-            String cval = canonicalizeDesi(val);
-            r.set(cfield, cval);
-        }
-
-        // split on cfield and get token frequencies
-        Multimap<String, Row> cfieldValToRows = SurfExcel.split(allRows, cfield);
-        Multiset<String> tokens = generateTokens(cfieldValToRows);
-
-        for (String val : cfieldValToRows.keySet()) {
-            // compute and set retokenized val
-            List<String> result = retokenize(val, tokens);
-            String tval = Joiner.on(" ").join(result);
-
-            // compute and set sorted-retokenized val
-            List<String> sortedResult = new ArrayList<>(result);
-            Collections.sort(sortedResult);
-            String stval = Joiner.on(" ").join(sortedResult);
-
-            for (Row r : cfieldValToRows.get(val)) {
-                r.set (tfield, tval);
-                r.set (stfield, stval);
+        Timers.canonTimer.reset();
+        Timers.canonTimer.start();
+        {
+            for (Row r : allRows) {
+                String val = r.get(field);
+                String cval = canonicalizeDesi(val);
+                r.set(cfield, cval);
             }
         }
+        Timers.canonTimer.stop();
+        Timers.log.info ("Time for canonicalization: " + Timers.canonTimer.toString());
+
+        // split on cfield and get token frequencies
+        Timers.tokenizationTimer.reset();
+        Timers.tokenizationTimer.start();
+        {
+            Multimap<String, Row> cfieldValToRows = SurfExcel.split(allRows, cfield);
+            Multiset<String> tokens = generateTokens(cfieldValToRows);
+
+            for (String val : cfieldValToRows.keySet()) {
+                // compute and set retokenized val
+                List<String> result = retokenize(val, tokens);
+                String tval = Joiner.on(" ").join(result);
+
+                // compute and set sorted-retokenized val
+                List<String> sortedResult = new ArrayList<>(result);
+                Collections.sort(sortedResult);
+                String stval = Joiner.on(" ").join(sortedResult);
+
+                for (Row r : cfieldValToRows.get(val)) {
+                    r.set(tfield, tval);
+                    r.set(stfield, stval);
+                }
+            }
+        }
+        Timers.tokenizationTimer.stop();
+        Timers.log.info ("Time for Tokenization: " + Timers.tokenizationTimer.toString());
     }
 
     /** canonicalizes Indian variations of spellings and replaces a run of repeated letters by a single letter */
@@ -155,9 +171,8 @@ public class Tokenizer {
             else
                 token = token.replaceAll("^KU$", "KUMAR");
 
-            for (int j = 0; j < replacementPatterns.size(); j++) {
-                token = replacementPatterns.get(j).matcher(token).replaceAll(Config.replacements[2*j+1]);
-            }
+            for (Pattern p: patternToReplacement.keySet())
+                token = p.matcher(token).replaceAll(patternToReplacement.get(p));
 
             // ignore titles
             if (Config.ignoreTokensSet.contains(token))

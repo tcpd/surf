@@ -2,479 +2,335 @@ package in.edu.ashoka.surf;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Timers;
+import in.edu.ashoka.surf.util.UnionFindSet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public abstract class MergeManager {
+import static in.edu.ashoka.surf.MergeManager.RowViewControl.IDS_MATCHING_FILTER;
+import static in.edu.ashoka.surf.MergeManager.RowViewControl.ROWS_MATCHING_FILTER;
 
-	//static final String SEPERATOR = "-";
-	Dataset d;
-	HashMap<Row, String> rowToId;
-    HashMap<String, Row> idToRow;
-    String arguments;
+/** class that takes care of running a merging algorithm and then manual merges to it.
+ * Important: these functions should not depend on a web-based frontend. This class should have no dependency on servlets. */
+public class MergeManager {
+    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
 
-    ArrayList<Collection<Row>> listOfSimilarCandidates;
-    ArrayList<Collection<Row>> groupMergedListOfSimilarCandidates;
-    Multimap<String,Row> personToRows;
-    HashMap<String, Integer> rowToGroup;
-    HashMap<String, Integer> rowToMergedGroup;
+    /** we first decide which groups to show. This determination is independent of which rows are shown. This does not take filter into account, only the algorithmically merged groups */
+    public enum GroupViewControl {
+        ALL_GROUPS, /* this will show all groups, including singleton rows */
+        GROUPS_WITH_TWO_OR_MORE_IDS, /* show all rows in a group, under which any row matches filter */
+        GROUPS_WITH_TWO_OR_MORE_ROWS
+    } /* this will show a group even if it only has 1 id, but multiple rows for that id. useful to see all id's that have been merged */
 
-    static final int WINNER_POSITION_CAP = 3;
-    
-    public static MergeManager getManager(String algo, Dataset d, String arguments){
-		MergeManager mergeManager = null;
-
-		if(algo.equals("exactSameName")){
-			mergeManager = new ExactSameNameMergeManager(d);
-		}
-		else if(algo.equals("editDistance1")){
-			mergeManager = new SimilarNameMergeManager(d, 1);	//TESTING
-		}
-		else if(algo.equals("editDistance2")){
-			mergeManager = new SimilarNameMergeManager(d, 2);	//TESTING
-		}
-		else if(algo.equals("dummyAllName")){
-			mergeManager = new DummyMergeManager(d);
-		}
-		else if(algo.equals("exactSameNameWithConstituency")){
-			mergeManager = new ExactSameNameWithConstituencyMergeManager(d);
-		} else if(algo.equals("compatibleNames")){
-			CompatibleNameManager cnm = new CompatibleNameManager(d);
-			cnm.setFields("cand1", "acname"); // this will be changed to PC_name for GE??
-			mergeManager = cnm;
-		}
-		else if(algo.equals("search")){
-			mergeManager = new SearchMergeManager(d, arguments);
-		}
-		else{}
-		return mergeManager;
-	}
-
-	Comparator<Collection<Row>> getComparator(String comparatorType){
-		Comparator<Collection<Row>> comparator;
-    	if(comparatorType.equals("confidence")) {
-    		evaluateConfidence();	//confidence needs to be evaluated first for every row
-			comparator = SurfExcel.confidenceComparator;
-		}
-    	else if(comparatorType.equals("alphabetical"))
-    		comparator = SurfExcel.alphabeticalComparartor;
-    	else
-    		comparator = SurfExcel.alphabeticalComparartor;
-    	return comparator;
-	}
-    
-	
-    protected MergeManager(Dataset d){
-    	this.d=d;
-        if(!d.hasColumnName("ID"))
-            d.addToActualColumnName("ID");
-        if(!d.hasColumnName("mapped_ID"))
-            d.addToActualColumnName("mapped_ID");
-        if(!d.hasColumnName("comments"))
-		    d.addToActualColumnName("comments");
-        if(!d.hasColumnName("user_name"))
-		    d.addToActualColumnName("user_name");
-        if(!d.hasColumnName("email"))
-		    d.addToActualColumnName("email");
-        if(!d.hasColumnName("is_done"))
-		    d.addToActualColumnName("is_done");
-		
-    }
-    
-	//initialize the id's for each row
-	final public void initializeIds(){
-		SurfExcel.assignUnassignedIds(d.getRows());
-	}
-	
-	public final void performInitialMapping(){
-		rowToId = new HashMap<>();
-		idToRow = new HashMap<>();
-		for(Row row:d.getRows()){
-    		rowToId.put(row, row.get("mapped_ID"));
-    		idToRow.put(row.get("ID"), row);
-    		if(row.get("comments").equals(""))
-    			row.set("comments", ""); 	//set comments to empty on initial mapping
-    	}
-	}
-	
-	//add candiates which will be judged based on their group
-	abstract public void addSimilarCandidates();
-	
-	final public void merge(String [] ids){
-		Multimap<Integer, String> mp = LinkedHashMultimap.create();
-		for(String id:ids){
-			//mp.put(idToRow.get(id).get("common_group_id"), id);		//algorithm will decide the common_group_id
-			mp.put(rowToMergedGroup.get(id),id);
-		}
-		
-		for(Integer key:mp.keySet()){
-			ArrayList<String> innerIds= new ArrayList<>();
-			innerIds.addAll(0, mp.get(key));
-			String defaultId = getRootId(innerIds.get(0));
-			for(int i=1;i<innerIds.size();i++){
-				Row tempRow = idToRow.get(innerIds.get(i));
-				rowToId.put(tempRow, defaultId);
-			}
-		}
-
-		/*//setting mapped id here instead of inside save
-		Collection<Row> rows = d.getRows();
-		for(Row row:rows){
-			row.set("mapped_ID", rowToId.get(row));
-		}*/
-	}
-
-	final public void forceMerge(String [] ids){
-		String defaultId = getRootId(ids[0]);
-        for(int i = 1; i<ids.length; i++){
-			Row tempRow = idToRow.get(ids[i]);
-			rowToId.put(tempRow, defaultId);
-			tempRow.set("mapped_ID", defaultId);
-		}
-		setupPersonToRowMap();
-		//setupRowToGroupMap();
+    /* Next, a filter is applied to rows in the groups selected for showing. */
+    public enum RowViewControl {
+        ALL_ROWS, /* this will show a group even if it only has 1 id, but multiple rows for that id */
+        IDS_MATCHING_FILTER, /* if an Id has at least 1 row matching the filter, show all rows for that id */
+        ROWS_MATCHING_FILTER /* Only show rows that directly match a filter */
     }
 
-	//basic version; might need improvements
-	final public void deMerge(String [] ids){
-		//First take care of rows with different id and mapped id
-		for(String id:ids){
-			Row row = idToRow.get(id);
-			//marked rows also needs to be reviewed again
-			row.set("is_done", "no");
-			if(row.get("ID").equals(row.get("mapped_ID")))
-				continue;
-			rowToId.put(row, row.get("ID"));
-			row.set("mapped_ID", row.get("ID"));
-			//System.out.println();
-		}
-		
-		//Now take care of rows with same id and mapped id
-		for(String id:ids){
-			Row row = idToRow.get(id);
-			
-			if(id.equals(row.get("mapped_ID"))){
-				ArrayList<Row> samePersonRows = new ArrayList<>();
-				for(Row tempRow:personToRows.get(row.get("mapped_ID"))){
-					if(tempRow.get("mapped_ID").equals(id) && isMappedToAnother(tempRow.get("ID"))){
-						samePersonRows.add(tempRow);
-					}
-				}
-				if(samePersonRows!=null){
-					for(Row tempRow:samePersonRows){
-						rowToId.put(tempRow, samePersonRows.get(0).get("ID"));
-						tempRow.set("mapped_ID", samePersonRows.get(0).get("ID"));
-					}
-				}
+    /** a view is a filtered and sorted view on top of this mergemanager's results */
+    public class View {
+
+        public final List<List<List<Row>>> viewGroups; // these are the groups
+        public final String filterSpec, sortOrder;
+        private int nIds, nRowsInGroups;
+
+        // there are controls with respect to filter
+        public GroupViewControl groupViewControl;
+
+        // controls with respect to algorithm's grouping. which groups to show?
+        public RowViewControl rowViewControl;
+
+        // both controls above have to be satisfied
+        // use cases:
+        // 1) see all rows in dataset, including singletons, sorted alphabetically: showOnlyRowsThatMatch (with empty filter), showAllGroups
+        // 2) see all rows in dataset that match a search term: showOnlyRowsThatMatch with filter spec, showAllGroups.
+        // 3) see all Ids in dataset that match a search term: showIdsWithAnyRowMatch with filter spec, showAllGroups.
+        // 4) See groups with merged all merges that have been performed: showGroupsWithAnyRowMatch (with empty filter) showGroupsWithAtLeast2Rows
+
+        private View (String filterSpec, GroupViewControl groupFilter, RowViewControl rowFilter, String sortOrder, List<List<List<Row>>> viewGroups) {
+            this.filterSpec = filterSpec;
+            this.sortOrder = sortOrder;
+            this.viewGroups = viewGroups;
+
+            nRowsInGroups = 0;
+            Set<String> idsSeen = new LinkedHashSet<>();
+            for (List<List<Row>> rowsForThisGroup: viewGroups) {
+                for (List<Row> rowsForThisId: rowsForThisGroup)
+                    for (Row row: rowsForThisId) {
+                        idsSeen.add(row.get(Config.ID_FIELD));
+                        nRowsInGroups++;
+                    }
+            }
+            nIds = idsSeen.size();
+
+            this.groupViewControl = groupFilter;
+            this.rowViewControl = rowFilter;
+        }
+
+        public String description() {
+            return  MergeManager.this.d.description + " Algorithm: " + MergeManager.this.algorithm.toString() +
+                    (!Util.nullOrEmpty(MergeManager.this.splitColumn) ? " (further split by " + splitColumn : ")") + "\n"
+                    + Util.commatize(viewGroups.size()) + " groups with " + Util.commatize(nRowsInGroups) + " rows (of " + Util.commatize(MergeManager.this.d.getRows().size())
+                    + ") with " + Util.commatize(nIds) + " unique ids";
+        }
+
+        public String toString() { return "View: #groups " + viewGroups + " filterSpec = " + filterSpec + " sortOrder = " + sortOrder + " ";}
+    }
+
+	private Dataset d;
+    private List<Collection<Row>> groups; // these are the groups
+    private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
+    private MergeAlgorithm algorithm;
+    private String splitColumn;
+    public View lastView; // currently we assume only 1 view
+
+    // a small class to represent operations made on this dataset.
+    // op is the operation to run: merge, or unmerge
+    // the merge or unmerge is run on the given ids.
+    // groupId is currently not needed.
+    public static class MergeCommand {
+        String op;
+        String groupId; // not needed and not used currently
+        String[] ids;
+    }
+
+    /** create a new mergeManager with the given algorithm and arguments, and runs the algorithm and stores the (initial) groups.
+     * further splits by splitColumn if it's not null or empty */
+    public MergeManager(Dataset dataset, String algo, String arguments, String splitColumn) {
+        this.d = dataset;
+        if (!d.hasColumnName("__comments"))
+            d.addToActualColumnName("__comments");
+        if (!d.hasColumnName("__reviewed"))
+            d.addToActualColumnName("__reviewed");
+        computeIdToRows(d.getRows());
+
+        Tokenizer.setupDesiVersions(dataset.getRows(), Config.MERGE_FIELD);
+
+        if (algo.equals("editDistance")) {
+            int editDistance = Config.DEFAULT_EDIT_DISTANCE;
+            try {
+                editDistance = Integer.parseInt(arguments);
+            } catch (NumberFormatException e) {
+                Util.print_exception(e, log);
+            }
+            algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance); // run e.d. on the _st_ version of the field
+        } else if (algo.equals("allNames")) {
+            algorithm = new MergeAlgorithm(dataset) {
+                @Override
+                public List<Collection<Row>> run() {
+                    classes = new ArrayList<>();
+                    classes.add(new ArrayList<>(d.getRows())); // just one class, with all the rows in it
+                    return classes;
+                }
+                public String toString() { return "Dummy merge"; }
+            };
+        } else if (algo.equals("compatibleNames")) {
+            algorithm = new CompatibleNameAlgorithm(d, Config.MERGE_FIELD);
+        }
+
+        // this is where the groups are generated
+        groups = algorithm.run();
+        // if the dataset already had some id's the same, merge them
+        updateMergesBasedOnIds();
+        this.splitColumn = splitColumn;
+        if (!Util.nullOrEmpty(splitColumn))
+            splitByColumn (splitColumn);
+    }
+
+    /** will split groups into new groups based on the split column */
+    private void splitByColumn (String splitColumn) {
+        // further split by split column if specified
+        if (Util.nullOrEmpty(splitColumn))
+            return;
+
+        List<Collection<Row>> result = new ArrayList<>();
+        List<Collection<Row>> groupsList = this.groups;
+        for (Collection<Row> group : groupsList) {
+            Multimap<String, Row> splitGroups = SurfExcel.split(group, splitColumn);
+            for (String key : splitGroups.keySet())
+                result.add(splitGroups.get(key));
+        }
+        this.groups = result;
+    }
+
+    /** updates groups based on id's as well as existing groups.
+     * MUST be called after id's are changed */
+    void updateMergesBasedOnIds() {
+        Timers.unionFindTimer.reset();
+        Timers.unionFindTimer.start();
+
+        int initialClusters = groups.size();
+        UnionFindSet<Row> ufs = new UnionFindSet<>();
+
+        // do unification, the criteria are based on one of 2 factors
+        // same id, or same cluster according to groups
+
+        for (String id: idToRows.keySet()) {
+            ufs.unifyAllElementsOfCollection (idToRows.get(id));
+        }
+
+        for (Collection<Row> cluster : groups) {
+            ufs.unifyAllElementsOfCollection(cluster);
+        }
+
+        Timers.unionFindTimer.stop();
+        Timers.log.info ("Time for union-find: " + Timers.unionFindTimer.toString());
+        groups = (List) ufs.getClassesSortedByClassSize();
+
+        // recompute id -> rows map
+        computeIdToRows(d.getRows());
+        log.info ("initial # of groups " + initialClusters + ", after merging by id, we have " + groups.size() + " groups");
+    }
+
+    private void computeIdToRows (Collection<Row> rows) {
+        for (Row r: rows)
+            idToRows.put (r.get(Config.ID_FIELD), r);
+    }
+
+    /** applies the given merge/unmerge commands on the dataset */
+    public void applyUpdatesAndSave(MergeCommand[] commands) throws IOException {
+        log.info ("Applying " + commands.length + " command(s) to " + d);
+
+        for (MergeCommand command: commands) {
+            if ("merge".equalsIgnoreCase(command.op)) {
+                // we have to merge all the ids in command.ids
+                // the id of the first will be put into firstId, and copied to all the other rows with that id
+                String firstId = null;
+                for (String id : command.ids) {
+                    if (firstId == null) {
+                        firstId = id;
+                        continue;
+                    }
+
+                    // update all the rows for this id to firstId
+                    // also remember to update the idToRows map
+                    log.info("Merging id " + id + " into " + firstId);
+                    Collection<Row> rowsForThisId = idToRows.get(id);
+                    for (Row row : rowsForThisId) {
+                        row.set(Config.ID_FIELD, firstId); // we wipe out the old id for this row
+                        idToRows.get(firstId).add (row);
+                    }
+                    idToRows.removeAll (id); // remove this id entirely from the map, it will not be used again
+                }
+                updateMergesBasedOnIds();
+            } else if ("unmerge".equalsIgnoreCase(command.op)) {
+                // create unique id's for all rows
+                for (String id : command.ids) {
+                    Collection<Row> rowsForThisId = idToRows.get(id);
+                    for (Row row : rowsForThisId) {
+                        // TODO
+                        // break the cluster, give each of these rows a new id, and put them in a new cluster in groups
+                    }
+                }
+            }
+        }
+
+        d.save();
+    }
+
+    public View getView (String filterSpec, GroupViewControl groupFilter, RowViewControl rowFilter, String sortOrder) {
+        List<List<List<Row>>> postFilterGroups = applyFilter(new Filter(filterSpec), groupFilter, rowFilter);
+        Comparator<List<List<Row>>> comparator = GroupOrdering.getComparator (sortOrder);
+        postFilterGroups.sort (comparator);
+        View view = new View(filterSpec, groupFilter, rowFilter, sortOrder, postFilterGroups);
+        this.lastView = view;
+        return view;
+    }
+
+    public View getView (String filterSpec, String groupViewControlSpec, String rowViewControlSpec, String sortOrder) {
+        return getView (filterSpec, GroupViewControl.valueOf(groupViewControlSpec), RowViewControl.valueOf(rowViewControlSpec), sortOrder);
+    }
+
+    /** returns a collection of groups after filtering groups by the given filter.
+     * under each group is a bunch of ids. under each id has a bunch of rows.
+	 * that's why it returns a List of List of List of Rows.
+	 * it is assumed that:
+	 * one row is only in one group, i.e. it can't belong to multiple groups.
+	 * and all rows belonging to an id are also in the same group.
+	 * (this should be satisfied if the inputGroupsList has been generated by a Union-Find set. */
+	private List<List<List<Row>>> applyFilter (Filter filter, GroupViewControl gvc, RowViewControl rvc) {
+
+		List<List<List<Row>>> result = new ArrayList<>();
+
+		for (Collection<Row> rowCollection: groups) {
+            List<Row> group = new ArrayList<>(rowCollection); // convert collection to list
+
+            // will this group be shown? yes, if ANY of the rows in this group matches the filter. otherwise move on to the next group.
+            {
+                boolean groupWillBeShown = true;
+                switch (gvc) {
+                    case GROUPS_WITH_TWO_OR_MORE_ROWS:
+                        groupWillBeShown = group.stream().filter(filter::passes).limit(2).count() >= 2; // limit(2) to ensure early out at finding the first row passing the filter
+                        break;
+                    case GROUPS_WITH_TWO_OR_MORE_IDS:
+                        Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
+                        groupWillBeShown = (idsInGroup.size() >= 2);
+                        break;
+                }
+
+                if (!groupWillBeShown)
+                    continue;
+            }
+
+			// ok, this group is to be shown. sort the rows in this group data based on sortColumns
+			{
+				String[] sortColumns = new String[]{"Constituency", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
+
+				Comparator c = (Comparator<Row>) (r1, r2) -> {
+                    for (String col : sortColumns) {
+                        int result1 = r1.get(col).toLowerCase().compareTo(r2.get(col).toLowerCase());
+                        if (result1 != 0)
+                            return result1;
+                    }
+                    return 0;
+                };
+				group.sort(c);
 			}
-		}
-		setupPersonToRowMap();
-		//setupRowToGroupMap();
-	}
-	final public void save(String filePath) throws IOException{
-		d.save(filePath);
-	}
 
-	final public void load(){
-		rowToId = new HashMap<>();
-		idToRow = new HashMap<>();
-		for(Row row:d.getRows()){
-			idToRow.put(row.get("ID"), row);
-			rowToId.put(row, row.get("mapped_ID"));
-		}
-	}
+			// generate a id -> RowsInThisGroup map
+			Multimap<String, Row> idToRowsInThisGroup = LinkedHashMultimap.create();
+			group.forEach(r -> {
+				idToRowsInThisGroup.put(r.get(Config.ID_FIELD), r);
+			});
 
-	final public void setupPersonToRowMap(){
-		personToRows = LinkedHashMultimap.create();
-		/*for(Collection<Row> group:listOfSimilarCandidates){
-			for(Row row:group){
-				personToRows.put(row.get("mapped_ID"),row);
-			}
-		}*/
-		for(Row row:d.getRows()){
-			personToRows.put(row.get("mapped_ID"),row);
-		}
-	}
+			// prepare list of list of rows for this group
+			List<List<Row>> rowsForThisGroup = new ArrayList<>();
+			for (String id: idToRowsInThisGroup.keySet()) {
+				List<Row> rowsForThisId = new ArrayList<>(idToRowsInThisGroup.get(id));
 
-	final public void setupRowToGroupMap(){
-		rowToGroup = new HashMap<>();
-		for(int i=0; i<listOfSimilarCandidates.size(); i++){
-			Collection<Row> group = listOfSimilarCandidates.get(i);
-			for(Row row:group){
-				rowToGroup.put(row.get("ID"),i);
-			}
-		}
-	}
+                List<Row> resultListForThisId;
+                if (rvc == IDS_MATCHING_FILTER) {
+                    // if any row for this id passes filter, we pass all the rows to resultListForThisId
+                    boolean doesAnyRowForThisIdMatch = rowsForThisId.stream().filter (filter::passes).limit(1).count() > 0;
+                    if (doesAnyRowForThisIdMatch)
+                        resultListForThisId = rowsForThisId;
+                    else
+                        continue;
+                } else if (rvc == ROWS_MATCHING_FILTER){
+				    resultListForThisId = rowsForThisId.stream().filter (filter::passes).collect(Collectors.toList());
+                } else { // if (rvc == ALL_ROWS) {
+                    resultListForThisId = rowsForThisId;
+                }
 
-	final public void setupRowToMergedGroupMap(){
-		rowToMergedGroup = new HashMap<>();
-		for(int i=0; i<groupMergedListOfSimilarCandidates.size(); i++){
-			Collection<Row> group = groupMergedListOfSimilarCandidates.get(i);
-			for(Row row:group){
-				rowToMergedGroup.put(row.get("ID"),i);
-			}
-		}
-	}
-
-	final public void onlyKeepWinners(ArrayList<Multimap<String,Row>> listOfSet){
-
-		for(int i=0; i<listOfSet.size();i++){
-			Multimap<String, Row> group = listOfSet.get(i);
-			boolean isWinner = false;
-			for(Row row:group.values()){
-				if(Integer.parseInt(row.get("Position"))<=WINNER_POSITION_CAP){
-					isWinner = true;
-					break;
-				}
-			}
-			if(!isWinner){
-				listOfSet.remove(i);
-				i--;
-			}
-		}
-	}
-
-	final public void evaluateConfidence(){
-		for(Collection<Row> group:listOfSimilarCandidates){
-			//Evaluate confidence for the current group
-			int confidence = 0;
-			confidence += group.iterator().next().get("st_Name").length();
-
-			//set confidence for current rows
-			for(Row row:group){
-				row.set("confidence",String.valueOf(confidence));
-			}
-		}
-	}
-
-	
-	//returns a list of group of similar named groups
-	final public ArrayList<Multimap<String,Row>> getGroups(String attribute, String [] values, boolean onlyWinners, String searchQuery){
-		boolean filterNeeded = (attribute!=null)&&(!attribute.equals(""))&&(values!=null);
-		for(String value:values){
-			if(value.equals("All Records")){
-				filterNeeded = false;
-				break;
-			}
-		}
-		boolean isSearch = searchQuery!=null && !searchQuery.equals("");
-		List<Collection<Row>> groupList;
-			groupList = getGroupMergedListOfSimilarCandidate();
-		ArrayList<Multimap<String, Row>> listOfSet = new ArrayList<>();
-		for(Collection<Row> similarRows:groupList){
-			Multimap<String, Row> mp = LinkedHashMultimap.create();
-			for(Row row:similarRows){
-				if(filterNeeded){	//APPLY FILTER IF NEEDED
-					for(String value:values){
-						if(row.get(attribute).equals(value))
-							mp.put(rowToId.get(row), row);
-					}
-				} else {			//NO FILTER APPLIED
-					mp.put(rowToId.get(row), row);
-				}
-			}
-			if(mp.values().size()>1)	//check whether there are more than 1 member in a group
-				listOfSet.add(mp);
-		}
-		
-		if(onlyWinners && !isSearch)onlyKeepWinners(listOfSet);
-
-		return listOfSet;
-	}
-
-
-	final private ArrayList<Collection<Row>> getGroupMergedListOfSimilarCandidate(){
-		setupRowToGroupMap();
-		groupMergedListOfSimilarCandidates = new ArrayList<>();
-		List<Integer> mergedGroupsIndices = new ArrayList<>();
-		Map<Integer, Integer> groupMap = new HashMap<>();
-		for(int i=0; i<listOfSimilarCandidates.size();i++){
-			Collection<Row> group = listOfSimilarCandidates.get(i);
-			Collection<Row> mergedGroup = new ArrayList<>();
-			Set<String> persons = new HashSet<>();
-			for(Row row:group){
-				persons.add(rowToId.get(row));
-			}
-			//IF GROUP NOT PRESENT
-			if(!mergedGroupsIndices.contains(i)){
-				mergedGroup.addAll(group);
-				for(String person:persons){
-					for(Row row:personToRows.get(person)){
-						if(rowToGroup.get(row.get("ID"))==null){	//rows belong to a person but didn't get added in any group in current algorithm
-							mergedGroup.add(row);
-							continue;
-						}else{
-							if(!rowToGroup.get(row.get("ID")).equals(i)){
-								if(mergedGroupsIndices.contains(rowToGroup.get(row.get("ID"))))
-									continue;
-								mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
-								mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
-								groupMap.put( rowToGroup.get(row.get("ID")) , groupMergedListOfSimilarCandidates.size());
-							}
-						}
-					}
-				}
-				groupMergedListOfSimilarCandidates.add(mergedGroup);
-			}
-			else{	//IF GROUP PRESENT
-				int parentGroup = groupMap.get(i);
-				for(String person:persons){
-					for(Row row:personToRows.get(person)){
-						if(rowToGroup.get(row.get("ID"))==null){
-							mergedGroup.add(row);
-							continue;
-						}else{
-							//If the current row doesn't belong to current group and it's parent's group
-							if(!rowToGroup.get(row.get("ID")).equals(i) && !rowToGroup.get(row.get("ID")).equals(parentGroup)){
-								if(mergedGroupsIndices.contains(rowToGroup.get(row.get("ID"))))
-									continue;
-								mergedGroupsIndices.add(rowToGroup.get(row.get("ID")));
-								mergedGroup.addAll(listOfSimilarCandidates.get(rowToGroup.get(row.get("ID"))));
-								groupMap.put(rowToGroup.get(row.get("ID")),parentGroup);
-							}
-						}
-					}
-				}
-				groupMergedListOfSimilarCandidates.get(parentGroup).addAll(mergedGroup);
+                if (resultListForThisId.size() > 0)
+                    rowsForThisGroup.add (resultListForThisId);
 			}
 
-		}
-		setupRowToMergedGroupMap();
-		return groupMergedListOfSimilarCandidates;
-	}
-
-	final public void sort(String comparatorType){
-		listOfSimilarCandidates.sort(getComparator(comparatorType));
-	}
-	
-	
-	//check whether this row is mapped to another name
-	final public boolean isMappedToAnother(String id){
-		if(rowToId.get(idToRow.get(id)).equals(id))
-			return false;
-		else 
-			return true;
-	}
-	
-	final public String getRootId(String id){
-		while(!rowToId.get(idToRow.get(id)).equals(id)){
-			id = rowToId.get(idToRow.get(id));
-		}
-		return id;
-	}
-	final public void updateMappedIds(){
-		for(Row row:rowToId.keySet()){
-			String id = getRootId(rowToId.get(row));
-			rowToId.put(row, id);
-			row.set("mapped_ID", rowToId.get(row));
-		}
-	}
-	
-	//check whether reading the file for the first time
-	public boolean isFirstReading(){
-		Collection<Row> allRows = d.getRows();
-		boolean isAssigned= true;
-		for(Row row:allRows){
-			if(row.get("ID").equals(""))
-				isAssigned=false;
-			if(row.get("mapped_ID").equals(""))
-				isAssigned=false;
-		}
-		return !isAssigned;
-	}
-	
-	public int [] getListCount(ArrayList<Multimap<String,Row>> groupLists){
-		int [] statusCount = new int[5];
-		if(listOfSimilarCandidates==null){
-			System.out.println("0");
-			return null;
-		}
-		int i=0;
-		int j=0;
-		int k=0;
-		System.out.println("total number of groups:" + groupLists.size());
-		for(Multimap mp:groupLists){
-			//System.out.println("Unique person identified: "+mp.keySet().size());
-			i+=mp.keySet().size();
-			j+=mp.values().size();
-			for (Row row:(Collection<Row>)mp.values()){
-				if(row.get("is_done").equals("yes"))
-					k++;
-			}
-		}
-		//System.out.println("Unique person identified: " + i);
-		//System.out.println("Unique rows identified: " + j);
-		//System.out.println("Redundency removed:  "+(j-i));
-		statusCount[0] = i;
-		statusCount[1] = j;
-		statusCount[2] = j-i;
-		statusCount[3] = groupLists.size();
-		statusCount[4] = k;	//rows reviewed
-		return statusCount;
-		
-	}
-	
-	public void updateComments(Map<String,String> map){
-		for(String key:map.keySet()){
-			idToRow.get(key).set("comments", map.get(key));
-			//System.out.println(idToRow.get(key).get("comments"));
-		}
-	}
-	
-	//method that updates the drop down information
-	public void updateIsDone(Map<String, String> map){
-		for(String key:map.keySet()){
-
-			Row row = idToRow.get(key);
-			Collection<Row> person = personToRows.get(row.get("mapped_ID"));
-			//This needs to be done because person to row map isn't updated after merge, it is only updated when the groups view is generated.
-			if(person.size()<=1){
-				row.set("is_done", (map.get(key).equals("on")?"yes":"no"));
-			}else{
-				for(Row record:person){
-					if(map.get(key).equals("on")){
-						record.set("is_done","yes");
-					}else{
-						record.set("is_done","no");
-					}
-
-				}
-			}
-			//Finally if the row is still not marked
-			row.set("is_done", (map.get(key).equals("on")?"yes":"no"));
-		}
-	}
-
-	public void resetIsDone(){
-		for(Row row:d.getRows()){
-			if(row.get("is_done").equals("yes"))
-				row.set("is_done", "no");
-		}
-	}
-	
-	public Map<String,Set<String>> getAttributesDataSet(String [] attributes){
-		Map<String,Set<String>> attributeMap = new HashMap<>();
-		
-		for(String attribute:attributes){
-			Set<String> valueSet = new HashSet<>();
-			for(Row row:d.getRows()){
-				valueSet.add(row.get(attribute));
-			}
-			attributeMap.put(attribute, valueSet);
-		}
-		
-		return attributeMap; 
-	}
-	
-	public final void updateUserIds(String []userRows, String userName, String email){
-			for(String id:userRows){
-				idToRow.get(id).set("user_name", userName);
-				idToRow.get(id).set("email", email);
-			}
+			if (rowsForThisGroup.size() > 0)
+    			result.add (rowsForThisGroup);
 		}
 
-	public final void setArguments(String arguments){
-		this.arguments = arguments;
+		return result;
 	}
+
+	public String toString() {
+	    return "Merge manager # of groups: " + (groups != null ? groups.size() : "(merge not run)" + " last view: " + lastView);
+    }
 }

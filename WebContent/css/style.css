@@ -6,12 +6,15 @@ body{
 }
 
 .table th, .table td { 
-     border-top: none !important; 
+     border-top: none !important;
+    padding: 3px;
  }
 
 .logo {
-    font-family:Sacramento,sans-serif;font-size:50px;font-weight:bold;color:#0c218a;padding-top:20px;margin-top:50px;
+    font-family:Sacramento,sans-serif;font-size:50px;font-weight:bold;color:#0c218a; /* padding-top:20px;margin-top:50px; */
 }
+
+.top-bar button { margin-left:20px; }
 
 .user-input{
 	display: table;
@@ -59,28 +62,35 @@ body{
 }
 
 .trow{
-	font-weight: bold;
+    border-bottom: solid 1px rgba(128,128,128,0.1);
 }
 
-.row-done{
-	background-color: #cc9494;
+.merged-row { border-bottom: none;} /* this should be applied to all rows except the last one in a merged group. interacts with broder-collapse on the entire table */
+
+.toolbar-row { font-size: 11px; }
+.toolbar-row td {
+    border-top: solid 1px rgba(128,128,128,1.0);
+    padding-top:10px;
+    padding-bottom: 5px;
+
 }
 
-.row-selected-for-done{
-    background-color: #b783e2;
+.reviewed {
+    background: repeating-linear-gradient(
+            to right,
+            #f6ba52,
+            #f6ba52 10px,
+            #ffd180 10px,
+            #ffd180 20px
+    );
 }
 
-.row-not-done{
+.reviewed1 {
+    background-color: #f6ba52;
 }
 
 .fixed{
 	position: fixed;
-}
-
-.unmerge-col{
-}
-
-.filterForm{
 }
 
 #loading {
@@ -176,11 +186,10 @@ body{
 
 
 /* ALL COLUMNS WIDTH GOES HERE; TOTAL SHOULDN'T EXCEED 100% */
-.table-cell-merge,
-.table-cell-sex,
+.table-cell-merge, .table-cell-sex, .table-cell-done { width: 2%; }
+
 .table-cell-year,
 .table-cell-party,
-.table-cell-done,
 .table-cell-votes{
 	width:5%
 }
@@ -191,7 +200,7 @@ body{
 }
 
 .table-cell-name{
-	width:18%
+	width:25%
 }
 
 .table-cell-comments{

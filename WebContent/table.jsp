@@ -1,496 +1,407 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"
-import="in.edu.ashoka.surf.Row"
-import="in.edu.ashoka.surf.MergeManager"
-import="in.edu.ashoka.surf.Row"
+		 import="in.edu.ashoka.surf.Row"
 import="in.edu.ashoka.surf.MergeManager"
 import="java.util.*"
-import="com.google.common.collect.Multimap"
 %>
 <%@ page import="edu.stanford.muse.util.Util" %>
+<%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+    <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet" type="text/css" href="style.css">
-    <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"   integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="   crossorigin="anonymous"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<!--  	 <link href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" type="text/css" rel="stylesheet" /> -->
-<!-- 	<script src="//code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script> -->
-<!-- 	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script> -->
-<!-- 	<script src="https://cdn.jsdelivr.net/jquery.ui-contextmenu/1.12.0/jquery.ui-contextmenu.min.js" type="text/javascript"></script> -->
-	<script src="helper.js" type="text/javascript"></script>
+<!--	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
 
-<title>Surf</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+    <script type="text/javascript"> if (!window.jQuery) {document.write('<script type="text/javascript" src="js/jquery-1.12.1.min.js"><\/script>');}</script>
+
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript"> if (!(typeof $().modal == 'function')) { document.write('<script type="text/javascript" src="js/bootstrap-3.1.1.min.js"><\/script>'); }</script>
+
+    <script src="js/selectpicker.js"></script>
+
+	<title>Surf</title>
 </head>
 <body>
-
-   
-<div id="loading" style="padding-top: 20%">
-	<img id="loading-image" src="loading.gif" alt="LOADING.."/>
-</div>
-
-   <%
-   
-	   	String userName, email, algorithm, dataset, filterParam, filterParamNav, filterValueNav;
-	  	String [] filterValue;
-	  	
-	  	userName = session.getAttribute("userName").toString();
-	   	email = session.getAttribute("email").toString();
-	   	filterParam = session.getAttribute("filterParam").toString();
-	   	filterValue = (String [])session.getAttribute("filterValue");
-	   	filterParamNav = session.getAttribute("filterParamNav").toString();
-	   	filterValueNav = session.getAttribute("filterValueNav").toString();
-
-		ArrayList<Multimap<String, Row>> groupsList = (ArrayList<Multimap<String, Row>>)session.getAttribute("subList");
-		int[] progressData = (int[])session.getAttribute("progressData");	
-		MergeManager mergeManager = (MergeManager)session.getAttribute("mergeManager");
-
-	%>
-	
-
-
-	<!-- Modal -->
-	<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-	  <div class="modal-dialog" role="document">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title" id="myModalLabel">Settings Menu</h4>
-	      </div>
-	      <div class="modal-body">
-	       	<div class="filterForm">
-				<form class="form" role="filter" method="get" action="merge">
-					<div class="form-group">
-						Algorithm:
-						<select class="form-control" name="algorithm" id="algorithm">
-								<option value="exactSameName">Exact Same Name</option>
-								<option value="exactSameNameWithConstituency">Exact Same Name with Constituency</option>
-								<option value="editDistance1">Approximate Name with Edit Distance 1</option>
-								<option value="editDistance2">Approximate Name with Edit Distance 2</option>
-								<option value="compatibleNames">Compatible names in same constituency</option>
-								<option value="search">Search</option>
-								<option value="dummyAllName">All names</option>
-						</select>
-					</div>
-					<div class="form-group">
-						Arguments for Algorithm:
-						<input type="text" class="form-control" id="algo-arg" name="algo-arg">
-					</div>
-					<div class="form-group">
-						Filter:
-						<select class="form-control" id="filterParam" name="filterParam" onchange="populateDropdown()">
-							<option value="State" id="Primary">State</option>
-							<option value="Party" >Party</option>
-							<option value="PC_name" >Constituencies</option>
-						</select>
-					</div>
-					<div class="form-group">
-						<select multiple class="form-control" id="filterValue" name="filterValue">
-							<option value="All Records">All Records</option>
-						</select>
-					</div>
-					<div class=form-group>
-						Choose only Winners:
-						<select id="onlyWinners" class="form-control" name="onlyWinners">
-							<option value="false">No</option>
-							<option value="true">Yes</option>
-						</select>
-					</div>
-					<div class=form-group>
-						Sort Order:
-						<select id="comparatorType" class="form-control" name="comparatorType">
-							<option value="confidence">By Confidence</option>
-							<option value="alphabetical">Alphabetical</option>
-						</select>
-					</div>
-				<div class="modal-footer">
-					<button type="submit" onclick="saveFilterSettings()" id="settingsSubmit" class="btn btn-default" style="margin:0 auto; display:table;">Submit</button>
-	      		</div>
-   		</form>
-    </div>
-  </div>
-</div>
-</div>
-</div>
-<div>
-	<form method="post">
-		<nav class="navbar navbar-default navbar-fixed-top">
-			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-					<span class="logo" style="font-size:30px">Surf</span>
-				</div>
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<input type="submit" class="btn btn-default navbar-btn navbar-right" name="submit" value="Save" id="saveButton" onclick="$('#loading').fadeIn()"/>
-				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Force Merge" id="forceMergeButton"/>
-				<button type="button" onclick="loadFilterSettings()" style="margin-right:0.9em; height:35px;"class= "btn btn-default navbar-btn navbar-right" data-toggle="modal" data-target="#filterModal">
-						<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-						Settings
-				</button>
-				<input type="submit" style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" name="submit" value="Reset" id="resetButton" onclick="return resetButtonPressed()"/>
-				<!adding search bar>
-				<div class="col-sm-3 col-md-3 pull-right">
-						<div class="input-group">
-							<input type="text" style="margin-right:0em; cursor:auto; height:35px;" class="form-control btn btn-default navbar-btn navbar-right" placeholder="Search Name..." name="searchValue" id="searchValue">
-							<span class="input-group-btn">
-								<button style="margin-right:0.9em; height:35px;" class="btn btn-default navbar-btn navbar-right" type="button" id="searchButton"><i class="glyphicon glyphicon-search"></i></button>
-							</span>
-						</div>
-				</div>
-				<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
-					<ul class="nav navbar-nav">
-						<ol class="breadcrumb">
-						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterParamNav %></a></li>
-						  <li><a data-toggle="modal" data-target="#filterModal"><%= filterValueNav %></a></li>
-						</ol>
-						<li><div class="navbar-text"><%= progressData[3] %> Groups</div></li>
-						<li><div class="navbar-text"><%= progressData[1] %> Records</div></li>
-						<li><div class="navbar-text"><%= progressData[4] %> Records Reviewed</div></li>
-						<li><div class="navbar-text"><%= userName%></div></li>
-<!-- 						<li><div class="navbar-text" id="test">Howdy</div></li> -->
-					</ul>
-				</div>
-				<div style="width: 100%; height: 100%">
-				<table class="nav nav-pills nav-stacked table-header">
-					<thead>
-					<tr class="table-row">
-						<th class="cell-table table-cell-merge">Merge</th>
-						<th class="cell-table table-cell-name">Name</th>
-						<th class="cell-table table-cell-sex">Sex</th>
-						<th class="cell-table table-cell-year">Year</th>
-						<th class="cell-table table-cell-constituency">Constituency</th>
-						<th class="cell-table table-cell-party">Party</th>
-						<th class="cell-table table-cell-state">State</th>
-						<th class="cell-table table-cell-position">Position</th>
-						<th class="cell-table table-cell-votes">Votes</th>
-						<!-- <th class="cell-table">ID</th>
-                        <th>Person ID</th> -->
-						<th class="cell-table table-cell-comments">Comments</th>
-						<th class="cell-table table-cell-unmerge">Unmerge</th>
-						<th class="cell-table table-cell-done">Done</th>
-					</tr>
-					</thead>
-				</table>
-				</div>
-				<!-- /.navbar-collapse -->
-			</div><!-- /.container-fluid -->
-		</nav>
-
-
-		<div>
-			<div class="table-div table-responsive" id="table-container">
-				<table class="table">
-					<tbody class="inside-table" id="table-body">
 <%
-							
-    //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
-							
-	boolean newGroup=false, newPerson=false;
-	int gid = 0;
-	for(Multimap<String, Row> group:groupsList){
-		newGroup=true;
-		//TRYING TO SORT data based on constituency and then year
-		final Multimap<String, Row> groupFinal = group;
-		List<String> keyList = new ArrayList<String>(group.keySet());
-		if(((String)session.getAttribute("algorithm")).equals("search")){
-		    //Do nothing
-		}else{
-			keyList.sort(new Comparator<String>() {
-				@Override
-				public int compare(String s1, String s2) {
-					int result = groupFinal.get(s1).iterator().next().get("PC_name").toLowerCase().compareTo(
-							groupFinal.get(s2).iterator().next().get("PC_name").toLowerCase());
-					return result==0 ? (groupFinal.get(s1).iterator().next().get("Year").toLowerCase().compareTo(
-							groupFinal.get(s2).iterator().next().get("Year").toLowerCase())):result;
-				}
-			});
-		}
+    int currentPage = 1;
+    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
+    MergeManager.View view = (MergeManager.View) session.getAttribute("view");
+    if (view == null) {
+        out.println ("Sorry, no view has been set up in the session");
+        return;
+    }
+    List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
 
+    int numPages = (int) Math.ceil(((double) groupsToShow.size()) / Config.groupsPerPage);
 
-		//TILL HERE
-		for(String key:keyList){
-			newPerson=true;
-			for(Row row:group.get(key)){
-				String tableData = "";
-				String rowStyleData;
-				String unMerge;
-				String rowCompletionColor;
-				boolean isChildPerson = false;
-				if(mergeManager.isMappedToAnother(row.get("ID"))){
-					tableData = "<mapped dummy tag>";
-					isChildPerson = true;
-				} 
-				/*else {
-					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("ID")+"\"/>";
-					pageContext.setAttribute("tableData","");	//same as above; used ny jstl
-				}*/
-				
-				if(group.get(key).size()>1){
-					unMerge = "<input type=\"checkbox\" class=\"checkBox\" name=\"demerges\" value=\""+row.get("ID")+"\"/>";
-				}else{
-					unMerge = "";
-				}
-				
-				if(row.get("is_done").equals("yes")){
-					rowCompletionColor = "row-done";
-				}else{
-					rowCompletionColor = "row-not-done";
-				}
-				
-				if(newGroup==true){
-					gid++;
-					String groupId = "name=\"g"+gid+"\"";
-					String groupValue = "g"+gid;
-					newGroup=false;
-					newPerson=false;
-					rowStyleData = "class=\"table-row-new-person trow\"";
-					pageContext.setAttribute("groupId",groupId);
-					pageContext.setAttribute("groupValue",groupValue);
-					//IF NEW GROUP, CREATE A HEADER FOR THE ROWS
-					%>
-						<tr <%=rowStyleData %>>
-							<td colspan="7">
-								<button type="button" ${groupId} id="merge-all" onclick="selectAllRowsInGroupForMerge('${groupValue}')" >Select and merge all</button>
-							</td>
-							<td colspan="5">
-								<button style="float:right;" type="button" ${groupId} id="done-all" onclick="selectAllRowsInGroupForDone('${groupValue}')">Mark as Done</button>
-								<button style="float: right; margin-right: 10px" type="button" ${groupId} id="done-all-uptill" onclick="selectUpTillHereForDone('${groupValue}')">Merge all groups above</button>
-							</td>
-						</tr>
-					<%
-					rowStyleData = "class=\"table-row-same-person trow " + rowCompletionColor + " \"";
-					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("mapped_ID")+"\"/>";
-					isChildPerson = false;
-				}
-				else if(newPerson==true){
-					newPerson=false;
-					rowStyleData = "class=\"table-row-same-person trow "+rowCompletionColor+" \"";
-					tableData = "<input type=\"checkbox\" name=\"row\" value=\""+row.get("mapped_ID")+"\"/>";
-					isChildPerson = false;
-				}
-				else{rowStyleData = "class=\""+rowCompletionColor+" \""; isChildPerson=true;}
-				pageContext.setAttribute("isChildPerson",isChildPerson);	//needed for jstl later on
-				String hoverText = "ID: " + row.get("ID") + " Person ID: " + row.get("mapped_ID");
-				hoverText += " Canonical: " + Util.escapeHTML(row.get ("cname"));
-				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("tname"));
-				hoverText += " Sorted: " + Util.escapeHTML(row.get ("stname"));
-				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
-			%>
-
-			<tr <%=rowStyleData %> ${groupId} title="<%=hoverText%>" id=<%=row.get("ID")%> data-personid="<%=row.get("mapped_ID")%>">
-				<td class="cell-table mergeCol table-cell-merge"><%=tableData %></td>
-				<td class="cell-table table-cell-name">
-					<a href="http://www.google.com/search?q=<%=row.get("Name").replace(" ","+")+"+"+row.get("PC_name").replace(" ","+")+"+"+row.get("Year")%>" target="_blank">
-						<%=row.get("Name")%>
-					</a>
-				</td>
-				<td class="cell-table table-cell-sex">
-					<%=Util.escapeHTML(row.get("Sex"))%>
-				</td>
-				<td class="cell-table table-cell-year">
-					<%=Util.escapeHTML(row.get("Year"))%>
-				</td>
-				<td class="cell-table table-cell-constituency">
-					<a href="https://www.google.co.in/maps/place/<%=row.get("PC_name").replace(" ","+")+","+row.get("State").replace("_","+")%>" target="_blank">
-						<span title="<%=pcInfo%>"%><%=Util.escapeHTML(row.get("PC_name"))%></span>
-					</a>
-				</td>
-				<td class="cell-table table-cell-party">
-					<%=Util.escapeHTML(row.get("Party"))%>
-				</td>
-				<td class="cell-table table-cell-state">
-					<%=Util.escapeHTML(row.get("State"))%>
-				</td>
-				<td class="cell-table table-cell-position">
-					<%=Util.escapeHTML(row.get("Position"))%>
-				</td>
-				<td class="cell-table table-cell-votes">
-					<%=Util.escapeHTML(row.get("Votes1"))%>
-				</td>
-
-				<%-- <td class="cell-table">
-					<%=row.get("ID")%>
-				</td>
-				<td class="cell-table">
-					<%=row.get("mapped_ID")%>
-				</td> --%>
-
-
-				
-				<%-- <c:set var="tableData" scope="page" value="lolo"></c:set> --%>
-				<c:choose>
-					<c:when test="${isChildPerson eq true }">
-						<td class="cell-table table-cell-comments" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
-						</td>
-						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
-						<td class="cell-table table-cell-done"></td>
-					</c:when>
-					<c:otherwise>
-						<td class="cell-table table-cell-comments" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=row.get("ID")%>')">
-							<div class="comment-box"><div style="padding:0.3em"><%=row.get("comments")%></div></div>
-						</td>
-						<td class="cell-table unmerge-col table-cell-unmerge"><%=unMerge%></td>
-						<c:out value="${tableData}"></c:out>
-						<td class="cell-table table-cell-done">
-							<%
-								String selected = row.get("is_done");
-								String selectedHTML;
-								if(selected==null||selected.equals("no")){
-									selectedHTML="";
-								}
-								else if(selected.equals("yes")){
-									selectedHTML="checked=\"checked\"";
-								}
-								else{
-									selectedHTML="";
-								}
-							%>
-							<input type="checkbox" id="isDone-<%=row.get("ID")%>" onclick="createNameParameter('<%=row.get("ID")%>')" <%=selectedHTML%>>
-						</input>
-						</td>
-					</c:otherwise>
-				</c:choose>
-			</tr>
-			
-			<%
-		}
-	}
-}
-
-
+    String description = view.description();
 
 %>
 
-</tbody>
+
+<!-- Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Filter and Sort</h4>
+            </div>
+            <div class="modal-body">
+                <div class="filterForm">
+                    <input type="hidden" name="filterOnly"/>
+                    <%@include file="filter-controls.jspf" %>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-default filter-submit-button" style="margin:0 auto; display:table;">OK</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="top-bar">
+        <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
+
+        <div style="display:inline-block;margin-top:5px;margin-left:30px"><%=Util.escapeHTML(description).replaceAll ("\n", "<br/>\n")%></div>
+
+        <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
+            <button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button>
+            <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span>
+            <button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button>
+            <button class="btn btn-default" type="button">Help</button>
+        </div>
+    </div>
+
+        <!-- main table starts here -->
+        <table class="table-header" style="border-collapse: collapse">
+            <thead>
+            <tr class="table-row">
+                <th class="cell-table"></th>
+                <th class="cell-table">Name</th>
+                <th class="cell-table">Constituency</th>
+                <% for (String col: Config.supplementaryColumns) { %>
+                    <th class="cell-table"><%=col%></th>
+                <% } %>
+<!--                <th class="cell-table ">Comments</th> -->
+            </tr>
+            </thead>
+<%
+							
+    //MAKES THE CSS FOR DISPLAYING RECORDS AS GROUPS
+	boolean firstGroup = true;
+	int startGid = (currentPage-1) * Config.groupsPerPage; // the currentPage as shown to the user in the URL and the bottom nav always starts from 1, not 0. so we adjust for it.
+	int endGid = Math.min (((currentPage) * Config.groupsPerPage), groupsToShow.size()); // endgid is not inclusive
+
+    // we'll show groups from startGid to endGid
+	for (int gid = startGid; gid < endGid; gid++) {
+        List<List<Row>> groupRows = groupsToShow.get(gid);
+        // render a group of records in a tbody (tables can have multiple tbody's)
+
+        %>
+        <tbody data-groupId="<%=gid%>" class="inside-table" id="table-body">
+        <tr class="toolbar-row">
+            <td colspan="20"> <!-- 20 just to be safe -- we just want it at extreme right -->
+                <button data-groupId="<%=gid%>" class="select-button" type="button" id="select-all" >Select all</button>
+                <button data-groupId="<%=gid%>" class="reviewed-button" type="button" id="done-all">Mark as reviewed</button>
+
+                <% if (!firstGroup) { // don't show "till above" buttons for first group %>
+
+                    <button data-groupId="<%=gid%>" class="reviewed-till-here-button" style="float: right; margin-right: 10px" type="button">Mark reviewed till here</button>
+                    <button data-groupId="<%=gid%>" class="select-till-here-button" style="float: right; margin-right: 10px" type="button">Select till here</button>
+                <% } %>
+
+            </td>
+        </tr>
+
+        <%
+        for (List<Row> rowsForThisId: groupRows) {
+            // print out all rows for this id.
+
+		    for (int i = 0; i < rowsForThisId.size(); i++) {
+                boolean firstRowForThisId = (i == 0), lastRowForThisid = (i == rowsForThisId.size() - 1);
+                Row row = rowsForThisId.get(i);
+				String mergeCheckboxHTML = "";
+                // the first row of this id will always have a checkbox
+				if (firstRowForThisId) { // && groupRows.size() > 1){
+				    // the first row for every id will have a merge checkbox html
+                    mergeCheckboxHTML = "<input data-id=\"" + row.get(Config.ID_FIELD) + "\" type=\"checkbox\" class=\"checkBox select-checkbox\" name=\"row\" value=\"" + row.get(Config.ID_FIELD) + "\"/>";
+				}
+
+				// now print the actual row
+				// compute name and pc hover text
+				String hoverText = "ID: " + row.get(Config.ID_FIELD);
+                hoverText += " Effective: " + Util.escapeHTML(row.get ("st" + Config.MERGE_FIELD));
+				hoverText += " (Indianized: " + Util.escapeHTML(row.get ("c" + Config.MERGE_FIELD));
+				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("t" + Config.MERGE_FIELD)) + ")";
+				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
+				String href = "http://www.google.com/search?q=" + row.get(Config.MERGE_FIELD).replace(" ","+") + "+" + row.get("Constituency").replace(" ","+") + "+" + row.get("Year");
+				String pc_href = "https://www.google.co.in/maps/place/" + row.get("Constituency").replace(" ","+") + "," + row.get("statename").replace("_","+");
+                hoverText = Util.escapeHTML(hoverText);
+                pcInfo = Util.escapeHTML(pcInfo);
+
+				String id = row.get(Config.ID_FIELD);
+				String tr_class = "";
+				if (!lastRowForThisid)
+				    tr_class = "merged-row";
+				if (firstRowForThisId)
+				    tr_class += " first-row-for-id";
+			%>
+
+			<tr class="<%=tr_class%> trow" data-id=<%=id%>>
+
+                <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
+
+				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD))%></a></td>
+				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency"))%></a></td>
+
+                <%  for (String col: Config.supplementaryColumns) { %>
+                    <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>
+                <% } %>
+<!--                <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td> -->
+
+				<td class="cell-table "></td>
+			</tr>
+			
+			<%
+				firstRowForThisId = false;
+			} // end row for this id
+		} // end id
+        firstGroup = false;
+        %>
+        </tbody>
+        <%
+	} // end group
+
+%>
+
 </table>
-</div>
-</div>
-</form>
 
 <div id="page-block">
-	
+
 	<!-- Page Navigation bar here -->
 	<nav aria-label="Page navigation">
   	<ul class="pagination pre-margin">
-  	
-  	<!-- Listing previous page url here-->
-  	<c:if test="${currentPage != 1}">
-	    <li class="page-item" onclick="resetScroll(); $('#loading').fadeIn();">
-		<a class="page-link" href="merge?page=${currentPage - 1}" aria-label="Previous">
-		<span aria-hidden="true">&laquo;</span>
-		<span class="sr-only">Previous</span>
-	 	</a>
-	    </li>
-    </c:if>
-    
+
+    <% if (currentPage > 1) { %>
+        <li class="page-item">
+            <a class="page-link" href="table?page=<%=currentPage-1%>" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="sr-only">Previous</span>
+            </a>
+        </li>
+    <% } %>
+
     <!-- Listing page numbers here -->
-    <c:forEach begin="1" end="${noOfPages}" var="i">
-				<c:choose>
-					<c:when test="${currentPage eq i}">
-						<c:set var="pageIsActive" value="page-item active"></c:set>
-					</c:when>
-					<c:otherwise>
-						<c:set var="pageIsActive" value="page-item"></c:set>
-					</c:otherwise>
-				</c:choose>
-				<li class="${pageIsActive}" onclick="resetScroll(); $('#loading').fadeIn();">
-					<a class="page-link" href="merge?page=${i}">${i}</a>
-				</li>
-	</c:forEach>
-    
-    <!-- Listing next page url here -->
-    
-    <c:if test="${currentPage lt noOfPages}">
-				<li class="page-item" onclick="resetScroll(); $('#loading').fadeIn()">
-      			<a class="page-link" href="merge?page=${currentPage + 1}" aria-label="Next">
-        		<span aria-hidden="true">&raquo;</span>
-        		<span class="sr-only">Next</span>
-      			</a>
-    			</li>
-	</c:if>
-    
-    
+    <% for (int i = 1 ; i <= numPages; i++) {
+            String pageClass = (currentPage == i) ? "page-item active" : "page-item"; %>
+            <li class="<%=pageClass%>">
+                <a class="page-link" href="table?page=<%=(i)%>"><%=i%></a>
+            </li>
+    <% } %>
+
+    <% if (currentPage < numPages) { %>
+        <li class="page-item">
+            <a class="page-link" href="table?page=<%=currentPage+1%>" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+                <span class="sr-only">Next</span>
+            </a>
+        </li>
+    <% } %>
+
   </ul>
 </nav>
 
 </div>
-</div>
 
-<script type="text/javascript">
-
-
-
-//CONSTRUCTS MAPS FROM FILTER PARAMETERS TO FILTER VALUES
-
-<% String[] filterParams = {"State", "PC_name", "Party"}; //Enter new parameters here
-
-Map<String,Set<String>> filterData = mergeManager.getAttributesDataSet(filterParams);%>
-
-var filterDataValues = {};
-<% for(int i = 0; i<filterParams.length; i++){ %>
-	filterDataValues["<%=filterParams[i]%>"] = new Array();
-<%}%>
-
-<%
-for(String key : filterData.keySet()){
-	for(String value:filterData.get(key)){
-		%>
-		filterDataValues["<%=key%>"].push("<%=value%>");
-		<%
-	}
-	
-}
-%>
-
-
-var values = new Array();
-
-//SETS DEFAULT FOR FILTERVALUE
-
-var filterValue = document.getElementById("filterValue");
-values = filterDataValues["State"]; //Default
-values.sort();
-for(var i = 0; i < values.length; i++) {
-	var opt = values[i];
-	var el = document.createElement("option");
-	el.textContent = opt;
-	el.value = opt;
-	filterValue.appendChild(el);
-};
-
-</script>
-
-<script type="application/javascript">
-//CREATE VARIABLES TO BE USED AS LOADING VARIABLES
-var filterVariables = new Array();
-filterVariables[0]=('${algorithm}')
-filterVariables[1]=null
-filterVariables[2]=('${onlyWinners}')
-filterVariables[3]=(<%=(session.getAttribute("algo-arg").equals(""))?"\'\'":"'"+(String)session.getAttribute("algo-arg")+"'"%>);
-filterVariables[4]=('${comparatorType}')
-filterVariables[5]='${filterParam}'
-
-</script>
-
-<!-- //SCRIPT FOR HOVER POP OVER
 <script>
-$(document).ready(function(){
-    $('[data-toggle="popover"]').popover();   
-});
-</script> -->
+    $(document).ready(function() { $('#loading').hide();});
+    function select_all_handler (e) {
+        var text1 = 'Select all', text2 = 'Unselect all';
 
+        var $target = $(e.target);
+        var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
+        if ($target.text() == text1) {
+            $('input.select-checkbox', $group).prop('checked', true); // set all checkboxes to true
+            $target.text(text2);
+        } else {
+            $('input.select-checkbox', $group).prop('checked', false); // set all checkboxes to true
+            $target.text(text1);
+        }
+    }
+
+    function group_reviewed_handler (e) {
+        var $target = $(e.target);
+        var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
+        $group.toggleClass ('reviewed'); // set all checkboxes to true
+        if ($target.text() == 'Mark as reviewed') {
+            $target.text('Mark as unreviewed');
+        } else {
+            $target.text('Mark as reviewed');
+        }
+    }
+
+    function select_till_here_handler (e) {
+        var $target = $(e.target);
+        var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
+        var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
+        $('input.select-checkbox', $groups).prop('checked', true);
+        $('input.select-checkbox', $group).prop('checked', true);
+    }
+
+    function reviewed_till_here_handler (e) {
+        var text1 = 'Mark reviewed till here', text2 = 'Mark unreviewed till here';
+
+        var $target = $(e.target);
+        var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
+        var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
+
+        // remember to set each group's button. if we're marking a group as reviewed, then it's .reviewed-button should provide the opposite option, i.e. to unreview
+        if ($target.text() == text1) {
+            $group.addClass('reviewed');
+            $('.reviewed-button', $group).text ('Mark as unreviewed');
+            $groups.addClass('reviewed');
+            $('.reviewed-button', $groups).text ('Mark as unreviewed');
+            $target.text(text2);
+        } else {
+            $group.removeClass('reviewed');
+            $('.reviewed-button', $group).text ('Mark as reviewed');
+            $groups.removeClass('reviewed');
+            $('.reviewed-button', $groups).text ('Mark as reviewed');
+            $target.text(text1);
+        }
+    }
+
+    function save_handler (e) {
+        var op = ($(e.target).hasClass('merge-button')) ? 'merge' : 'unmerge';
+        var $spinner = ($(e.target).hasClass('merge-button')) ? $('.merge-spinner') : $('.unmerge-spinner');
+
+        $groups = $('tbody'); // find the nearest tbody, which corresponds to a group
+        var commands = [];
+        var across_groups =  $('.across-groups').is(':checked');
+
+        if (across_groups || op === 'unmerge') {
+            // if across_groups there will be a single command, merging all the id's regardless of group
+            // if unmerge also, there will be a single command with all the ids to be broken up
+            var command = {op:op, groupId: 'none', ids: []}; // if merging across groups, groupId doesn't matter.
+            $checked = $('input.select-checkbox:checked'); // gather checked checkboxes anywhere on the page
+            for (var j = 0; j < $checked.length; j++) {
+                command.ids.push($($checked[j]).attr('data-id'));
+            }
+            commands[0] = command;
+            $('.across-groups').prop ('checked', false); // deliberately set it to false immediately after, we're worried about accidental merges across groups. across-groups should be the exception rather than the rule.
+        } else {
+            for (var i = 0; i < $groups.length; i++) {
+                var $group = $($groups[i]);
+                var commandForThisGroup = {op: op, groupId: $group.attr('data-groupId'), ids: []}; // groupId is not directly used but we keep it anyway for future use
+
+                $checked = $('input.select-checkbox:checked', $group);
+                if ($checked.length < 2)
+                    continue; // no id, or 1 id checked, in either case it doesn't matter.
+
+                for (var j = 0; j < $checked.length; j++) {
+                    commandForThisGroup.ids.push($($checked[j]).attr('data-id'));
+                }
+                commands.push(commandForThisGroup);
+            }
+        }
+
+        var post_data = {json: JSON.stringify(commands)};
+
+        $spinner.fadeIn();
+
+        $.ajax ({
+                type: 'POST',
+                url: 'ajax/do-commands',
+                datatype: 'json',
+                data: post_data,
+                success: function() {
+                    $spinner.fadeOut();
+                    if (o && o.status == 0) {
+                        // could perhaps display a toast here
+                    } else {
+                        alert('Save failed!');
+                    }
+                },
+            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: save failed! ' + textStatus + ' ' + jqXHR.responseText);}
+        });
+    }
+
+    function filter_submit_handler (e) {
+        var post_data = {
+            filterOnly: true,
+            filterSpec: $('#filterSpec').val(),
+            sortOrder: $('#sortOrder').val(),
+            groupViewControlSpec: $('#groupViewControlSpec').val(),
+            rowViewControlSpec: $('#rowViewControlSpec').val()
+        };
+
+        var $spinner = $('.filter-spinner');
+        $spinner.fadeIn();
+
+        $.ajax ({
+            type: 'POST',
+            url: 'ajax/run-merge',
+            datatype: 'json',
+            data: post_data,
+            success: function(o) {
+                $spinner.fadeOut();
+                if (o && o.status == 0) {
+                    // could perhaps display a toast here
+                } else {
+                    alert('Filter failed!');
+                }
+                window.location = 'table?page=1';
+            },
+            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: filter failed! ' + textStatus + ' ' + jqXHR.responseText);}
+        });
+    }
+
+    /* make it so that clicking anywhere in the row gets the corresponding id checkbox selected */
+    $('.trow').click (function(e) {
+        $row = $(e.target).closest('.trow');
+        if ($(e.target).is('a')) {
+            // return for links, we don't want to interfere with that
+            return;
+        }
+
+        if ($row.hasClass('first-row-for-id'))
+            $row_with_checkbox = $row;
+        else
+            $row_with_checkbox = $($row.siblings('.first-row-for-id')[0]);
+        $checkbox = $('input.select-checkbox', $row_with_checkbox);
+        $checkbox.prop('checked', !$checkbox.prop ('checked'));
+        e.stopPropagation();
+        return false;
+    });
+
+    $('.select-button').click (select_all_handler);
+    $('.reviewed-button').click (group_reviewed_handler);
+    $('.select-till-here-button').click (select_till_here_handler);
+    $('.reviewed-till-here-button').click (reviewed_till_here_handler);
+    $('.merge-button').click (save_handler);
+    $('.unmerge-button').click (save_handler);
+    $('.filter-button').click (function() { $('#filterModal').modal();});
+    $('.filter-submit-button').click (filter_submit_handler);
+
+</script>
 </body>
 </html>

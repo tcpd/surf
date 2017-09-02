@@ -2001,45 +2001,6 @@ div.search-tips:last-of-type p {
     width: 100%;
     margin: 20px 0; }
 
-.checkbox-wraper label {
-  cursor: pointer; }
-
-input[type="checkbox"] + .label-text:before,
-input[type="radio"] + .text-radio:before,
-.multi-select .dropdown-menu ul li a:before {
-  font-family: "fontAwesome";
-  speak: none;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: normal;
-  text-transform: none;
-  line-height: 0.8;
-  margin-right: 5px;
-  width: 1em;
-  display: inline-block;
-  -webkit-font-smoothing: antialiased;
-  color: #ccc;
-  background-color: #fff;
-  width: 13px;
-  height: 13px;
-  font-size: 17px; }
-
-input[type="checkbox"] {
-  display: none; }
-  input[type="checkbox"] + .label-text:before {
-    content: "\f096"; }
-  input[type="checkbox"]:checked + .label-text:before {
-    content: "\f14a";
-    color: #0175bc; }
-
-input[type="radio"] {
-  display: none; }
-  input[type="radio"] + .text-radio:before {
-    content: "\f1db"; }
-  input[type="radio"]:checked + .text-radio:before {
-    content: "\f192";
-    color: #0175bc; }
-
 .multi-select .dropdown-menu ul li a:before {
   content: "\f096"; }
 .multi-select .dropdown-menu ul li.selected a:before {

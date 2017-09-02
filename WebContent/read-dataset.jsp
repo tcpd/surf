@@ -40,10 +40,10 @@
                     else if (sampleRow.getAllFieldNames().contains("Cand"))
                         dataset.registerColumnAlias("Cand", "Name");
 
-                    if (sampleRow.getAllFieldNames().contains("AC_name"))
-                        dataset.registerColumnAlias("AC_name", "Constituency");
-                    else if (sampleRow.getAllFieldNames().contains("PC_name"))
-                        dataset.registerColumnAlias("PC_name", "Constituency");
+                    if (sampleRow.getAllFieldNames().contains("acname"))
+                        dataset.registerColumnAlias("acname", "Constituency");
+                    else if (sampleRow.getAllFieldNames().contains("pcname"))
+                        dataset.registerColumnAlias("pcname", "Constituency");
 
                     if (sampleRow.getAllFieldNames().contains("Votes1"))
                         dataset.registerColumnAlias("Votes1", "Votes");

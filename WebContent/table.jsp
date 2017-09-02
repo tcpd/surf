@@ -375,10 +375,11 @@ import="java.util.*"
         });
     }
 
+    /* make it so that clicking anywhere in the row gets the corresponding id checkbox selected */
     $('.trow').click (function(e) {
         $row = $(e.target).closest('.trow');
         if ($(e.target).is('a')) {
-            alert ('returning ' + e.target);
+            // return for links, we don't want to interfere with that
             return;
         }
 

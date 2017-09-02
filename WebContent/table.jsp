@@ -63,20 +63,8 @@ import="java.util.*"
             <div class="modal-body">
                 <div class="filterForm">
                     <input type="hidden" name="filterOnly"/>
-                    <div class=form-group>
-                        <label for="filterSpec">Filter</label>
-                        <input id="filterSpec" name="filterSpec" type="text" class="filterSpec form-control">
-                        <span style="font-size:90%;color:gray">Example: Position=1,2,3;Sex=M;Cand1=/GANDHI/</span>
-                    </div>
+                    <%@include file="filter-controls.jspf" %>
 
-                    <div class="form-group">
-                        <label for="sortOrder">Sort order for groups</label>
-                        <select class="form-control selectpicker sortOrder" id="sortOrder" name="sortOrder">
-                            <option value="stringLength">Long strings first</option>
-                            <option value="groupSize">Largest group first</option>
-                            <option value="approxAlpha">Approximately alphabetical</option>
-                        </select>
-                    </div>
                     <div class="modal-footer">
                         <button class="btn btn-default filter-submit-button" style="margin:0 auto; display:table;">OK</button>
                     </div>
@@ -165,7 +153,7 @@ import="java.util.*"
 				hoverText += " (Indianized: " + Util.escapeHTML(row.get ("c" + Config.MERGE_FIELD));
 				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("t" + Config.MERGE_FIELD)) + ")";
 				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
-				String href = "http://www.google.com/search?q=" + row.get("Name").replace(" ","+") + "+" + row.get("PC_name").replace(" ","+") + "+" + row.get("Year");
+				String href = "http://www.google.com/search?q=" + row.get(Config.MERGE_FIELD).replace(" ","+") + "+" + row.get("acname").replace(" ","+") + "+" + row.get("Year");
 				String pc_href = "https://www.google.co.in/maps/place/" + row.get("acname").replace(" ","+") + "," + row.get("statename").replace("_","+");
                 hoverText = Util.escapeHTML(hoverText);
                 pcInfo = Util.escapeHTML(pcInfo);
@@ -358,7 +346,13 @@ import="java.util.*"
     }
 
     function filter_submit_handler (e) {
-        var post_data = {filterOnly: true, filterSpec: $('.filterSpec').val(), sortOrder: $('#sortOrder').val()};
+        var post_data = {
+            filterOnly: true,
+            filterSpec: $('#filterSpec').val(),
+            sortOrder: $('#sortOrder').val(),
+            groupViewControlSpec: $('#groupViewControlSpec').val(),
+            rowViewControlSpec: $('#rowViewControlSpec').val()
+        };
 
         var $spinner = $('.filter-spinner');
         $spinner.fadeIn();

@@ -49,7 +49,7 @@
 
     <div class="form-group">
         <label for="splitColumn">Further split by column (optional)</label>
-        <select class="form-control selectpicker" id="splitColumn" name="splitColumn">
+        <select  class="form-control selectpicker" id="splitColumn" name="splitColumn">
             <option value="">None</option>
             <%
                 for (String col: dataset.getColumnNames()) {
@@ -61,25 +61,16 @@
         </select>
     </div>
 
-    <div class=form-group>
-        <label for="filterSpec">Filter</label>
-        <input id="filterSpec" name="filterSpec" type="text" class="form-control">
-        <span style="font-size:90%;color:gray">Example: Position=1,2,3;Sex=M;Cand1=/GANDHI/</span>
-    </div>
+    <hr/>
 
-    <div class="form-group">
-        <label for="sortOrder">Sort order for groups</label>
-        <select class="form-control selectpicker" id="sortOrder" name="sortOrder">
-            <option value="stringLength">Long strings first</option>
-            <option value="groupSize">Largest group first</option>
-            <option value="approxAlpha">Approximately alphabetical</option>
-        </select>
-    </div>
-
+    <%@include file="filter-controls.jspf" %>
 	<div class="submit-button">
         <button type="submit" class="btn btn-default run-button">Run algorithm <i style="display:none" class="spinner fa fa-spin fa-spinner"></i></button>
 </div>
 <script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
     /** collects all input fields on the page, and makes an object out of them with the field names as property names */
     var collect_input_fields = function() {
         var result = {};

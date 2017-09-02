@@ -2,6 +2,7 @@ package in.edu.ashoka.surf;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -11,18 +12,49 @@ import in.edu.ashoka.surf.util.UnionFindSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import static in.edu.ashoka.surf.MergeManager.RowViewControl.IDS_MATCHING_FILTER;
+import static in.edu.ashoka.surf.MergeManager.RowViewControl.ROWS_MATCHING_FILTER;
+
 /** class that takes care of running a merging algorithm and then manual merges to it.
  * Important: these functions should not depend on a web-based frontend. This class should have no dependency on servlets. */
 public class MergeManager {
     public static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
 
+    /** we first decide which groups to show. This determination is independent of which rows are shown. This does not take filter into account, only the algorithmically merged groups */
+    public enum GroupViewControl {
+        ALL_GROUPS, /* this will show all groups, including singleton rows */
+        GROUPS_WITH_TWO_OR_MORE_IDS, /* show all rows in a group, under which any row matches filter */
+        GROUPS_WITH_TWO_OR_MORE_ROWS
+    } /* this will show a group even if it only has 1 id, but multiple rows for that id. useful to see all id's that have been merged */
+
+    /* Next, a filter is applied to rows in the groups selected for showing. */
+    public enum RowViewControl {
+        ALL_ROWS, /* this will show a group even if it only has 1 id, but multiple rows for that id */
+        IDS_MATCHING_FILTER, /* if an Id has at least 1 row matching the filter, show all rows for that id */
+        ROWS_MATCHING_FILTER /* Only show rows that directly match a filter */
+    }
+
     /** a view is a filtered and sorted view on top of this mergemanager's results */
     public class View {
+
         public final List<List<List<Row>>> viewGroups; // these are the groups
         public final String filterSpec, sortOrder;
         private int nIds, nRowsInGroups;
 
-        public View (String filterSpec, String sortOrder, List<List<List<Row>>> viewGroups) {
+        // there are controls with respect to filter
+        public GroupViewControl groupFilter;
+
+        // controls with respect to algorithm's grouping. which groups to show?
+        public RowViewControl rowFilter;
+
+        // both controls above have to be satisfied
+        // use cases:
+        // 1) see all rows in dataset, including singletons, sorted alphabetically: showOnlyRowsThatMatch (with empty filter), showAllGroups
+        // 2) see all rows in dataset that match a search term: showOnlyRowsThatMatch with filter spec, showAllGroups.
+        // 3) see all Ids in dataset that match a search term: showIdsWithAnyRowMatch with filter spec, showAllGroups.
+        // 4) See groups with merged all merges that have been performed: showGroupsWithAnyRowMatch (with empty filter) showGroupsWithAtLeast2Rows
+
+        private View (String filterSpec, GroupViewControl groupFilter, RowViewControl rowFilter, String sortOrder, List<List<List<Row>>> viewGroups) {
             this.filterSpec = filterSpec;
             this.sortOrder = sortOrder;
             this.viewGroups = viewGroups;
@@ -37,6 +69,9 @@ public class MergeManager {
                     }
             }
             nIds = idsSeen.size();
+
+            this.groupFilter = groupFilter;
+            this.rowFilter = rowFilter;
         }
 
         public String description() {
@@ -97,8 +132,7 @@ public class MergeManager {
                 public String toString() { return "Dummy merge"; }
             };
         } else if (algo.equals("compatibleNames")) {
-            CompatibleNameAlgorithm cnm = new CompatibleNameAlgorithm(d, Config.MERGE_FIELD);
-            algorithm = cnm;
+            algorithm = new CompatibleNameAlgorithm(d, Config.MERGE_FIELD);
         }
 
         // this is where the groups are generated
@@ -111,7 +145,7 @@ public class MergeManager {
     }
 
     /** will split groups into new groups based on the split column */
-    public void splitByColumn (String splitColumn) {
+    private void splitByColumn (String splitColumn) {
         // further split by split column if specified
         if (Util.nullOrEmpty(splitColumn))
             return;
@@ -128,7 +162,7 @@ public class MergeManager {
 
     /** updates groups based on id's as well as existing groups.
      * MUST be called after id's are changed */
-    public void updateMergesBasedOnIds() {
+    void updateMergesBasedOnIds() {
         Timers.unionFindTimer.reset();
         Timers.unionFindTimer.start();
 
@@ -191,6 +225,7 @@ public class MergeManager {
                 for (String id : command.ids) {
                     Collection<Row> rowsForThisId = idToRows.get(id);
                     for (Row row : rowsForThisId) {
+                        // TODO
                         // break the cluster, give each of these rows a new id, and put them in a new cluster in groups
                     }
                 }
@@ -200,13 +235,17 @@ public class MergeManager {
         d.save();
     }
 
-    public View getView (String filterSpec, String sortOrder) {
-        List<List<List<Row>>> postFilterGroups = applyFilter(new Filter(filterSpec));
+    public View getView (String filterSpec, GroupViewControl groupFilter, RowViewControl rowFilter, String sortOrder) {
+        List<List<List<Row>>> postFilterGroups = applyFilter(new Filter(filterSpec), groupFilter, rowFilter);
         Comparator<List<List<Row>>> comparator = GroupOrdering.getComparator (sortOrder);
-        Collections.sort (postFilterGroups, comparator);
-        View view = new View(filterSpec, sortOrder, postFilterGroups);
+        postFilterGroups.sort (comparator);
+        View view = new View(filterSpec, groupFilter, rowFilter, sortOrder, postFilterGroups);
         this.lastView = view;
         return view;
+    }
+
+    View getView (String filterSpec, String groupViewControlSpec, String rowViewControlSpec, String sortOrder) {
+        return getView (filterSpec, GroupViewControl.valueOf(groupViewControlSpec), RowViewControl.valueOf(rowViewControlSpec), sortOrder);
     }
 
     /** returns a collection of groups after filtering groups by the given filter.
@@ -216,41 +255,48 @@ public class MergeManager {
 	 * one row is only in one group, i.e. it can't belong to multiple groups.
 	 * and all rows belonging to an id are also in the same group.
 	 * (this should be satisfied if the inputGroupsList has been generated by a Union-Find set. */
-	public List<List<List<Row>>> applyFilter (Filter filter) {
+	private List<List<List<Row>>> applyFilter (Filter filter, GroupViewControl gvc, RowViewControl rvc) {
 
 		List<List<List<Row>>> result = new ArrayList<>();
 
 		for (Collection<Row> rowCollection: groups) {
-			List<Row> group = new ArrayList<>(rowCollection); // convert collection to list
+            List<Row> group = new ArrayList<>(rowCollection); // convert collection to list
 
-			// will this group be shown? yes, if ANY of the rows in this group matches the filter. otherwise move on to the next group.
-			{
-				long nRowsPassingFilter = group.stream().filter(r -> filter.passes(r)).limit(1).count(); // limit(1) to ensure early out at finding the first row passing the filter
-				if (nRowsPassingFilter == 0)
-					continue;
-			}
+            // will this group be shown? yes, if ANY of the rows in this group matches the filter. otherwise move on to the next group.
+            {
+                boolean groupWillBeShown = true;
+                switch (gvc) {
+                    case GROUPS_WITH_TWO_OR_MORE_ROWS:
+                        groupWillBeShown = group.stream().filter(filter::passes).limit(2).count() >= 2; // limit(2) to ensure early out at finding the first row passing the filter
+                        break;
+                    case GROUPS_WITH_TWO_OR_MORE_IDS:
+                        Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
+                        groupWillBeShown = (idsInGroup.size() >= 2);
+                        break;
+                }
+
+                if (!groupWillBeShown)
+                    continue;
+            }
 
 			// ok, this group is to be shown. sort the rows in this group data based on sortColumns
 			{
 				String[] sortColumns = new String[]{"PC_name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
 
-				Comparator c = new Comparator<Row>() {
-					@Override
-					public int compare(Row r1, Row r2) {
-						for (String col : sortColumns) {
-							int result = r1.get(col).toLowerCase().compareTo(r2.get(col).toLowerCase());
-							if (result != 0)
-								return result;
-						}
-						return 0;
-					}
-				};
+				Comparator c = (Comparator<Row>) (r1, r2) -> {
+                    for (String col : sortColumns) {
+                        int result1 = r1.get(col).toLowerCase().compareTo(r2.get(col).toLowerCase());
+                        if (result1 != 0)
+                            return result1;
+                    }
+                    return 0;
+                };
 				group.sort(c);
 			}
 
 			// generate a id -> RowsInThisGroup map
 			Multimap<String, Row> idToRowsInThisGroup = LinkedHashMultimap.create();
-			group.stream().forEach(r -> {
+			group.forEach(r -> {
 				idToRowsInThisGroup.put(r.get(Config.ID_FIELD), r);
 			});
 
@@ -258,9 +304,27 @@ public class MergeManager {
 			List<List<Row>> rowsForThisGroup = new ArrayList<>();
 			for (String id: idToRowsInThisGroup.keySet()) {
 				List<Row> rowsForThisId = new ArrayList<>(idToRowsInThisGroup.get(id));
-				rowsForThisGroup.add (rowsForThisId);
+
+                List<Row> resultListForThisId;
+                if (rvc == IDS_MATCHING_FILTER) {
+                    // if any row for this id passes filter, we pass all the rows to resultListForThisId
+                    boolean doesAnyRowForThisIdMatch = rowsForThisId.stream().filter (filter::passes).limit(1).count() > 0;
+                    if (doesAnyRowForThisIdMatch)
+                        resultListForThisId = rowsForThisId;
+                    else
+                        continue;
+                } else if (rvc == ROWS_MATCHING_FILTER){
+				    resultListForThisId = rowsForThisId.stream().filter (filter::passes).collect(Collectors.toList());
+                } else { // if (rvc == ALL_ROWS) {
+                    resultListForThisId = rowsForThisId;
+                }
+
+                if (resultListForThisId.size() > 0)
+                    rowsForThisGroup.add (resultListForThisId);
 			}
-			result.add (rowsForThisGroup);
+
+			if (rowsForThisGroup.size() > 0)
+    			result.add (rowsForThisGroup);
 		}
 
 		return result;

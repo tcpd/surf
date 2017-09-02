@@ -1,0 +1,33 @@
+<div class="form-group">
+    <label for="sortOrder">Sort order for clusters</label>
+    <select class="form-control selectpicker" id="sortOrder" name="sortOrder">
+        <option value="stringLength">Long strings first</option>
+        <option value="groupSize">Largest cluster first</option>
+        <option value="approxAlpha">Approximately alphabetical</option>
+    </select>
+</div>
+
+<div class=form-group>
+    <label for="filterSpec">Filter</label>
+    <input id="filterSpec" name="filterSpec" type="text" class="form-control">
+    <span style="font-size:90%;color:#aaa">Example: Position=1,2,3;Sex=M;Cand1=/GANDHI/</span>
+</div>
+
+<div class="form-group">
+    <label for="groupViewControlSpec">Clusters to show:</label>
+    <select class="form-control selectpicker" id="groupViewControlSpec" name="groupViewControlSpec">
+        <option selected value="GROUPS_WITH_TWO_OR_MORE_ROWS">Clusters with two or more rows</option>
+        <option value="GROUPS_WITH_TWO_OR_MORE_IDS">Clusters with two or more IDs</option>
+        <option value="ALL_GROUPS">All clusters (including single rows)</option>
+    </select>
+    <br/>
+</div>
+
+<div class="form-group">
+    <label data-toggle="tooltip" title="These rows will be shown within the selected clusters." for="rowViewControlSpec">Rows to show (within shown clusters):</label>
+    <select class="form-control selectpicker" id="rowViewControlSpec" name="rowViewControlSpec">
+        <option selected value="ALL_ROWS">All rows</option>
+        <option value="IDS_MATCHING_FILTER">All rows for IDs matching filter</option>
+        <option value="ROWS_MATCHING_FILTER">Only rows matching filter</option>
+    </select>
+</div>

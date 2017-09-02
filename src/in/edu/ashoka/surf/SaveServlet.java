@@ -40,7 +40,7 @@ public class SaveServlet extends HttpServlet {
 
 			// update the groups and view
 			mergeManager.applyUpdatesAndSave(commands);
-			MergeManager.View view = mergeManager.getView (mergeManager.lastView.filterSpec, mergeManager.lastView.sortOrder);
+			MergeManager.View view = mergeManager.getView (mergeManager.lastView.filterSpec, mergeManager.lastView.groupFilter.name(), mergeManager.lastView.rowFilter.name(), mergeManager.lastView.sortOrder);
 			session.setAttribute("view", view);
 
 			response.getOutputStream().print("{status: 0}");

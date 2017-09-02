@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.stanford.muse.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.google.gson.JsonObject;
@@ -44,14 +45,22 @@ public class MergeServlet extends HttpServlet {
 
             MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");
 
-            // we have to merge based on ids to honor existing merges that may already have been done on the dataset
-            MergeManager.View view = mergeManager.getView(request.getParameter("filterSpec"), request.getParameter("sortOrder"));
+            // read view control specs
+            String groupViewControlSpec = request.getParameter ("groupViewControlSpec");
+            if (Util.nullOrEmpty(groupViewControlSpec))
+                groupViewControlSpec = MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_ROWS.name();
+            String rowViewControlSpec = request.getParameter ("rowViewControlSpec");
+            if (Util.nullOrEmpty(rowViewControlSpec))
+                rowViewControlSpec = MergeManager.RowViewControl.ALL_ROWS.name();
+
+            MergeManager.View view = mergeManager.getView(request.getParameter("filterSpec"), groupViewControlSpec, rowViewControlSpec, request.getParameter("sortOrder"));
             session.setAttribute("view", view);
 
             result.addProperty ("status", 0);
         } catch (Exception e){
             result.addProperty ("status", 1);
             result.addProperty ("message", e.getClass().getName() + "}"); // TODO: add detailed error message
+            Util.print_exception("Exception in running merge algorithm", e, log);
         }
         response.getOutputStream().print(result.toString());
     }

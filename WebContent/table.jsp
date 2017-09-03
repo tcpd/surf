@@ -78,18 +78,25 @@ import="java.util.*"
 
 
     <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="top-bar">
-        <span class="logo" style="font-size:30px;margin-left:20px;">Surf</span>
 
-        <div style="display:inline-block;margin-top:5px;margin-left:30px"><%=Util.escapeHTML(description).replaceAll ("\n", "<br/>\n")%></div>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="logo navbar-brand" style="font-size:30px;margin-left:20px;" href="#">Surf</a>
+        </div>
 
-        <div style="float:right; display:inline; margin-right:20px;margin-top:5px">
-            <button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button>
-            <button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span>
-            <button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button>
-            <button class="btn btn-default" type="button">Help</button>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button></li>
+                <li><button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span></li>
+                <li><button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button></li>
+                <li><button class="btn btn-default" type="button">Help</button></li>
+            </ul>
         </div>
     </div>
+</nav>
+
+        <div style="display:inline-block;margin-top:5px;margin-left:30px"><%=Util.escapeHTML(description).replaceAll ("\n", "<br/>\n")%></div>
 
         <!-- main table starts here -->
         <table class="table-header" style="border-collapse: collapse">

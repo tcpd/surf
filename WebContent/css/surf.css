@@ -65,6 +65,10 @@ body{
     border-bottom: solid 1px rgba(128,128,128,0.1);
 }
 
+.selected-trow{
+   /* background-color:yellow; */
+}
+
 .merged-row { border-bottom: none;} /* this should be applied to all rows except the last one in a merged group. interacts with broder-collapse on the entire table */
 
 .toolbar-row { font-size: 11px; }
@@ -75,7 +79,7 @@ body{
 
 }
 
-.reviewed {
+.reviewed1 {
     background: repeating-linear-gradient(
             to right,
             #f6ba52,
@@ -85,8 +89,8 @@ body{
     );
 }
 
-.reviewed1 {
-    background-color: #f6ba52;
+.reviewed {
+    background-color: lightgreen;
 }
 
 .fixed{

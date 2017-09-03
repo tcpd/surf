@@ -22,7 +22,7 @@ import="java.util.*"
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
 
     <link rel="stylesheet" type="text/css" href="css/main.css">
-	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="stylesheet" type="text/css" href="css/surf.css">
 
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <script type="text/javascript"> if (!window.jQuery) {document.write('<script type="text/javascript" src="js/jquery-1.12.1.min.js"><\/script>');}</script>
@@ -241,16 +241,19 @@ import="java.util.*"
 
 <script>
     $(document).ready(function() { $('#loading').hide();});
+
     function select_all_handler (e) {
         var text1 = 'Select all', text2 = 'Unselect all';
 
         var $target = $(e.target);
         var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
         if ($target.text() == text1) {
-            $('input.select-checkbox', $group).prop('checked', true); // set all checkboxes to true
+            $('input.select-checkbox', $group).prop('checked', true);
+            $('.trow', $group).addClass ('selected-trow');
             $target.text(text2);
         } else {
-            $('input.select-checkbox', $group).prop('checked', false); // set all checkboxes to true
+            $('input.select-checkbox', $group).prop('checked', false);
+            $('.trow', $group).removeClass('selected-trow');
             $target.text(text1);
         }
     }
@@ -267,11 +270,58 @@ import="java.util.*"
     }
 
     function select_till_here_handler (e) {
+        var text1 = 'Select till here', text2 = 'Unselect till here';
+
         var $target = $(e.target);
-        var $group = $target.closest ('tbody'); // find the nearest tbody, which corresponds to a group
-        var $groups = $group.prevAll ('tbody'); // find all prev tbody's on page
-        $('input.select-checkbox', $groups).prop('checked', true);
-        $('input.select-checkbox', $group).prop('checked', true);
+        var $group = $target.closest('tbody'); // find the nearest tbody, which corresponds to a group
+        var $groups = $group.prevAll('tbody'); // find all prev tbody's on page
+        var $all = $group.add($groups);
+        if ($target.text() == text1) {
+            $('input.select-checkbox', $all).prop('checked', true);
+            $('.trow', $all).addClass ('selected-trow');
+            $target.text(text2);
+        } else {
+            $('input.select-checkbox', $all).prop('checked', false);
+            $('.trow', $all).removeClass('selected-trow');
+            $target.text(text1);
+        }
+    }
+
+    /* click handler for rows, to make it so that clicking anywhere in the row gets the corresponding id checkbox selected */
+    function row_click_handler (e) {
+        $row = $(e.target).closest('.trow');
+        if ($(e.target).is('a') || $(e.target).is('input')) {
+            // return for links and checkbox, we don't want to interfere with that
+            return;
+        }
+
+        // get the actual row which has the checkbox on it (which is the first row of the group
+        var $row_with_checkbox = $row.hasClass('first-row-for-id') ? $row : $($row.siblings('.first-row-for-id')[0]);
+
+        var $checkbox = $('input.select-checkbox', $row_with_checkbox);
+        // toggle the checkbox
+        if ($checkbox.prop ('checked')) {
+            $checkbox.prop('checked', false);
+            $row_with_checkbox.removeClass ("selected-trow");
+        } else {
+            $checkbox.prop('checked', true);
+            $row_with_checkbox.addClass ("selected-trow");
+        }
+
+        e.stopPropagation();
+        return false;
+    };
+
+    function checkbox_change_handler(e) {
+        var $checkbox = $(e.target);
+       //  alert ($checkbox);
+        var $row_with_checkbox = $checkbox.closest ('.trow'); // row for this checkbox
+        if ($checkbox.prop ('checked')) {
+            $row_with_checkbox.addClass ("selected-trow");
+        } else {
+            $row_with_checkbox.removeClass ("selected-trow");
+        }
+        return false; // propagate further
     }
 
     function reviewed_till_here_handler (e) {
@@ -340,7 +390,7 @@ import="java.util.*"
                 url: 'ajax/do-commands',
                 datatype: 'json',
                 data: post_data,
-                success: function() {
+                success: function(o) {
                     $spinner.fadeOut();
                     if (o && o.status == 0) {
                         // could perhaps display a toast here
@@ -382,28 +432,16 @@ import="java.util.*"
         });
     }
 
-    /* make it so that clicking anywhere in the row gets the corresponding id checkbox selected */
-    $('.trow').click (function(e) {
-        $row = $(e.target).closest('.trow');
-        if ($(e.target).is('a')) {
-            // return for links, we don't want to interfere with that
-            return;
-        }
 
-        if ($row.hasClass('first-row-for-id'))
-            $row_with_checkbox = $row;
-        else
-            $row_with_checkbox = $($row.siblings('.first-row-for-id')[0]);
-        $checkbox = $('input.select-checkbox', $row_with_checkbox);
-        $checkbox.prop('checked', !$checkbox.prop ('checked'));
-        e.stopPropagation();
-        return false;
-    });
 
     $('.select-button').click (select_all_handler);
-    $('.reviewed-button').click (group_reviewed_handler);
     $('.select-till-here-button').click (select_till_here_handler);
+    $('.trow').click (row_click_handler);
+    $('.trow input.select-checkbox').change (checkbox_change_handler);
+
+    $('.reviewed-button').click (group_reviewed_handler);
     $('.reviewed-till-here-button').click (reviewed_till_here_handler);
+
     $('.merge-button').click (save_handler);
     $('.unmerge-button').click (save_handler);
     $('.filter-button').click (function() { $('#filterModal').modal();});

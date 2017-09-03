@@ -86,7 +86,17 @@ public class MergeManager {
 
 	private Dataset d;
     private List<Collection<Row>> groups; // these are the groups
+
+    /** nextAvailableID and idToRows should be updated in sync.
+     * nextAvailableID is the integer beyond which all integers can be used as IDs (after conversion to strings), i.e. they are not used as id's for any rows.
+     * e.g. if nextAvailableID is 5000, any integer > 5000 can be converted to a string and safely used as an ID without conflicting with existing IDs.
+     * This is useful when rows under an ID are unmerged and have to be assigned new IDs.
+     */
     private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
+    public int nextAvailableId = 0;
+
+    List<MergeCommand> allCommands = new ArrayList<>(); // compile all the commands, so that they can be replayed some day, if needed
+
     private MergeAlgorithm algorithm;
     private String splitColumn;
     public View lastView; // currently we assume only 1 view
@@ -94,11 +104,25 @@ public class MergeManager {
     // a small class to represent operations made on this dataset.
     // op is the operation to run: merge, or unmerge
     // the merge or unmerge is run on the given ids.
-    // groupId is currently not needed.
     public static class MergeCommand {
+        private static final String MERGE_ID_DELIMITER = ";"; // this string should not be allowed to be part of any ID
         String op;
         String groupId; // not needed and not used currently
         String[] ids;
+
+        // e.g.
+        // merge: 100; 200; 300
+        // unmerge: 1000
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(op);
+            sb.append(":");
+            for (String id : ids) {
+                sb.append(id);
+                sb.append(MERGE_ID_DELIMITER); // delimite ID's with
+            }
+            return sb.toString();
+        }
     }
 
     /** create a new mergeManager with the given algorithm and arguments, and runs the algorithm and stores the (initial) groups.
@@ -189,13 +213,26 @@ public class MergeManager {
         log.info ("initial # of groups " + initialClusters + ", after merging by id, we have " + groups.size() + " groups");
     }
 
+    /* computes idToRows and also updates nextAvailableId */
     private void computeIdToRows (Collection<Row> rows) {
         for (Row r: rows)
             idToRows.put (r.get(Config.ID_FIELD), r);
+
+        int maxNumberUsed = 1;
+        for (String id: idToRows.keySet()) {
+            int x = 0;
+            try { x = Integer.parseInt(id); } catch (NumberFormatException nfe) { continue; }
+            if (x > maxNumberUsed)
+                maxNumberUsed = x;
+        }
+
+        nextAvailableId = maxNumberUsed + 1;
     }
 
     /** applies the given merge/unmerge commands on the dataset */
     public void applyUpdatesAndSave(MergeCommand[] commands) throws IOException {
+        allCommands.addAll (Arrays.asList(commands));
+
         log.info ("Applying " + commands.length + " command(s) to " + d);
 
         for (MergeCommand command: commands) {
@@ -225,8 +262,8 @@ public class MergeManager {
                 for (String id : command.ids) {
                     Collection<Row> rowsForThisId = idToRows.get(id);
                     for (Row row : rowsForThisId) {
-                        // TODO
-                        // break the cluster, give each of these rows a new id, and put them in a new cluster in groups
+                        row.set(Config.ID_FIELD, Integer.toString(nextAvailableId));
+                        nextAvailableId++;
                     }
                 }
             }

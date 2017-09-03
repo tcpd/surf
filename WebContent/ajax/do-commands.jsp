@@ -1,6 +1,6 @@
 <%@page language="java" contentType="application/json;charset=UTF-8"%>
 <%@page trimDirectiveWhitespaces="true"%>
-<%@ page import="in.edu.ashoka.surf.MergeManager"%><%@ page import="com.google.gson.GsonBuilder"%><%@ page import="com.google.gson.Gson"%><%@ page import="com.google.gson.JsonObject"%>
+<%@ page import="in.edu.ashoka.surf.MergeManager"%><%@ page import="com.google.gson.GsonBuilder"%><%@ page import="com.google.gson.Gson"%><%@ page import="com.google.gson.JsonObject"%><%@ page import="edu.stanford.muse.util.Util"%>
 <%
 MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");
     JsonObject result = new JsonObject();
@@ -17,6 +17,7 @@ try {
     session.setAttribute("view", view);
     result.addProperty ("status", 0);
 } catch (Exception e) {
+    Util.print_exception("Error in doing commands", e, MergeManager.log);
     result.addProperty ("status", 1);
     result.addProperty ("message", e.getClass().getName() + "}"); // TODO: add detailed error message
 }

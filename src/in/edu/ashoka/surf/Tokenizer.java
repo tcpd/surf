@@ -102,6 +102,7 @@ public class Tokenizer {
         {
             for (Row r : allRows) {
                 String val = r.get(field);
+                val = val.toUpperCase();
                 String cval = canonicalizeDesi(val);
                 r.set(cfield, cval);
             }

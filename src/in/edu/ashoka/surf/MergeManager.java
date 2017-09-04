@@ -75,8 +75,8 @@ public class MergeManager {
         }
 
         public String description() {
-            return  MergeManager.this.d.description + " Algorithm: " + MergeManager.this.algorithm.toString() +
-                    (!Util.nullOrEmpty(MergeManager.this.splitColumn) ? " (further split by " + splitColumn : ")") + "\n"
+            return  MergeManager.this.d.description + "\nAlgorithm: " + MergeManager.this.algorithm.toString() +
+                    (!Util.nullOrEmpty(MergeManager.this.splitColumn) ? " (further split by " + splitColumn + ")" : "") + "\n"
                     + Util.commatize(viewGroups.size()) + " groups with " + Util.commatize(nRowsInGroups) + " rows (of " + Util.commatize(MergeManager.this.d.getRows().size())
                     + ") with " + Util.commatize(nIds) + " unique ids";
         }

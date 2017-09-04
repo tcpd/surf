@@ -75,6 +75,30 @@ import="java.util.*"
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" >About Surf</h4>
+            </div>
+            <div class="modal-body">
+
+                <p>
+                    Current Data:
+                    <p>
+                    <%= Util.escapeHTML(description).replace("\n", "<br/>")%>
+                <p>
+                <hr/>
+                Surf is a data mapping tool for Indian data.
+                It can map approximately similar Indian names in a column of a dataset, using different algorithms.
+                The Surf user interface allows a user to efficiently merge these rows.
+                Rows confirmed to have the same value for the selected column are assigned the same ID.
+            </div>
+        </div>
+    </div>
+</div>
 
 
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -90,13 +114,11 @@ import="java.util.*"
                 <li><button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button></li>
                 <li><button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span></li>
                 <li><button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button></li>
-                <li><button class="btn btn-default" type="button">Help</button></li>
+                <li><button class="btn btn-default help-button" type="button">Help</button></li>
             </ul>
         </div>
     </div>
 </nav>
-
-        <div style="display:inline-block;margin-top:5px;margin-left:30px"><%=Util.escapeHTML(description).replaceAll ("\n", "<br/>\n")%></div>
 
         <!-- main table starts here -->
         <table class="table-header" style="border-collapse: collapse">
@@ -446,6 +468,7 @@ import="java.util.*"
     $('.unmerge-button').click (save_handler);
     $('.filter-button').click (function() { $('#filterModal').modal();});
     $('.filter-submit-button').click (filter_submit_handler);
+    $('.help-button').click (function() { $('#helpModal').modal()});
 
 </script>
 </body>

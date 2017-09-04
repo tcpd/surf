@@ -39,9 +39,22 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
         Timers.editDistanceTimer.reset();
         Timers.editDistanceTimer.start();
 
-        final EditDistanceClusterer edc = (editDistance > 0) ? new EditDistanceClusterer(editDistance) : null;
-        allRows.stream().forEach(r -> edc.populate(r.get(fieldName)));
-        List<Set<String>> clusters = (List) edc.getClusters();
+        List<Set<String>> clusters;
+
+        if (editDistance >= 1) {
+            final EditDistanceClusterer edc = new EditDistanceClusterer(editDistance);
+            allRows.stream().forEach(r -> edc.populate(r.get(fieldName)));
+            clusters = (List) edc.getClusters();
+        } else {
+            // handle the case when edit distance is 0 by creating a list of single-element sets with all unique fieldVal's
+            clusters = new ArrayList<>();
+            for (String fieldVal: fieldValueToRows.keySet()) {
+                // create a set with a single val
+                Set set = new LinkedHashSet<String>();
+                set.add(fieldVal);
+                clusters.add(set);
+            }
+        }
 
         Timers.editDistanceTimer.stop();
 

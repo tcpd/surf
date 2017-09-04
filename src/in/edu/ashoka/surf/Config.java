@@ -1,10 +1,12 @@
 package in.edu.ashoka.surf;
 
+import edu.stanford.muse.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -97,9 +99,13 @@ public class Config {
 
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
     public static Map<String, String> keyToPath  = new LinkedHashMap<>(), keyToDescription = new LinkedHashMap<>();
+    public static Properties gitProps = null;
 
     static {
         Properties props = readProperties();
+        gitProps = null;
+        try { props.load(getResourceAsStream("git.properties")); }
+        catch (Exception e) { Util.print_exception("unable to load git.properties", e, log); }
 
         // props file should like like:
         // UP_Path: /Users/user/foo/bar/...
@@ -175,5 +181,17 @@ public class Config {
                 props.setProperty(key, val);
         }
         return props;
+    }
+
+    /** reads a resource with the given offset path. Resources should be read ONLY with this method, so there is a uniform way of finding and overriding resources.
+     * Path components are always separated by forward slashes, just like resource paths in Java.
+     * First looks in settings folder, then on classpath (e.g. inside war's WEB-INF/classes).
+     **/
+    public static InputStream getResourceAsStream(String path) {
+
+        InputStream is = in.edu.ashoka.surf.Config.class.getClassLoader().getResourceAsStream(path);
+        if (is == null)
+            log.warn ("UNABLE TO READ RESOURCE FILE: " + path);
+        return is;
     }
 }

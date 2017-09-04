@@ -8,6 +8,7 @@
 	<properties>
         	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+			<skip.generate.git.props>false</skip.generate.git.props> <!-- default, for dev builds -->
 	</properties>
 	<name>SURF</name>
 	<url>http://maven.apache.org</url>
@@ -117,6 +118,51 @@
           			<compilerVersion>1.8</compilerVersion>
 					<source>1.8</source>
 					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+			<groupId>pl.project13.maven</groupId>
+			<artifactId>git-commit-id-plugin</artifactId>
+			<version>2.2.1</version>
+
+			<executions>
+				<execution>
+					<id>get-the-git-infos</id>
+					<phase>validate</phase>
+					<goals>
+						<goal>revision</goal>
+					</goals>
+				</execution>
+			</executions>
+
+				<configuration>
+					<dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+					<prefix>git</prefix>
+					<dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+					<dateFormatTimeZone>${user.timezone}</dateFormatTimeZone>
+					<verbose>true</verbose>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+					<format>properties</format>
+					<skipPoms>true</skipPoms>
+					<injectAllReactorProjects>false</injectAllReactorProjects>
+					<failOnNoGitDirectory>true</failOnNoGitDirectory>
+					<failOnUnableToExtractRepoInfo>true</failOnUnableToExtractRepoInfo>
+					<skip>${skip.generate.git.props}</skip>
+					<runOnlyOnce>false</runOnlyOnce>
+					<useNativeGit>false</useNativeGit>
+					<abbrevLength>7</abbrevLength>
+					<commitIdGenerationMode>flat</commitIdGenerationMode>
+					<gitDescribe>
+						<skip>false</skip>
+						<always>false</always>
+						<abbrev>7</abbrev>
+						<dirty>-dirty</dirty>
+						<match>*</match>
+						<tags>false</tags>
+						<forceLongFormat>false</forceLongFormat>
+					</gitDescribe>
 				</configuration>
 			</plugin>
 

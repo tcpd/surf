@@ -86,6 +86,8 @@ import="java.util.*"
             <div class="modal-body">
 
                 <p>
+                    Surf version: <%= Config.gitProps != null ? Config.gitProps.getProperty ("git.commit.id.describe-short") : "Unavailable"%>
+                    <p>
                     Current Data:
                     <p>
                     <%= Util.escapeHTML(description).replace("\n", "<br/>")%>

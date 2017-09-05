@@ -121,6 +121,7 @@ import="java.util.*"
         </div>
     </div>
 </nav>
+<br/>
 
         <!-- main table starts here -->
         <table class="table-header" style="border-collapse: collapse">

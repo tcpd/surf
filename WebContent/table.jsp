@@ -81,26 +81,39 @@ import="java.util.*"
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" >About Surf</h4>
+                <h4 class="modal-title" >Surf Help</h4>
             </div>
             <div class="modal-body">
 
                 <p>
-                    <% String gitId = Config.gitProps.getProperty ("git.commit.id.describe-short");
-                    if (gitId == null)
-                        gitId = "Unavailable";
-                    %>
-                    Surf version: <%= gitId%>
+
                     <p>
-                    Current Data:
+                    Current dataset:
                     <p>
                     <%= Util.escapeHTML(description).replace("\n", "<br/>")%>
                 <p>
                 <hr/>
-                Surf is a data mapping tool for Indian data.
-                It can map approximately similar Indian names in a column of a dataset, using different algorithms.
-                The Surf user interface allows a user to efficiently merge these rows.
-                Rows confirmed to have the same value for the selected column are assigned the same ID.
+                <b>About Surf</b>
+                <p></p>
+                Surf is a data cleaning tool for messy data. It enables a user to quickly scan a dataset for rows that have approximately similar values in a column,
+                and confirm when the values are actually the same. Rows confirmed to have the same value in the selected column are assigned the same ID.
+                <p>
+                    <% String gitId = Config.gitProps.getProperty ("git.commit.id.describe-short");
+                        if (gitId == null)
+                            gitId = "(Unavailable)";
+                        String gitCommitTime = Config.gitProps.getProperty ("git.commit.time");
+                        if (gitCommitTime == null)
+                            gitCommitTime = "(Unavailable)";
+                        String gitBuildUser = Config.gitProps.getProperty ("git.build.user.name");
+                        if (gitBuildUser == null)
+                            gitBuildUser = "(Unavailable)";
+                        String gitBranch = Config.gitProps.getProperty ("git.branch");
+                        if (gitBranch == null)
+                            gitBranch = "(Unavailable)";
+                    %>
+                    Surf version: <%= gitId%> <br/>
+                    Built <%= gitCommitTime%> by <%=gitBuildUser%> from branch <%=gitBranch%>
+                </p>
             </div>
         </div>
     </div>

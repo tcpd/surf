@@ -6,6 +6,8 @@ import edu.tsinghua.dbgroup.EditDistanceClusterer;
 import in.edu.ashoka.surf.util.Timers;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Created by hangal on 8/12/17.
@@ -15,11 +17,12 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
     private int editDistance;
     private String fieldName; // fieldname on which to compute edit distance
+    private Filter filter;
 
     /* set up merge algorithm parameters: d, the fieldName (col. name) of the field on which edit distance clustering is to be done, max. editDistance (inclusive) */
-    protected EditDistanceMergeAlgorithm(Dataset dataset, String fieldName, int editDistance) {
+    protected EditDistanceMergeAlgorithm(Dataset dataset, String fieldName, int editDistance, Filter filter) {
         super (dataset);
-        Collection<Row> allRows = dataset.getRows();
+        this.filter = filter;
 
         // set up desi versions of the given field. we'll perform edit distance computation on this version of the given field, not the original one.
         this.fieldName = fieldName;
@@ -29,11 +32,11 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
     @Override
     public List<Collection<Row>> run() {
 
-        Collection<Row> allRows = dataset.getRows();
+        Collection<Row> filteredRows = dataset.getRows().stream().filter(filter::passes).collect(Collectors.toList());
 
         // create map of fieldValueToRows
         SetMultimap<String, Row> fieldValueToRows = HashMultimap.create();
-        allRows.stream().forEach (r -> { fieldValueToRows.put (r.get(fieldName), r);});
+        filteredRows.stream().forEach (r -> { fieldValueToRows.put (r.get(fieldName), r);});
 
         // do the clustering based on ed (but only if ed > 0)
         Timers.editDistanceTimer.reset();
@@ -43,7 +46,7 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
         if (editDistance >= 1) {
             final EditDistanceClusterer edc = new EditDistanceClusterer(editDistance);
-            allRows.stream().forEach(r -> edc.populate(r.get(fieldName)));
+            filteredRows.stream().forEach(r -> edc.populate(r.get(fieldName)));
             clusters = (List) edc.getClusters();
         } else {
             // handle the case when edit distance is 0 by creating a list of single-element sets with all unique fieldVal's

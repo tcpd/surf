@@ -35,6 +35,8 @@ public class Filter {
      */
     public Filter (String filterSpec) {
 
+        if (filterSpec == null)
+            filterSpec = "";
         List<String> directives = Util.tokenize (filterSpec, ";");
 
         for (String directive: directives) {

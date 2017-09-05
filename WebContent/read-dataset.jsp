@@ -1,4 +1,5 @@
 <%@ page import="in.edu.ashoka.surf.*" %>
+<%@ page import="edu.stanford.muse.util.Util" %>
 
 <!DOCTYPE html>
 <html>
@@ -49,14 +50,14 @@
                         dataset.registerColumnAlias("Votes1", "Votes");
                 }
         %>
-                Dataset with <%=nRows%> rows and <%=nCols%> columns loaded.<br/>
+                Dataset with <%=Util.commatize(nRows)%> rows and <%=Util.commatize(nCols)%> columns loaded.<br/>
                 <% if (!dataset.hasIds()) {
                     dataset.initializeIds(); %>
                     Ids have not yet been assigned. <br/>
                     Now assigned new ids.
                  <%} else {
                     int nIds = SurfExcel.split (dataset.getRows(), Config.MERGE_FIELD).size(); %>
-                    <%=nIds%> unique ids previously assigned.
+                    <%=Util.commatize(nIds)%> unique ids previously assigned.
                 <% } %>
                 <br/>
                 <br/>

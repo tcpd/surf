@@ -12,10 +12,13 @@ import java.util.stream.Collectors;
 public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
     private String primaryFieldName;
+    Filter filter;
 
-	public CompatibleNameAlgorithm(Dataset d, String primaryFieldName) {
+	public CompatibleNameAlgorithm(Dataset d, String primaryFieldName, Filter filter) {
 		super(d);
 	    this.primaryFieldName = primaryFieldName;
+	    this.filter = filter;
+
     }
 
     // check that each token in x maps to a token in y
@@ -35,6 +38,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 		return true;
 	}
 
+	// core compatibility function: at least 2 multi-letter tokens common, or whether all tokens in one can map to the other modulo initials
 	private static int compatibility (String x, String y) {
 		Set<String> xTokens = new LinkedHashSet<>(Util.tokenize(x));
 		Set<String> yTokens = new LinkedHashSet<> (Util.tokenize(y));
@@ -53,14 +57,15 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
 	@Override
 	public List<Collection<Row>> run() {
-		String field = "_c_" + primaryFieldName; // we run it on the canon version of the name, not the tokenized, cecause that causes too many merges
+		String field = primaryFieldName;
 
-		List<Row> rows = new ArrayList<>(dataset.getRows());
-		// setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
+        List<Row> filteredRows = dataset.getRows().stream().filter(filter::passes).collect(Collectors.toList());
+
+        // setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
 		// since editDistance computation is expensive, we'll only compute it for pairs that have at least 1 token in common
 		Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
-		for (int i = 0; i < rows.size(); i++) {
-			String fieldVal = rows.get(i).get(field);
+		for (int i = 0; i < filteredRows.size(); i++) {
+			String fieldVal = filteredRows.get(i).get(field);
 			StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
 			while (st.hasMoreTokens()) {
 				String tok = st.nextToken();
@@ -71,8 +76,8 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 		}
 
 		UnionFindSet<Row> ufs = new UnionFindSet<>();
-		for (int i = 0; i < rows.size(); i++) {
-            String fieldVal = rows.get(i).get(field);
+		for (int i = 0; i < filteredRows.size(); i++) {
+            String fieldVal = filteredRows.get(i).get(field);
 
             // collect the indexes of the values that we should compare stField with, based on common tokens
 			Set<Integer> idxsToCompareWith = new LinkedHashSet<>();
@@ -90,8 +95,8 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 			}
 
 			for (int j : idxsToCompareWith) {
-				if (compatibility (rows.get(i).get(field), rows.get(j).get(field)) > 0) { // note: we could also compare primary field, not st field, to reduce noise
-					ufs.unify (rows.get(i), rows.get(j)); // i and j are in the same group
+				if (compatibility (filteredRows.get(i).get(field), filteredRows.get(j).get(field)) > 0) { // note: we could also compare primary field, not st field, to reduce noise
+					ufs.unify (filteredRows.get(i), filteredRows.get(j)); // i and j are in the same group
 				}
 			}
 		}

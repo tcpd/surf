@@ -127,9 +127,11 @@ public class MergeManager {
 
     /** create a new mergeManager with the given algorithm and arguments, and runs the algorithm and stores the (initial) groups.
      * further splits by splitColumn if it's not null or empty */
-    public MergeManager(Dataset dataset, String algo, String arguments, String splitColumn) {
+    public MergeManager(Dataset dataset, String algo, String arguments, String splitColumn, String filterSpec) {
         this.d = dataset;
         computeIdToRows(d.getRows());
+
+        Filter filter = new Filter (filterSpec);
 
         Tokenizer.setupDesiVersions(dataset.getRows(), Config.MERGE_FIELD);
 
@@ -140,19 +142,19 @@ public class MergeManager {
             } catch (NumberFormatException e) {
                 Util.print_exception(e, log);
             }
-            algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance); // run e.d. on the _st_ version of the field
+            algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance, filter); // run e.d. on the _st_ version of the field
         } else if (algo.equals("allNames")) {
             algorithm = new MergeAlgorithm(dataset) {
                 @Override
                 public List<Collection<Row>> run() {
                     classes = new ArrayList<>();
-                    classes.add(new ArrayList<>(d.getRows())); // just one class, with all the rows in it
+                    classes.add(d.getRows().stream().filter (filter::passes).collect(Collectors.toList())); // just one class, with all the rows in it
                     return classes;
                 }
                 public String toString() { return "Dummy merge"; }
             };
         } else if (algo.equals("compatibleNames")) {
-            algorithm = new CompatibleNameAlgorithm(d, Config.MERGE_FIELD);
+            algorithm = new CompatibleNameAlgorithm(d, "_c_" + Config.MERGE_FIELD, filter); // we run it on the canon version of the name, not the tokenized, cecause that causes too many merges
         }
 
         // this is where the groups are generated

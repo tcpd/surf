@@ -129,10 +129,6 @@ public class MergeManager {
      * further splits by splitColumn if it's not null or empty */
     public MergeManager(Dataset dataset, String algo, String arguments, String splitColumn) {
         this.d = dataset;
-        if (!d.hasColumnName("__comments"))
-            d.addToActualColumnName("__comments");
-        if (!d.hasColumnName("__reviewed"))
-            d.addToActualColumnName("__reviewed");
         computeIdToRows(d.getRows());
 
         Tokenizer.setupDesiVersions(dataset.getRows(), Config.MERGE_FIELD);

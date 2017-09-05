@@ -43,12 +43,14 @@
             <option value="allNames">All names</option>
 		</select>
         <br/>
-        <label for="algo-arg">Arguments for Algorithm</label>
-        <input type="text" class="form-control" id="algo-arg" name="algo-arg">
+        <div class="div-algo-arg">
+            <label for="algo-arg">Maximum edit distance</label>
+            <input type="text" class="form-control" id="algo-arg" name="algo-arg" placeholder="<%=Config.DEFAULT_EDIT_DISTANCE%>">
+        </div>
     </div>
 
     <div class="form-group">
-        <label for="splitColumn">Further split by column (optional)</label>
+        <label for="splitColumn">Further split clusters by value of column (optional)</label>
         <select  class="form-control selectpicker" id="splitColumn" name="splitColumn">
             <option value="">None</option>
             <%
@@ -105,7 +107,16 @@
             success: function (o) { if (o && o.status == 0) { window.location = 'table?page=1'; } else { alert ('Warning: error ' + o);} $spinner.fadeOut();},
             error: function () { $spinner.fadeOut(); alert ('Warning: Run algorithm failed!');}
         });
-    })
+    });
+
+    $('#algorithm').change(function() {
+        if ($('#algorithm').find(':selected').val() != 'editDistance') {
+            $('.div-algo-arg').hide();
+        } else {
+            $('.div-algo-arg').show();
+        }
+    });
+
 </script>
 
 </div>

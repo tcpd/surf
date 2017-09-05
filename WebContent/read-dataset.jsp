@@ -62,7 +62,7 @@
                 <br/>
                 <label for="columnName">Column to merge:</label>
                 <select class="form-control selectpicker" id="columnName" name="columnName">
-                    <% for (String col: dataset.getColumnNames()) { %>
+                    <% for (String col: dataset.getColumnDisplayNames()) { %>
                         <option value="<%=col%>"><%=col%></option>
                     <% } %>
                 </select>

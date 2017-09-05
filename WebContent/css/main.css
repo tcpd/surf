@@ -2025,8 +2025,10 @@ ul.dropdown-menu.inner li {
 ul.dropdown-menu.inner li:last-of-type {
   border-bottom: none; }
 
+/* sgh: removing because it obscures first element of dropdown
 ul.dropdown-menu.inner li:first-child {
   display: none !important; }
+*/
 
 .advanced-search .btn-default, .advanced-search .btn-default:hover,
 .advanced-search .btn-default:focus,

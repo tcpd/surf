@@ -36,7 +36,19 @@ public class Dataset implements Serializable{
     	else
     		actualColumnName.add(col);
     }
-    
+
+    /* returns the actual display names of the columns in this dataset */
+    public Set<String> getColumnDisplayNames() {
+        Set<String> result = new LinkedHashSet<>();
+        for (String col: cColumns) {
+            Collection<String> displayNames = cColumnToDisplayName.get(col);
+            if (displayNames.size() > 0) {
+                result.add (displayNames.iterator().next()); // pick up only the first, in case there are multiple display names (is this possible??)
+            }
+        }
+        return result;
+    }
+
     static String removePlural(String s)
     {
         /* S stemmer: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.104.9828

@@ -103,8 +103,8 @@ public class Config {
 
     static {
         Properties props = readProperties();
-        gitProps = null;
-        try { props.load(getResourceAsStream("git.properties")); }
+        gitProps = new Properties();
+        try { gitProps.load(getResourceAsStream("git.properties")); }
         catch (Exception e) { Util.print_exception("unable to load git.properties", e, log); }
 
         // props file should like like:

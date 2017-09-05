@@ -86,7 +86,11 @@ import="java.util.*"
             <div class="modal-body">
 
                 <p>
-                    Surf version: <%= Config.gitProps != null ? Config.gitProps.getProperty ("git.commit.id.describe-short") : "Unavailable"%>
+                    <% String gitId = Config.gitProps.getProperty ("git.commit.id.describe-short");
+                    if (gitId == null)
+                        gitId = "Unavailable";
+                    %>
+                    Surf version: <%= gitId%>
                     <p>
                     Current Data:
                     <p>

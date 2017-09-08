@@ -294,10 +294,15 @@ import="java.util.*"
             $('input.select-checkbox', $group).prop('checked', true);
             $('.trow', $group).addClass ('selected-trow');
             $target.text(text2);
+            $group.addClass('reviewed')
+            $('.reviewed-button', $group).text ('Mark as unreviewed');
         } else {
             $('input.select-checkbox', $group).prop('checked', false);
             $('.trow', $group).removeClass('selected-trow');
             $target.text(text1);
+            $('')
+            $group.removeClass('reviewed')
+            $('.reviewed-button', $group).text ('Mark as reviewed');
         }
     }
 

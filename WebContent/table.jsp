@@ -442,6 +442,7 @@ import="java.util.*"
                     $spinner.fadeOut();
                     if (o && o.status == 0) {
                         // could perhaps display a toast here
+                        window.location.reload();
                     } else {
                         alert('Save failed!');
                     }

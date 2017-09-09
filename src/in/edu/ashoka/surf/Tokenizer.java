@@ -162,7 +162,7 @@ public class Tokenizer {
         StringBuilder result = new StringBuilder();
 
         // these are from Gilles
-        List<String> tokens = Util.tokenize(s);
+        List<String> tokens = Util.tokenize(s, " \t."); // very important to always tokenize on periods. M.F. SOLANKI should become M F SOLANKI, not MF SOLANKI
         for (int i=0; i<tokens.size(); i++) {
             String token = tokens.get(i);
 
@@ -204,6 +204,7 @@ public class Tokenizer {
     public static void main (String args[]) {
         System.out.println (canonicalizeDesi("PATEL CHELABHAI PRABHUDAS"));
 
+        System.out.println (canonicalizeDesi("M.F. SOLANKI"));
 
 
     }

@@ -54,7 +54,7 @@
         <select  class="form-control selectpicker" id="splitColumn" name="splitColumn">
             <option value="">None</option>
             <%
-                for (String col: dataset.getColumnNames()) {
+                for (String col: dataset.getColumnDisplayNames()) {
                     if (col.equalsIgnoreCase(mergeCol))
                         continue;
             %>

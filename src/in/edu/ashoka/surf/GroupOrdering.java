@@ -41,8 +41,7 @@ public class GroupOrdering {
         }
     };
 
-    // this comparator takes avg. length of all the rows in a group, and sorts group by decreasing avg. length
-    private static Comparator<List<List<Row>>> approxAlphaComparator = new Comparator<List<List<Row>>>() {
+    private static Comparator<List<List<Row>>> complexAlphaComparator = new Comparator<List<List<Row>>>() {
         @Override
         public int compare(List<List<Row>> group1, List<List<Row>> group2) {
             float avgFirstChar1, avgFirstChar2;
@@ -62,6 +61,28 @@ public class GroupOrdering {
             avgFirstChar2 = (group2.size() > 0) ? ((float) sumFirstChar2)/group2.size() : 0.0f;
 
             return ((Float) avgFirstChar1).compareTo(avgFirstChar2); // return -1 if avg length of group 1 is more than avg length of group 2
+        }
+    };
+
+    // this comparator takes first row in a group, and alphabetically compares it to the first row of the second group
+    private static Comparator<List<List<Row>>> approxAlphaComparator = new Comparator<List<List<Row>>>() {
+        @Override
+        public int compare(List<List<Row>> group1, List<List<Row>> group2) {
+            float avgFirstChar1, avgFirstChar2;
+
+            // this is somewhat inefficient, we are computing sumLength repeatedly.
+            // could be made faster by computing it just once for each group.
+
+            // flatmap: flatten the list of list of rows to a list of rows first
+            // map each row to it's MERGE_FIELD value
+            // then map that field to it's length (0 if null)
+            // convert that Integer to an int
+            // them sum up the ints
+            // note limit(1) here, it only considers first row
+            Row firstRowInGroup1 = group1.stream().flatMap(List::stream).iterator().next();
+            Row firstRowInGroup2 = group2.stream().flatMap(List::stream).iterator().next();
+
+            return firstRowInGroup1.get(Config.MERGE_FIELD).compareTo (firstRowInGroup2.get(Config.MERGE_FIELD));
         }
     };
 

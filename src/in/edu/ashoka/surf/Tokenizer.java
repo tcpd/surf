@@ -172,12 +172,12 @@ public class Tokenizer {
             else
                 token = token.replaceAll("^KU$", "KUMAR");
 
-            for (Pattern p: patternToReplacement.keySet())
-                token = p.matcher(token).replaceAll(patternToReplacement.get(p));
-
             // ignore titles
             if (Config.ignoreTokensSet.contains(token))
                 continue;
+
+            for (Pattern p: patternToReplacement.keySet())
+                token = p.matcher(token).replaceAll(patternToReplacement.get(p));
 
             token = token.replaceAll(" ", "");
             if (token.length() < 1)
@@ -202,6 +202,7 @@ public class Tokenizer {
 
 
     public static void main (String args[]) {
+        System.out.println (canonicalizeDesi("BRAHMKUMAR RANCHHODLAL BHATT"));
         System.out.println (canonicalizeDesi("PATEL CHELABHAI PRABHUDAS"));
 
         System.out.println (canonicalizeDesi("M.F. SOLANKI"));

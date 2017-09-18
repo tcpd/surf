@@ -36,7 +36,7 @@ public class Config {
             "AGRA", "AGAR", // AGRAWAL vs AGARWAL
             "KER", "KAR", // SONKAR vs SONKER
             "HAR", "HR", // e.g. VOHARA vs VOHRA
-            "HAT", "HT", // e.g. MAHATAB vs MAHTAB
+         //   "HAT", "HT", // e.g. MAHATAB vs MAHTAB, but this breaks BHAT and makes it BT
             "RAT", "RT", // e.g. BHARATENDRA vs BHARTENDRA
             "RAJ", "RJ", // e.g. NEERJA vs NEERAJA
             "SAL", "SL", // e.g. BHONSALE vs BHONSLE

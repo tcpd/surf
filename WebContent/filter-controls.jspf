@@ -49,8 +49,8 @@ if (Util.nullOrEmpty(filterSpec)) { placeholder = "No filter is set. All rows ma
 <div class="form-group">
     <label data-toggle="tooltip" title="These rows will be shown within the selected clusters." for="rowViewControlSpec">Rows to show (within shown clusters):</label>
     <select class="form-control selectpicker" id="rowViewControlSpec" name="rowViewControlSpec">
-        <option <%=MergeManager.RowViewControl.ALL_ROWS.name().equals (rvc.name()) ? "selected" : ""%> value="<%=MergeManager.RowViewControl.ALL_ROWS.name()%>">All rows</option>
-        <option <%=MergeManager.RowViewControl.IDS_MATCHING_FILTER.name().equals (rvc.name()) ? "selected" : ""%> value="<%=MergeManager.RowViewControl.IDS_MATCHING_FILTER.name()%>">All rows for IDs matching filter</option>
-        <option <%=MergeManager.RowViewControl.ROWS_MATCHING_FILTER.name().equals (rvc.name()) ? "selected" : ""%> value="<%=MergeManager.RowViewControl.ROWS_MATCHING_FILTER.name()%>">All rows matching filter</option>
+        <option <%=MergeManager.RowViewControl.ALL_ROWS.name().equals (rvc.name()) ? "selected" : ""%> value="<%=MergeManager.RowViewControl.ALL_ROWS.name()%>">All rows in cluster</option>
+        <option <%=MergeManager.RowViewControl.IDS_MATCHING_FILTER.name().equals (rvc.name()) ? "selected" : ""%> value="<%=MergeManager.RowViewControl.IDS_MATCHING_FILTER.name()%>">All rows for an ID if any of its rows matches filter</option>
+        <option <%=MergeManager.RowViewControl.ROWS_MATCHING_FILTER.name().equals (rvc.name()) ? "selected" : ""%> value="<%=MergeManager.RowViewControl.ROWS_MATCHING_FILTER.name()%>">Only rows matching filter</option>
     </select>
 </div>

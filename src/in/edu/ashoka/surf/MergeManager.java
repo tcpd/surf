@@ -274,6 +274,23 @@ public class MergeManager {
         List<List<List<Row>>> postFilterGroups = applyFilter(new Filter(filterSpec), groupFilter, rowFilter);
         Comparator<List<List<Row>>> comparator = GroupOrdering.getComparator (sortOrder);
         postFilterGroups.sort (comparator);
+
+        /** use this to dump all the groups for debugging
+        for (List<List<Row>> group: postFilterGroups) {
+            StringBuilder sb = new StringBuilder();
+            int length = 0, count = 0, num = 0;
+            for (List<Row> rows: group) {
+                for (Row row: rows) {
+                    length += row.get(Config.MERGE_FIELD).length();
+                    count++;
+                    num++;
+                    sb.append(row.get(Config.MERGE_FIELD) + " ");
+                }
+            }
+            System.out.println ("Group #" + num + ": " + sb + " #rows in group = " + count + " avg. len = " + ((float) length)/count);
+        }
+         */
+
         View view = new View(filterSpec, groupFilter, rowFilter, sortOrder, postFilterGroups);
         this.lastView = view;
         return view;

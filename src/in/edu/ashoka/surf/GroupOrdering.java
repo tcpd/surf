@@ -3,6 +3,8 @@ package in.edu.ashoka.surf;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Class that encapsulates comparison functions on groups.
@@ -27,10 +29,23 @@ public class GroupOrdering {
             int sumLength1 = group1.stream().flatMap(List::stream).map (row -> row.get(Config.MERGE_FIELD)).map (fieldValue -> ((fieldValue != null) ? fieldValue.length() : 0)).mapToInt(Integer::intValue).sum();
             int sumLength2 = group2.stream().flatMap(List::stream).map (row -> row.get(Config.MERGE_FIELD)).map (fieldValue -> ((fieldValue != null) ? fieldValue.length() : 0)).mapToInt(Integer::intValue).sum();
 
-            avgLengthOfO1 = (group1.size() > 0) ? ((float) sumLength1)/group1.size() : 0.0f;
-            avgLengthOfO2 = (group2.size() > 0) ? ((float) sumLength2)/group2.size() : 0.0f;
+            avgLengthOfO1 = (group1.size() > 0) ? ((float) sumLength1)/group1.stream().flatMap(List::stream).count() : 0.0f;
+            avgLengthOfO2 = (group2.size() > 0) ? ((float) sumLength2)/group2.stream().flatMap(List::stream).count() : 0.0f;
 
-            return ((Float) avgLengthOfO2).compareTo(avgLengthOfO1); // return -1 if avg length of group 1 is more than avg length of group 2
+            // if same length (because many groups, esp. the smaller ones will have exactly the same total length and the same number of entries),
+            // order by alpha on the merge field, just so we have some stability
+            if (Math.abs (avgLengthOfO1 - avgLengthOfO2) < 0.001 ) {
+                // sort all the rows in each group, take the first row and compare them
+                List<String> list1 = group1.stream().flatMap(List::stream).map (r -> r.get(Config.MERGE_FIELD)).collect (Collectors.toList());
+                List<String> list2 = group2.stream().flatMap(List::stream).map (r -> r.get(Config.MERGE_FIELD)).collect (Collectors.toList());
+                Collections.sort (list1);
+                Collections.sort (list2);
+                if (list1.size() > 0 && list2.size() > 0)
+                    return list1.get(0).compareTo (list2.get(0));
+                else
+                    return 0;
+            } else
+                return ((Float) avgLengthOfO2).compareTo(avgLengthOfO1); // return -1 if avg length of group 1 is more than avg length of group 2
         }
     };
 

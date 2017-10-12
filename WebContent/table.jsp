@@ -343,8 +343,8 @@ import="java.util.*"
             return;
         }
 
-        // get the actual row which has the checkbox on it (which is the first row of the group
-        var $row_with_checkbox = $row.hasClass('first-row-for-id') ? $row : $($row.siblings('.first-row-for-id')[0]);
+        // get the actual row which has the checkbox on it (which is the first row of the id)
+        var $row_with_checkbox = $row.hasClass('first-row-for-id') ? $row : $($row.prev('.first-row-for-id'));
 
         var $checkbox = $('input.select-checkbox', $row_with_checkbox);
         // toggle the checkbox

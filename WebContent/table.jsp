@@ -202,9 +202,9 @@ import="java.util.*"
                 hoverText += " Effective: " + Util.escapeHTML(row.get ("st" + Config.MERGE_FIELD));
 				hoverText += " (Indianized: " + Util.escapeHTML(row.get ("c" + Config.MERGE_FIELD));
 				hoverText += " Tokenized: " + Util.escapeHTML(row.get ("t" + Config.MERGE_FIELD)) + ")";
-				String pcInfo = "Constituency number: " + row.get("AC_no") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("subregion");
-				String href = "http://www.google.com/search?q=" + row.get(Config.MERGE_FIELD).replace(" ","+") + "+" + row.get("Constituency").replace(" ","+") + "+" + row.get("Year");
-				String pc_href = "https://www.google.co.in/maps/place/" + row.get("Constituency").replace(" ","+") + "," + row.get("statename").replace("_","+");
+				String pcInfo = "Constituency number: " + row.get("Constituency_No") + " (Delim " + row.get("DelimId") + ") Subregion: " + row.get("Sub_Region");
+				String href = "http://www.google.com/search?q=" + row.get(Config.MERGE_FIELD).replace(" ","+") + "+" + row.get("Constituency_Name").replace(" ","+") + "+" + row.get("Year");
+				String pc_href = "https://www.google.co.in/maps/place/" + row.get("Constituency_Name").replace(" ","+") + "," + row.get("statename").replace("_","+");
                 hoverText = Util.escapeHTML(hoverText);
                 pcInfo = Util.escapeHTML(pcInfo);
 
@@ -220,8 +220,8 @@ import="java.util.*"
 
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
-				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD))%></a></td>
-				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency"))%></a></td>
+				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
+				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td>
 
                 <%  for (String col: Config.supplementaryColumns) { %>
                     <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>

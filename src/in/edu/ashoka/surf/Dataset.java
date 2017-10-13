@@ -23,18 +23,18 @@ public class Dataset implements Serializable{
 
 	public static String NEW_LINE_SEPARATOR = "\n";
     Collection<Row> rows;
-    Collection<String> actualColumnName;
+    private Collection<String> columnsToSave; // this is what is used to decide which columns get written out when the dataset is saved
     String name, description;
     Set<String> cColumns = new LinkedHashSet<>(); // this is the real list of col names (canonical) available (no aliases) for each row in this dataset.
     Multimap<String, String> cColumnToDisplayName = LinkedHashMultimap.create(); // display col names (both real and aliases)
     Map<String, String> cColumnAliases = new LinkedHashMap<>(); // cCol -> cCol as aliases.
     Timer timer;
     
-    public void addToActualColumnName(String col){
-    	if(actualColumnName.contains(col))
+    public void addToColumnsToSave(String col){
+    	if(columnsToSave.contains(col))
     		return;
     	else
-    		actualColumnName.add(col);
+    		columnsToSave.add(col);
     }
 
     /* returns the actual display names of the columns in this dataset */
@@ -91,11 +91,15 @@ public class Dataset implements Serializable{
             System.err.println("Error: duplicate columns for repeated: " + col);
     }
 
-    void registerColumn(String col) {
+    void registerColumn(String col) { registerColumn(col, false); }
+
+    void registerColumn(String col, boolean isAlias) {
         warnIfColumnExists(col);
         String cCol = canonicalizeCol(col);
         cColumns.add(cCol);
         cColumnToDisplayName.put(cCol, col);
+        if (!isAlias) // don't add if an alias, otherwise we get the column twice in the saved csv
+            addToColumnsToSave(col);
     }
 
     //check whether reading the file for the first time, i.e. no id's have been assigned yet.
@@ -110,6 +114,8 @@ public class Dataset implements Serializable{
 
     //initialize the id's for each row
     final public void initializeIds(){
+        if (!hasColumnName(Config.ID_FIELD))
+            registerColumn(Config.ID_FIELD);
         SurfExcel.assignUnassignedIds(getRows());
     }
 
@@ -120,7 +126,7 @@ public class Dataset implements Serializable{
             return;
         }
 
-        registerColumn(newCol);
+        registerColumn(newCol, true /* is an alias */);
         cColumnAliases.put(canonicalizeCol(newCol), canonicalizeCol(oldCol));
     }
 
@@ -158,7 +164,7 @@ public class Dataset implements Serializable{
         this.name = filename;
 
         Set<Row> allRows = new LinkedHashSet<>();
-        actualColumnName = new ArrayList<>();
+        columnsToSave = new ArrayList<>();
         int nRows = 0;
 //        Reader in = new FileReader("GE.csv");
         // read the names from CSV
@@ -169,7 +175,7 @@ public class Dataset implements Serializable{
 
             if (nRows == 1) {
                 for (String col : map.keySet()) {
-                	actualColumnName.add(col);
+                	columnsToSave.add(col);
                     registerColumn(col);
                 }
             }
@@ -247,7 +253,7 @@ public class Dataset implements Serializable{
         CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
         CSVPrinter csvFilePrinter = new CSVPrinter(fileWriter,csvFileFormat.withQuoteMode(QuoteMode.NON_NUMERIC));
 
-        List<String> columnList = new ArrayList<>(actualColumnName);
+        List<String> columnList = new ArrayList<>(columnsToSave);
         csvFilePrinter.printRecord(columnList);
         
         for(Row row:rows){

@@ -32,7 +32,7 @@ public class SaveServlet extends HttpServlet {
 			// parse the merge commands in json format
 			GsonBuilder gsonBuilder = new GsonBuilder();
 			Gson gson = gsonBuilder.create();
-			MergeManager.MergeCommand[] commands = gson.fromJson(request.getParameter("json"), MergeManager.MergeCommand[].class);
+			MergeManager.Command[] commands = gson.fromJson(request.getParameter("json"), MergeManager.Command[].class);
 
 			// update the groups and view
 			mergeManager.applyUpdatesAndSave(commands);

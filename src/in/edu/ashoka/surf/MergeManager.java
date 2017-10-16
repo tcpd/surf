@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 import edu.stanford.muse.util.Util;
 import in.edu.ashoka.surf.util.Timers;
 import in.edu.ashoka.surf.util.UnionFindSet;
@@ -74,6 +76,8 @@ public class MergeManager {
             this.rowViewControl = rowFilter;
         }
 
+        public MergeManager getMergeManager () { return MergeManager.this; }
+
         public String description() {
             return  MergeManager.this.d.description + "\nAlgorithm: " + MergeManager.this.algorithm.toString() +
                     (!Util.nullOrEmpty(MergeManager.this.splitColumn) ? " (further split by " + splitColumn + ")" : "") + "\n"
@@ -93,9 +97,10 @@ public class MergeManager {
      * This is useful when rows under an ID are unmerged and have to be assigned new IDs.
      */
     private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
+    private SetMultimap<Row, String> rowToLabels = HashMultimap.create();
     public int nextAvailableId = 0;
 
-    List<MergeCommand> allCommands = new ArrayList<>(); // compile all the commands, so that they can be replayed some day, if needed
+    List<Command> allCommands = new ArrayList<>(); // compile all the commands, so that they can be replayed some day, if needed
 
     private MergeAlgorithm algorithm;
     private String splitColumn;
@@ -104,19 +109,24 @@ public class MergeManager {
     // a small class to represent operations made on this dataset.
     // op is the operation to run: merge, or unmerge
     // the merge or unmerge is run on the given ids.
-    public static class MergeCommand {
+    public static class Command {
         private static final String MERGE_ID_DELIMITER = ";"; // this string should not be allowed to be part of any ID
         String op;
         String groupId; // not needed and not used currently
+        String label;
         String[] ids;
 
         // e.g.
         // merge: 100; 200; 300
         // unmerge: 1000
+        // add-label: reviewed 100;200;300
+        // remove-label: reviewed 400;500;600
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append(op);
             sb.append(":");
+            if (!Util.nullOrEmpty(label))
+                sb.append(label);
             for (String id : ids) {
                 sb.append(id);
                 sb.append(MERGE_ID_DELIMITER); // delimite ID's with
@@ -159,11 +169,25 @@ public class MergeManager {
 
         // this is where the groups are generated
         groups = algorithm.run();
+        rowToLabels.clear(); // remove all the old labels the moment a new alg. is run
         // if the dataset already had some id's the same, merge them
         updateMergesBasedOnIds();
         this.splitColumn = splitColumn;
         if (!Util.nullOrEmpty(splitColumn))
             splitByColumn (splitColumn);
+    }
+
+    public void addLabel (Row r, String label) {
+        rowToLabels.put (r, label);
+    }
+
+    public boolean removeLabel (Row r, String label) {
+        return rowToLabels.remove(r, label);
+    }
+
+    public boolean hasLabel (Row r, String label) {
+        Collection<String> labels = rowToLabels.get (r);
+        return labels != null && labels.contains (label);
     }
 
     /** will split groups into new groups based on the split column */
@@ -228,12 +252,12 @@ public class MergeManager {
     }
 
     /** applies the given merge/unmerge commands on the dataset */
-    public void applyUpdatesAndSave(MergeCommand[] commands) throws IOException {
+    public void applyUpdatesAndSave(Command[] commands) throws IOException {
         allCommands.addAll (Arrays.asList(commands));
 
         log.info ("Applying " + commands.length + " command(s) to " + d);
 
-        for (MergeCommand command: commands) {
+        for (Command command: commands) {
             if ("merge".equalsIgnoreCase(command.op)) {
                 // we have to merge all the ids in command.ids
                 // the id of the first will be put into firstId, and copied to all the other rows with that id
@@ -254,7 +278,7 @@ public class MergeManager {
                     }
                     idToRows.removeAll (id); // remove this id entirely from the map, it will not be used again
                 }
-                updateMergesBasedOnIds();
+                updateMergesBasedOnIds(); // is this needed now, or can it be done outside the loop?
             } else if ("unmerge".equalsIgnoreCase(command.op)) {
                 // create unique id's for all rows
                 for (String id : command.ids) {
@@ -262,6 +286,28 @@ public class MergeManager {
                     for (Row row : rowsForThisId) {
                         row.set(Config.ID_FIELD, Integer.toString(nextAvailableId));
                         nextAvailableId++;
+                    }
+                }
+            } else if ("add-label".equalsIgnoreCase(command.op)) {
+                String label = command.label;
+                for (String gid : command.ids) {
+                    List<List<Row>> rowsForThisGid = lastView.viewGroups.get(Integer.parseInt(gid));
+
+                    for (List<Row> rowsForThisId : rowsForThisGid) {
+                        for (Row row : rowsForThisId) {
+                            addLabel(row, label);
+                        }
+                    }
+                }
+            } else if ("remove-label".equalsIgnoreCase(command.op)) {
+                String label = command.label;
+                for (String gid : command.ids) {
+                    List<List<Row>> rowsForThisGid = lastView.viewGroups.get(Integer.parseInt(gid));
+
+                    for (List<Row> rowsForThisId : rowsForThisGid) {
+                        for (Row row : rowsForThisId) {
+                            removeLabel(row, label);
+                        }
                     }
                 }
             }

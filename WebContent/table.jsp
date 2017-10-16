@@ -39,11 +39,13 @@ import="java.util.*"
     int currentPage = 1;
     try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
     MergeManager.View view = (MergeManager.View) session.getAttribute("view");
+
     if (view == null) {
         out.println ("Sorry, no view has been set up in the session");
         return;
     }
     List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
+    MergeManager mergeManager = view.getMergeManager();
 
     int numPages = (int) Math.ceil(((double) groupsToShow.size()) / Config.groupsPerPage);
 
@@ -166,12 +168,14 @@ import="java.util.*"
         List<List<Row>> groupRows = groupsToShow.get(gid);
         // render a group of records in a tbody (tables can have multiple tbody's)
 
+        boolean isReviewed = groupRows.stream().flatMap(List::stream).allMatch(r -> mergeManager.hasLabel (r, "reviewed"));
+        String isReviewedClass = isReviewed ? "reviewed" : "";
         %>
-        <tbody data-groupId="<%=gid%>" class="inside-table" id="table-body">
+        <tbody data-groupId="<%=gid%>" class="inside-table <%=isReviewedClass%>" id="table-body">
         <tr class="toolbar-row">
             <td colspan="20"> <!-- 20 just to be safe -- we just want it at extreme right -->
                 <button data-groupId="<%=gid%>" class="select-button" type="button" id="select-all" >Select all</button>
-                <button data-groupId="<%=gid%>" class="reviewed-button" type="button" id="done-all">Mark as reviewed</button>
+                <button data-groupId="<%=gid%>" class="reviewed-button" type="button" id="done-all">Mark as <%=isReviewed ? "unreviewed" : "reviewed"%></button>
 
                 <% if (!firstGroup) { // don't show "till above" buttons for first group %>
 
@@ -401,44 +405,70 @@ import="java.util.*"
 
         $groups = $('tbody'); // find the nearest tbody, which corresponds to a group
         var commands = [];
-        var across_groups =  $('.across-groups').is(':checked');
 
-        if (across_groups || op === 'unmerge') {
-            // if across_groups there will be a single command, merging all the id's regardless of group
-            // if unmerge also, there will be a single command with all the ids to be broken up
-            var command = {op:op, groupId: 'none', ids: []}; // if merging across groups, groupId doesn't matter.
-            $checked = $('input.select-checkbox:checked'); // gather checked checkboxes anywhere on the page
-            for (var j = 0; j < $checked.length; j++) {
-                command.ids.push($($checked[j]).attr('data-id'));
-            }
-            commands[0] = command;
-            $('.across-groups').prop ('checked', false); // deliberately set it to false immediately after, we're worried about accidental merges across groups. across-groups should be the exception rather than the rule.
-        } else {
-            for (var i = 0; i < $groups.length; i++) {
-                var $group = $($groups[i]);
-                var commandForThisGroup = {op: op, groupId: $group.attr('data-groupId'), ids: []}; // groupId is not directly used but we keep it anyway for future use
+        // gather un/merge commands
+        {
+            var across_groups = $('.across-groups').is(':checked');
 
-                $checked = $('input.select-checkbox:checked', $group);
-                if ($checked.length < 2)
-                    continue; // no id, or 1 id checked, in either case it doesn't matter.
-
+            if (across_groups || op === 'unmerge') {
+                // if across_groups there will be a single command, merging all the id's regardless of group
+                // if unmerge also, there will be a single command with all the ids to be broken up
+                var command = {op: op, groupId: 'none', ids: []}; // if merging across groups, groupId doesn't matter.
+                $checked = $('input.select-checkbox:checked'); // gather checked checkboxes anywhere on the page
                 for (var j = 0; j < $checked.length; j++) {
-                    commandForThisGroup.ids.push($($checked[j]).attr('data-id'));
+                    command.ids.push($($checked[j]).attr('data-id'));
                 }
-                commands.push(commandForThisGroup);
+                commands[0] = command;
+                $('.across-groups').prop('checked', false); // deliberately set it to false immediately after, we're worried about accidental merges across groups. across-groups should be the exception rather than the rule.
+            } else {
+                // merge within clusters
+                for (var i = 0; i < $groups.length; i++) {
+                    var $group = $($groups[i]);
+                    var commandForThisGroup = {op: op, groupId: $group.attr('data-groupId'), ids: []}; // groupId is not directly used but we keep it anyway for future use
+
+                    $checked = $('input.select-checkbox:checked', $group);
+                    if ($checked.length < 2)
+                        continue; // no id, or 1 id checked, in either case it doesn't matter.
+
+                    for (var j = 0; j < $checked.length; j++) {
+                        commandForThisGroup.ids.push($($checked[j]).attr('data-id'));
+                    }
+                    commands.push(commandForThisGroup);
+                }
             }
         }
 
-        var post_data = {json: JSON.stringify(commands)};
+        // gather un/reviewed status for all groups and add it to the commands
+        {
+            var reviewedGroupIds = [], unreviewedGroupIds = [];
+            for (var i = 0; i < $groups.length; i++) {
+                var $group = $($groups[i]);
+                // gather all group ids into 2 arrays, reviewed and unreviewed
+                if ($group.hasClass('reviewed')) {
+                    reviewedGroupIds.push($group.attr('data-groupid'));
+                } else {
+                    unreviewedGroupIds.push($group.attr('data-groupid'));
+                }
+            }
 
-        $spinner.fadeIn();
+            var commandForReviewedGroups = {op: 'add-label', label: 'reviewed', ids: reviewedGroupIds}; // groupId is not directly used but we keep it anyway for future use
+            var commandForUnreviewedGroups = {op: 'remove-label', label: 'reviewed', ids: unreviewedGroupIds}; // groupId is not directly used but we keep it anyway for future use
+            commands.push(commandForReviewedGroups);
+            commands.push(commandForUnreviewedGroups);
+        }
 
-        $.ajax ({
+        // now send the commands to the backend
+        {
+            var post_data = {json: JSON.stringify(commands)};
+
+            $spinner.fadeIn();
+
+            $.ajax({
                 type: 'POST',
                 url: 'ajax/do-commands',
                 datatype: 'json',
                 data: post_data,
-                success: function(o) {
+                success: function (o) {
                     $spinner.fadeOut();
                     if (o && o.status == 0) {
                         // could perhaps display a toast here
@@ -447,8 +477,12 @@ import="java.util.*"
                         alert('Save failed!');
                     }
                 },
-            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: save failed! ' + textStatus + ' ' + jqXHR.responseText);}
-        });
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $spinner.fadeOut();
+                    alert('Warning: save failed! ' + textStatus + ' ' + jqXHR.responseText);
+                }
+            });
+        }
     }
 
     function filter_submit_handler (e) {

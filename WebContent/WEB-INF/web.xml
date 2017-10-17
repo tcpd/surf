@@ -1,54 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
-  <display-name>surf</display-name>
-  <welcome-file-list>
-    <welcome-file>index.jsp</welcome-file>
-  </welcome-file-list>
-  <servlet>
-    <servlet-name>table</servlet-name>
-    <jsp-file>/table.jsp</jsp-file>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>table</servlet-name>
-    <url-pattern>/table</url-pattern>
-  </servlet-mapping>
+<web-app
+        xmlns="http://java.sun.com/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_1.xsd"
+        version="3.1">
+    <display-name>surf</display-name>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+    <servlet>
+        <servlet-name>table</servlet-name>
+        <jsp-file>/table.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>table</servlet-name>
+        <url-pattern>/table</url-pattern>
+    </servlet-mapping>
 
-  <servlet>
-    <servlet-name>select-op</servlet-name>
-    <jsp-file>/select-op.jsp</jsp-file>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>select-op</servlet-name>
-    <url-pattern>/select-op</url-pattern>
-  </servlet-mapping>
+    <servlet>
+        <servlet-name>select-op</servlet-name>
+        <jsp-file>/select-op.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>select-op</servlet-name>
+        <url-pattern>/select-op</url-pattern>
+    </servlet-mapping>
 
-  <servlet>
-    <servlet-name>read-dataset</servlet-name>
-    <jsp-file>/read-dataset.jsp</jsp-file>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>read-dataset</servlet-name>
-    <url-pattern>/read-dataset</url-pattern>
-  </servlet-mapping>
+    <servlet>
+        <servlet-name>read-dataset</servlet-name>
+        <jsp-file>/read-dataset.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>read-dataset</servlet-name>
+        <url-pattern>/read-dataset</url-pattern>
+    </servlet-mapping>
 
-  <servlet>
-    <servlet-name>run-merge</servlet-name>
-    <servlet-class>in.edu.ashoka.surf.MergeServlet</servlet-class>
-  </servlet>
+    <servlet>
+        <servlet-name>run-merge</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.MergeServlet</servlet-class>
+    </servlet>
 
-  <servlet-mapping>
-    <servlet-name>run-merge</servlet-name>
-    <url-pattern>/ajax/run-merge</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>run-merge</servlet-name>
+        <url-pattern>/ajax/run-merge</url-pattern>
+    </servlet-mapping>
 
-  <error-page>
-    <exception-type>java.lang.Exception</exception-type>
-    <location>/error.jsp</location>
-  </error-page>
+    <error-page>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/error.jsp</location>
+    </error-page>
 
     <servlet>
         <servlet-name>do-commands</servlet-name>
-      <jsp-file>/ajax/do-commands.jsp</jsp-file>
+        <jsp-file>/ajax/do-commands.jsp</jsp-file>
     </servlet>
 
     <servlet-mapping>
@@ -57,19 +61,41 @@
     </servlet-mapping>
 
     <filter>
-    <filter-name>LoggingFilter</filter-name>
-    <filter-class>
-      edu.stanford.muse.webapp.LoggingFilter
-    </filter-class>
-    <init-param>
-      <param-name>test-param</param-name>
-      <param-value>This parameter is for testing.</param-value>
-    </init-param>
-  </filter>
+        <filter-name>LoggingFilter</filter-name>
+        <filter-class>
+            edu.stanford.muse.webapp.LoggingFilter
+        </filter-class>
+        <init-param>
+            <param-name>test-param</param-name>
+            <param-value>This parameter is for testing.</param-value>
+        </init-param>
+    </filter>
 
-  <filter-mapping>
-    <filter-name>LoggingFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
+    <servlet>
+        <servlet-name>jsp</servlet-name>
+        <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+        <init-param>
+            <param-name>fork</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>xpoweredBy</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>compilerSourceVM</param-name>
+            <param-value>1.8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>compilerTargetVM</param-name>
+            <param-value>1.8</param-value>
+        </init-param>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <filter-mapping>
+        <filter-name>LoggingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
 </web-app>

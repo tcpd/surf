@@ -137,18 +137,20 @@ public class MergeManager {
 
     /** create a new mergeManager with the given algorithm and arguments, and runs the algorithm and stores the (initial) groups.
      * further splits by splitColumn if it's not null or empty */
-    public MergeManager(Dataset dataset, String algo, String arguments, String splitColumn, String filterSpec) {
+    public MergeManager(Dataset dataset, Map<String, String> params) {
         this.d = dataset;
         computeIdToRows(d.getRows());
 
+        String filterSpec = params.get ("filterSpec");
         Filter filter = new Filter (filterSpec);
+        String algo = params.get ("algorithm");
 
         Tokenizer.setupDesiVersions(dataset.getRows(), Config.MERGE_FIELD);
 
         if (algo.equals("editDistance")) {
             int editDistance = Config.DEFAULT_EDIT_DISTANCE;
             try {
-                editDistance = Integer.parseInt(arguments);
+                editDistance = Integer.parseInt(params.get("edit-distance"));
             } catch (NumberFormatException e) {
                 Util.print_exception(e, log);
             }
@@ -164,7 +166,20 @@ public class MergeManager {
                 public String toString() { return "Dummy merge"; }
             };
         } else if (algo.equals("compatibleNames")) {
-            algorithm = new CompatibleNameAlgorithm(d, "_c_" + Config.MERGE_FIELD, filter); // we run it on the canon version of the name, not the tokenized, cecause that causes too many merges
+            int minTokenOverlap = Config.DEFAULT_MIN_TOKEN_OVERLAP;
+            try {
+                minTokenOverlap = Integer.parseInt(params.get("min-token-overlap"));
+            } catch (NumberFormatException e) {
+                Util.print_exception(e, log);
+            }
+            int ignoreTokenFrequency = Config.DEFAULT_IGNORE_TOKEN_FREQUENCY;
+            try {
+                ignoreTokenFrequency = Integer.parseInt(params.get("ignore-token-frequency"));
+            } catch (NumberFormatException e) {
+                Util.print_exception(e, log);
+            }
+            String fieldToCompare = "_c_" + Config.MERGE_FIELD; // we run it on the canon version of the name, not the tokenized, because that causes too many merges
+            algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency);
         }
 
         // this is where the groups are generated
@@ -172,7 +187,7 @@ public class MergeManager {
         rowToLabels.clear(); // remove all the old labels the moment a new alg. is run
         // if the dataset already had some id's the same, merge them
         updateMergesBasedOnIds();
-        this.splitColumn = splitColumn;
+        this.splitColumn = params.get("splitColumn");
         if (!Util.nullOrEmpty(splitColumn))
             splitByColumn (splitColumn);
     }

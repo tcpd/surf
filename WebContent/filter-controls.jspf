@@ -33,7 +33,7 @@ if (Util.nullOrEmpty(filterSpec)) { placeholder = "No filter is set. All rows ma
 <div class=form-group>
     <label for="filterSpec">Filter</label>
     <input id="filterSpec" name="filterSpec" type="text" class="form-control" placeholder="<%=placeholder%>" value="<%=filterSpec%>">
-    <span style="font-size:90%;color:#aaa">Example: Position=1,2,3;Sex=M;Cand1=/GANDHI/</span>
+    <span class="help">Example: Position=1,2,3;Sex=M;Cand1=/GANDHI/</span>
 </div>
 
 <div class="form-group">

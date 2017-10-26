@@ -1,5 +1,15 @@
 package in.edu.ashoka.surf;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import edu.stanford.muse.webapp.JSPHelper;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class Util1 {
 
     static int editDistance(String word1, String word2) {
@@ -40,6 +50,46 @@ public class Util1 {
         }
 
         return dp[len1][len2];
+    }
+
+    public static Multimap<String, String> convertRequestToMultimap(HttpServletRequest request) throws UnsupportedEncodingException {
+        Multimap<String, String> params = LinkedHashMultimap.create();
+        {
+            if (true) {
+                // regular file encoding
+                Enumeration<String> paramNames = request.getParameterNames();
+
+                while (paramNames.hasMoreElements()) {
+                    String param = paramNames.nextElement();
+                    String[] vals = request.getParameterValues(param);
+                    if (vals != null)
+                        for (String val : vals)
+                            params.put(param, JSPHelper.convertRequestParamToUTF8(val));
+                }
+            }
+        }
+
+        return params;
+    }
+
+    public static Map<String, String> convertRequestToMap(HttpServletRequest request) throws UnsupportedEncodingException {
+        Map<String, String> params = new LinkedHashMap<>();
+        {
+            if (true) {
+                // regular file encoding
+                Enumeration<String> paramNames = request.getParameterNames();
+
+                while (paramNames.hasMoreElements()) {
+                    String param = paramNames.nextElement();
+                    String[] vals = request.getParameterValues(param);
+                    if (vals != null)
+                        for (String val : vals)
+                            params.put(param, JSPHelper.convertRequestParamToUTF8(val));
+                }
+            }
+        }
+
+        return params;
     }
 }
 

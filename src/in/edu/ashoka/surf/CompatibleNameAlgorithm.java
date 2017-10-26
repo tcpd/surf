@@ -14,14 +14,19 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
     private String primaryFieldName;
     private Filter filter;
     private Set<String> ignoredTokens = new LinkedHashSet<>(); // these are common tokens that won't be considered for matching
+	private int minTokenOverlap;
+	public int ignoreTokenFrequency; /* beyond this freq. threshold in the dataset, the token will not be considered */
 
-    private static final int MIN_TOKEN_OVERLAP = 3;
-    private static final int IGNORE_TOKEN_THRESHOLD = 200;
+	public CompatibleNameAlgorithm(Dataset d) {
+		super(d);
+	}
 
-	public CompatibleNameAlgorithm(Dataset d, String primaryFieldName, Filter filter) {
+	public CompatibleNameAlgorithm(Dataset d, String primaryFieldName, Filter filter, int minTokenOverlap, int ignoreTokenFrequency) {
 		super(d);
 	    this.primaryFieldName = primaryFieldName;
 	    this.filter = filter;
+		this.minTokenOverlap = minTokenOverlap;
+        this.ignoreTokenFrequency = ignoreTokenFrequency;
 
 	    Map<String, Integer> map = new LinkedHashMap<>();
 	    for (Row r: dataset.getRows()) {
@@ -39,10 +44,11 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
         log.info ("Printing token frequencies");
         List<Pair<String, Integer>> pairs = Util.sortMapByValue(map);
 	    for (Pair<String, Integer>  p: pairs) {
-	        if (p.getSecond() > IGNORE_TOKEN_THRESHOLD)
+	        if (p.getSecond() > ignoreTokenFrequency)
                 ignoredTokens.add (p.getFirst());
         }
         log.info ("Done printing token frequencies");
+        log.info ("Ignored tokens: " + Util.join (ignoredTokens, " "));
     }
 
     // check that each token in x maps to a token in y.
@@ -110,7 +116,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
             Multisets.removeOccurrences (yTokens, commonTokens);
             // if # commonTokens (barring ignoredTokens) is > MIN_TOKEN_OVERLAP then we can return straightaway
             commonTokens.removeAll (ignoredTokens);
-            if (commonTokens.size() >= MIN_TOKEN_OVERLAP)
+            if (commonTokens.size() >= minTokenOverlap)
                 return commonTokens.size();
         }
 
@@ -206,5 +212,8 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 		Util.ASSERT (compatibility("L K ADVANI", "LAL KRISHNA ADVANI") > 0);
         System.out.println ("All tests successful!");
         */
+		CompatibleNameAlgorithm alg = new CompatibleNameAlgorithm(null);
+		System.out.println (alg.compatibility("BISAN DUT LAKAN PAL", "BISAN DUT"));
+
 	}
 }

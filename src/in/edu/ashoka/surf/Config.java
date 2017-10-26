@@ -26,7 +26,9 @@ public class Config {
     public static String admin = "hangal@ashoka.edu.in";
     public static String ID_FIELD = "ID", MERGE_FIELD = "Name";
     public static int groupsPerPage = 100;
-    public static int DEFAULT_EDIT_DISTANCE = 2;
+    public static final int DEFAULT_EDIT_DISTANCE = 2;
+    public static final int DEFAULT_MIN_TOKEN_OVERLAP = 2;
+    public static final int DEFAULT_IGNORE_TOKEN_FREQUENCY = 200;
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{

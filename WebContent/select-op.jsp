@@ -1,7 +1,6 @@
 <%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ page import="in.edu.ashoka.surf.*" %>
 <%@ page import="edu.stanford.muse.util.Util" %>
-<%@ page import="javax.management.RuntimeMBeanException" %>
 
 <!DOCTYPE html>
 <html>
@@ -43,9 +42,21 @@
             <option value="allNames">All names</option>
 		</select>
         <br/>
-        <div class="div-algo-arg">
-            <label for="algo-arg">Maximum edit distance</label>
-            <input type="text" class="form-control" id="algo-arg" name="algo-arg" placeholder="<%=Config.DEFAULT_EDIT_DISTANCE%>">
+        <div style="display:none" class="div-edit-distance">
+            <label for="edit-distance">Maximum edit distance</label>
+            <input type="text" class="form-control" id="edit-distance" name="edit-distance" placeholder="<%=Config.DEFAULT_EDIT_DISTANCE%>">
+            <span class="help">Edit distance 0 not included</span>
+
+        </div>
+        <div style="display:none" class="div-min-token-overlap">
+            <label for="min-token-overlap">Token overlap</label>
+            <input type="text" class="form-control" id="min-token-overlap" name="min-token-overlap" placeholder="<%=Config.DEFAULT_MIN_TOKEN_OVERLAP%>">
+            <span class="help">Group rows together if this number of tokens are common</span>
+        </div>
+        <div style="display:none" class="div-ignore-token-frequency">
+            <label for="ignore-token-frequency">Ignore token frequency</label>
+            <input type="text" class="form-control" id="ignore-token-frequency" name="ignore-token-frequency" placeholder="<%=Config.DEFAULT_IGNORE_TOKEN_FREQUENCY%>">
+            <span class="help">Frequency threshold in this dataset beyond which a token will be ignored</span>
         </div>
     </div>
 
@@ -77,8 +88,8 @@
     var collect_input_fields = function() {
         var result = {};
         $('input,select').each (function() {  // select field is needed for accounttype
-            if ($(this).attr('type') == 'button') { return; } // ignore buttons (usually #gobutton)
-            if ($(this).attr('type') == 'checkbox') {
+            if ($(this).attr('type') === 'button') { return; } // ignore buttons (usually #gobutton)
+            if ($(this).attr('type') === 'checkbox') {
                 if ($(this).is(':checked'))
                 {
                     result[this.name] = 'on';
@@ -104,18 +115,30 @@
             url: 'ajax/run-merge',
             datatype: 'json',
             data: collect_input_fields(),
-            success: function (o) { if (o && o.status == 0) { window.location = 'table?page=1'; } else { alert ('Warning: error ' + o);} $spinner.fadeOut();},
+            success: function (o) { if (o && o.status === 0) { window.location = 'table?page=1'; } else { alert ('Warning: error ' + o);} $spinner.fadeOut();},
             error: function () { $spinner.fadeOut(); alert ('Warning: Run algorithm failed!');}
         });
     });
 
-    $('#algorithm').change(function() {
-        if ($('#algorithm').find(':selected').val() != 'editDistance') {
-            $('.div-algo-arg').hide();
+    function set_options_for_algorithm() {
+        var alg = $('#algorithm').val();
+        if (alg === 'editDistance') {
+            $('.div-edit-distance').show();
         } else {
-            $('.div-algo-arg').show();
+            $('.div-edit-distance').hide();
         }
-    });
+
+        if (alg === 'compatibleNames') {
+            $('.div-min-token-overlap').show();
+            $('.div-ignore-token-frequency').show();
+        } else {
+            $('.div-min-token-overlap').hide();
+            $('.div-ignore-token-frequency').hide();
+        }
+    };
+
+    $('#algorithm').change(set_options_for_algorithm);
+    $(document).ready(set_options_for_algorithm);
 
 </script>
 

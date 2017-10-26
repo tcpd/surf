@@ -79,6 +79,8 @@ body{
 
 }
 
+.help {font-size:90%;color:#aaa}
+
 .reviewed1 {
     background: repeating-linear-gradient(
             to right,

@@ -96,6 +96,7 @@ public class Config {
 
     // these will be customized per dataset, or even by the user at run time
     public static String[] supplementaryColumns = new String[]{"Year", "Party", "Position", "Sex", "Statename", "Votes"}; // supplementary columns to display. These are emitted as is, without any special processing
+    public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
 
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
     public static Map<String, String> keyToPath  = new LinkedHashMap<>(), keyToDescription = new LinkedHashMap<>();

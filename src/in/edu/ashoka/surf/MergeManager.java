@@ -379,7 +379,7 @@ public class MergeManager {
 
 			// ok, this group is to be shown. sort the rows in this group data based on sortColumns
 			{
-				String[] sortColumns = new String[]{"Constituency", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
+				String[] sortColumns = Config.sortColumns;
 
 				Comparator c = (Comparator<Row>) (r1, r2) -> {
                     for (String col : sortColumns) {

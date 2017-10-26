@@ -198,6 +198,10 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 		return classes;
 	}
 
+	public String toString() {
+	    return "Compatible names algorithm with min. token overlap: " + minTokenOverlap + " ignore token frequency: " + ignoreTokenFrequency + ", " + ignoredTokens.size() + " ignored tokens (" + Util.join (ignoredTokens, " ") + ")";
+    }
+
 	public static void main (String args[]) {
 	    /*
 	    CompatibleNameAlgorithm alg = new CompatibleNameAlgorithm();

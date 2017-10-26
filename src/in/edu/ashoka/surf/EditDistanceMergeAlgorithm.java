@@ -74,5 +74,5 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
         return classes;
     }
 
-    public String toString() { return "Edit distance " + editDistance; }
+    public String toString() { return "Edit distance algorithm with maximum edit distance" + editDistance; }
 }

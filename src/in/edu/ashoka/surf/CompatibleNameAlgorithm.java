@@ -4,7 +4,12 @@ import com.google.common.collect.*;
 import edu.stanford.muse.util.Pair;
 import in.edu.ashoka.surf.util.UnionFindSet;
 import edu.stanford.muse.util.Util;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,28 +21,27 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
     private Set<String> ignoredTokens = new LinkedHashSet<>(); // these are common tokens that won't be considered for matching
 	private int minTokenOverlap;
 	public int ignoreTokenFrequency; /* beyond this freq. threshold in the dataset, the token will not be considered */
+    private boolean substringAllowed = true, initialMapping = true;
 
 	public CompatibleNameAlgorithm(Dataset d) {
 		super(d);
 	}
 
-	public CompatibleNameAlgorithm(Dataset d, String primaryFieldName, Filter filter, int minTokenOverlap, int ignoreTokenFrequency) {
+	CompatibleNameAlgorithm(Dataset d, String primaryFieldName, Filter filter, int minTokenOverlap, int ignoreTokenFrequency, boolean substringAllowed, boolean initialMapping) {
 		super(d);
 	    this.primaryFieldName = primaryFieldName;
 	    this.filter = filter;
 		this.minTokenOverlap = minTokenOverlap;
         this.ignoreTokenFrequency = ignoreTokenFrequency;
+        this.substringAllowed = substringAllowed;
+        this.initialMapping = initialMapping;
 
 	    Map<String, Integer> map = new LinkedHashMap<>();
 	    for (Row r: dataset.getRows()) {
 	        String fieldVal = r.get (primaryFieldName);
 	        List<String> fieldValTokens = Util.tokenize(fieldVal);
 	        for (String t: fieldValTokens) {
-	            Integer I = map.get(t);
-	            if (I == null)
-	                map.put (t, 1);
-	            else
-	                map.put (t, I+1);
+                map.merge(t, 1, (a, b) -> a + b);
             }
         }
 
@@ -101,12 +105,20 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
         }
     }
 
-	// core compatibility function: at least 2 multi-letter tokens common, or whether all tokens in one can map to the other modulo initials
-	private int compatibility (String x, String y) {
+	// core compatibility function: at least (minTokenOverlap) multi-letter tokens common, or whether all tokens in one can map to the other modulo initials (if initialMapping is true)
+	private int compatibility (String x, String y, int minTokenOverlap, boolean substringAllowed, boolean initialMapping) {
 		Multiset<String> xTokens = LinkedHashMultiset.create();
 		xTokens.addAll(Util.tokenize(x));
         Multiset<String> yTokens = LinkedHashMultiset.create();
         yTokens.addAll (Util.tokenize(y));
+
+        // remove all ignored tokens
+        xTokens.removeAll(ignoredTokens);
+        yTokens.removeAll(ignoredTokens);
+
+        // if either x or y consists only of ignored tokens, it is effectively an empty token, return 0
+        if (xTokens.size() == 0 || yTokens.size() == 0)
+            return 0;
 
         {
             Multiset<String> commonTokens = LinkedHashMultiset.create();
@@ -114,8 +126,6 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
             Multisets.retainOccurrences (commonTokens, yTokens);
             Multisets.removeOccurrences (xTokens, commonTokens);
             Multisets.removeOccurrences (yTokens, commonTokens);
-            // if # commonTokens (barring ignoredTokens) is > MIN_TOKEN_OVERLAP then we can return straightaway
-            commonTokens.removeAll (ignoredTokens);
             if (commonTokens.size() >= minTokenOverlap)
                 return commonTokens.size();
         }
@@ -125,76 +135,208 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
         if (xTokens.size() == 0 && yTokens.size() == 0) {
             return 1;
         }
-        if (xTokens.size() == 0 || yTokens.size() == 0) {
-            return 0;
+        if (substringAllowed && (xTokens.size() == 0 || yTokens.size() == 0)) {
+            return 1;
         }
 
-
         // # x and y each have some tokens that are not the same. check if these tokens can map
-        if (canTokensMap(xTokens, yTokens) || canTokensMap(yTokens, xTokens))
+        if (initialMapping && (canTokensMap(xTokens, yTokens) || canTokensMap(yTokens, xTokens)))
 			return 1;
 		else
 			return 0;
 	}
 
-	@Override
-	public List<Collection<Row>> run() {
-		String field = primaryFieldName;
 
-        List<Row> filteredRows = dataset.getRows().stream().filter(filter::passes).collect(Collectors.toList());
+	private List<List<Row>> computeClasses (List<Row> filteredRows, int minTokenOverlap, boolean substringAllowed, boolean initialMapping) throws FileNotFoundException {
+	    log.info ("Compute classes called. #rows = " + filteredRows.size() + " minTokenOverlap: " + minTokenOverlap + " substringAllowed: " + substringAllowed + " initialMapping: " + initialMapping);
+        String field = primaryFieldName;
+        List<Pair<String, String>> edges = new ArrayList<>(); // for debugging only
 
-        // setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes in stnames that contain that token
-		// since editDistance computation is expensive, we'll only compute it for pairs that have at least 1 token in common
-		Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
-		for (int i = 0; i < filteredRows.size(); i++) {
-			String fieldVal = filteredRows.get(i).get(field);
-			StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
-			while (st.hasMoreTokens()) {
-				String tok = st.nextToken();
-				if (tok.length() < 3)
-					continue;
-				tokenToFieldIdx.put(tok, i);
-			}
-		}
+        // setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes that contain that token
+        // since compat computation is expensive, we'll only compute it for pairs that have at least 1 token in common
+        Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
+        for (int i = 0; i < filteredRows.size(); i++) {
+            String fieldVal = filteredRows.get(i).get(field);
+            StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
+            while (st.hasMoreTokens()) {
+                String tok = st.nextToken();
+                if (tok.length() < 2)
+                    continue;
+                tokenToFieldIdx.put(tok, i);
+            }
+        }
 
-		UnionFindSet<Row> ufs = new UnionFindSet<>();
-		for (int i = 0; i < filteredRows.size(); i++) {
+        UnionFindSet<Row> ufs = new UnionFindSet<>();
+        for (int i = 0; i < filteredRows.size(); i++) {
             String fieldVal = filteredRows.get(i).get(field);
 
             // collect the indexes of the values that we should compare stField with, based on common tokens
-			Set<Integer> idxsToCompareWith = new LinkedHashSet<>();
-			{
-				StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
-				while (st.hasMoreTokens()) {
-					String tok = st.nextToken();
-					if (tok.length() < 3)
-						continue;
-					Collection<Integer> c = tokenToFieldIdx.get(tok);
-					for (Integer j: c)
-						if (j > i)
-							idxsToCompareWith.add(j);
-				}
-			}
+            Set<Integer> idxsToCompareWith = new LinkedHashSet<>();
+            {
+                StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
+                while (st.hasMoreTokens()) {
+                    String tok = st.nextToken();
+                    Collection<Integer> c = tokenToFieldIdx.get(tok);
+                    for (Integer j : c)
+                        if (j > i)
+                            idxsToCompareWith.add(j);
+                }
+            }
 
-			for (int j : idxsToCompareWith) {
-			    String field_i = filteredRows.get(i).get(primaryFieldName);
+            for (int j : idxsToCompareWith) {
+                String field_i = filteredRows.get(i).get(primaryFieldName);
                 String field_j = filteredRows.get(j).get(primaryFieldName);
 
-                float compatibility = compatibility (field_i, field_j);
-				if (compatibility > 0) { // note: we could also compare primary field, not st field, to reduce noise
-					ufs.unify (filteredRows.get(i), filteredRows.get(j)); // i and j are in the same group
-					log.info ("merging " + field_i + " with " + field_j + " with confidence " + compatibility);
-				}
-			}
-		}
+                if (field_i.equals(field_j))
+                    // if fields are exactly the same, even if they only contain ignored tokens, they should be considered the same
+                    // no graph edge created here
+                    ufs.unify(filteredRows.get(i), filteredRows.get(j)); // i and j are in the same group
+                else {
+                    float compatibility = compatibility(field_i, field_j, minTokenOverlap, substringAllowed, initialMapping);
+                    if (compatibility > 0) { // note: we could also compare primary field, not st field, to reduce noise
+                        ufs.unify(filteredRows.get(i), filteredRows.get(j)); // i and j are in the same group
+                        edges.add(new Pair<>(field_i, field_j));
+                    }
+                }
+            }
+        }
 
-		List<List<Row>> clusters = ufs.getClassesSortedByClassSize(); // this gives us equivalence classes of row#s that have been merged
+        List<List<Row>> clusters = ufs.getClassesSortedByClassSize(); // this gives us equivalence classes of row#s that have been merged
+        log.info ("Compute classes generated " + clusters.size() + " clusters. -- params: #rows = " + filteredRows.size() + " minTokenOverlap: " + minTokenOverlap + " substringAllowed: " + substringAllowed + " initialMapping: " + initialMapping);
+
+        /*
+        if (clusters.size() > 0) {
+            List<Row> largestCluster = clusters.get(0);
+            // get the biggest cluster
+            Set<String> stringsInLargestCluster = largestCluster.stream().map (r -> r.get(Config.MERGE_FIELD)).collect(Collectors.toSet());
+            // from the list of all edges, keep only the edges that are in this cluster
+            edges = edges.stream().filter (p -> stringsInLargestCluster.contains(p.getFirst()) && stringsInLargestCluster.contains (p.getSecond())).collect(Collectors.toList());
+            log.info ("In the largest cluster, #nodes is " + stringsInLargestCluster.size() + " #edges is " + edges.size());
+            writeEdgesToFile_sigmaJS(stringsInLargestCluster, edges, "/tmp/data-" + minTokenOverlap + ".json");
+        }
+        */
+        return clusters;
+    }
+
+    /* write out in sigma.js format */
+    private void writeEdgesToFile_sigmaJS(Set<String> nodeNames, List<Pair<String, String>> edges, String filename) throws FileNotFoundException {
+        JSONObject json = new JSONObject();
+        JSONArray nodes = new JSONArray();
+        JSONArray links = new JSONArray();
+
+        Map<String, Integer> map = new LinkedHashMap<>();
+
+        int idx = 0;
+        for (String node: nodeNames) {
+            JSONObject obj = new JSONObject();
+            obj.put ("label", node);
+            obj.put ("group", 1);
+            obj.put ("id", idx);
+            map.put (node, idx);
+            nodes.put (idx++, obj);
+        }
+
+        idx = 0;
+        for (Pair<String, String> p: edges) {
+            JSONObject obj = new JSONObject();
+            obj.put ("source", map.get(p.getFirst()));
+            obj.put ("target", map.get(p.getSecond()));
+            obj.put ("id", idx);
+            links.put (idx++, obj);
+        }
+
+        json.put ("nodes", nodes);
+        json.put ("edges", links);
+
+        String str = json.toString(4);
+        PrintWriter fos = new PrintWriter(new FileOutputStream(filename));
+        fos.println (str);
+        fos.close();
+    }
+
+    private void writeEdgesToFile_d3(Set<String> nodeNames, List<Pair<String, String>> edges, String filename) throws FileNotFoundException {
+        JSONObject json = new JSONObject();
+        JSONArray nodes = new JSONArray();
+        JSONArray links = new JSONArray();
+
+        int idx = 0;
+        for (String node: nodeNames) {
+            JSONObject obj = new JSONObject();
+            obj.put ("label", node);
+            obj.put ("id", idx);
+            nodes.put (idx++, obj);
+        }
+
+        idx = 0;
+        for (Pair<String, String> p: edges) {
+            JSONObject obj = new JSONObject();
+            obj.put ("source", p.getFirst());
+            obj.put ("target", p.getSecond());
+            obj.put ("value", 1);
+            links.put (idx++, obj);
+        }
+
+        json.put ("nodes", nodes);
+        json.put ("edges", links);
+
+        String str = json.toString();
+        PrintWriter fos = new PrintWriter(new FileOutputStream(filename));
+        fos.println (str);
+        fos.close();
+    }
+
+
+    // returns how many unique id's in this cluster
+    private int idsInCluster(Collection<Row> rows) {
+	    return rows.stream().map (row -> row.get(Config.ID_FIELD)).collect(Collectors.toSet()).size();
+    }
+
+    private void runRecursive(List<Collection<Row>> result, List<Row> rows, int tokenOverlap, boolean substringAllowed, boolean initialMapping) throws FileNotFoundException {
+
+        String params = " (params: #rows: "+ rows.size() + "tokenOverlap: " + tokenOverlap + " substringAllowed: " + substringAllowed + " initialMapping: " + initialMapping + ")";
+
+        List<List<Row>> clusts = computeClasses (rows, tokenOverlap, substringAllowed, initialMapping);
+        long nRowsInAllClusters = clusts.stream().flatMap(List::stream).count();
+        log.info ("runRecursive clustered " + rows.size() + " rows into " + clusts.size() + " clusters with " + nRowsInAllClusters + " rows in these clusters" + params);
+
+        for (List<Row> thisCluster : clusts) {
+            int nIdsInThisCluster = idsInCluster(thisCluster);
+            /*
+            if (nIdsInThisCluster > 20) {
+                log.info ("Need to break down a large cluster with " + nIdsInThisCluster + " ids and " + thisCluster.size() + " rows " + params);
+
+                // too big cluster... first try initiaMapping off if it was on, since it can be quite aggressive
+                if (initialMapping) {
+                    log.info ("Trying without initial mapping");
+                    runRecursive(result, thisCluster, tokenOverlap, substringAllowed, false); // if we still haven't been able to break down the cluster with token overlap = 10, we'll instead try doing it without initials
+                } else {
+                    // try substring allowed if it was on
+                    log.info ("Trying without substring allowed");
+                    if (substringAllowed)
+                        runRecursive(result, thisCluster, tokenOverlap, false, initialMapping); // if we still haven't been able to break down the cluster with token overlap = 10, we'll instead try doing it without initials
+                    else {
+                        log.info ("Warning: adding a large cluster with size: " + thisCluster.size());
+                        thisCluster.stream().map(r -> r.get(Config.MERGE_FIELD)).forEach(System.out::println);
+                        result.add(thisCluster);
+                    }
+                }
+            } else */ {
+                // normal sized cluster, no problem
+                result.add(thisCluster);
+            }
+            // if # ids in custer > 20, try with increased size
+        }
+    }
+
+    @Override
+	public List<Collection<Row>> run() throws FileNotFoundException {
+
+        List<Row> filteredRows = dataset.getRows().stream().filter(filter::passes).collect(Collectors.toList());
 
 		// now translate the row#s back to the actual rows
         classes = new ArrayList<>();
-		for (List<Row> cluster : clusters) {
-			classes.add (cluster);
-		}
+        runRecursive (classes, filteredRows, minTokenOverlap, substringAllowed, initialMapping);
+
 		return classes;
 	}
 
@@ -217,7 +359,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
         System.out.println ("All tests successful!");
         */
 		CompatibleNameAlgorithm alg = new CompatibleNameAlgorithm(null);
-		System.out.println (alg.compatibility("BISAN DUT LAKAN PAL", "BISAN DUT"));
+		System.out.println (alg.compatibility("BISAN DUT LAKAN PAL", "BISAN DUT", 2, true, true));
 
 	}
 }

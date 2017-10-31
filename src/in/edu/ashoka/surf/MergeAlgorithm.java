@@ -3,6 +3,7 @@ package in.edu.ashoka.surf;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,7 +17,7 @@ abstract public class MergeAlgorithm {
     Dataset dataset;
 
     /** after run(), returns the groups of merged rows. the field classes should also be set up with the same */
-    abstract public List<Collection<Row>> run();
+    abstract public List<Collection<Row>> run() throws FileNotFoundException;
 
     MergeAlgorithm (Dataset dataset) {
         this.dataset = dataset;

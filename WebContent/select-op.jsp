@@ -48,15 +48,36 @@
             <span class="help">Edit distance 0 not included</span>
 
         </div>
-        <div style="display:none" class="div-min-token-overlap">
-            <label for="min-token-overlap">Token overlap</label>
-            <input type="text" class="form-control" id="min-token-overlap" name="min-token-overlap" placeholder="<%=Config.DEFAULT_MIN_TOKEN_OVERLAP%>">
-            <span class="help">Group rows together if this number of tokens are common</span>
+
+        <div class="div-compat-alg-controls">
+            <div class="div-min-token-overlap">
+                <label for="min-token-overlap">Token overlap</label>
+                <input type="text" class="form-control" id="min-token-overlap" name="min-token-overlap" placeholder="<%=Config.DEFAULT_MIN_TOKEN_OVERLAP%>">
+                <span class="help">Group rows together if this number of tokens are common</span>
+            </div>
+            <div class="div-ignore-token-frequency">
+                <label for="ignore-token-frequency">Ignore token frequency</label>
+                <input type="text" class="form-control" id="ignore-token-frequency" name="ignore-token-frequency" placeholder="<%=Config.DEFAULT_IGNORE_TOKEN_FREQUENCY%>">
+                <span class="help">Frequency threshold in this dataset beyond which a token will be ignored</span>
+            </div>
+            <br/>
+
+            <div style="display:block" class="div-substringAllowed">
+                <label for="substringAllowed">Cluster substrings together</label>
+                    <input type="checkbox" class="form-control" id="substringAllowed" name="substringAllowed" checked>
+            </div>
+            <span class="help">If checked, a name is clustered with a longer name of which it is a part.<br/>
+                e.g., <i>RAM GOPAL</i> is clustered with <i>RAM GOPAL VARMA</i><br/>
+            The number of overlapping tokens does not matter. </span>
+            <br/>
+            <br/>
+
+            <div class="div-initialMapping">
+            <label for="initialMapping">Allow initials</label>
+            <input type="checkbox" class="form-control" id="initialMapping" name="initialMapping" checked>
+                <span class="help">If checked, allows partial words or initials from one name to full words in the other. <br/>e.g., <i>M. GANDHI</i> is clustered with <i>MOHANDAS GANDHI</i></span>
         </div>
-        <div style="display:none" class="div-ignore-token-frequency">
-            <label for="ignore-token-frequency">Ignore token frequency</label>
-            <input type="text" class="form-control" id="ignore-token-frequency" name="ignore-token-frequency" placeholder="<%=Config.DEFAULT_IGNORE_TOKEN_FREQUENCY%>">
-            <span class="help">Frequency threshold in this dataset beyond which a token will be ignored</span>
+            <hr/>
         </div>
     </div>
 
@@ -93,10 +114,7 @@
                 if ($(this).is(':checked'))
                 {
                     result[this.name] = 'on';
-                    epadd.log ('checkbox ' + this.name + ' is on');
                 }
-                else
-                    epadd.log ('checkbox ignored');
             }
             else {
                 result[this.name] = this.value;
@@ -129,11 +147,9 @@
         }
 
         if (alg === 'compatibleNames') {
-            $('.div-min-token-overlap').show();
-            $('.div-ignore-token-frequency').show();
+            $('.div-compat-alg-controls').show();
         } else {
-            $('.div-min-token-overlap').hide();
-            $('.div-ignore-token-frequency').hide();
+            $('.div-compat-alg-controls').hide();
         }
     };
 

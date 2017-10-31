@@ -170,8 +170,9 @@ import="java.util.*"
 
         boolean isReviewed = groupRows.stream().flatMap(List::stream).allMatch(r -> mergeManager.hasLabel (r, "reviewed"));
         String isReviewedClass = isReviewed ? "reviewed" : "";
+        String tooltip = "Cluster with " + Util.pluralize(groupRows.size(), " id");
         %>
-        <tbody data-groupId="<%=gid%>" class="inside-table <%=isReviewedClass%>" id="table-body">
+        <tbody title="<%=tooltip%>" data-groupId="<%=gid%>" class="inside-table <%=isReviewedClass%>" id="table-body">
         <tr class="toolbar-row">
             <td colspan="20"> <!-- 20 just to be safe -- we just want it at extreme right -->
                 <button data-groupId="<%=gid%>" class="select-button" type="button" id="select-all" >Select all</button>

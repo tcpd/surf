@@ -1,5 +1,6 @@
 package in.edu.ashoka.surf;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -137,7 +138,7 @@ public class MergeManager {
 
     /** create a new mergeManager with the given algorithm and arguments, and runs the algorithm and stores the (initial) groups.
      * further splits by splitColumn if it's not null or empty */
-    public MergeManager(Dataset dataset, Map<String, String> params) {
+    public MergeManager(Dataset dataset, Map<String, String> params) throws FileNotFoundException {
         this.d = dataset;
         computeIdToRows(d.getRows());
 
@@ -178,8 +179,11 @@ public class MergeManager {
             } catch (NumberFormatException e) {
                 Util.print_exception(e, log);
             }
+
+            boolean initialMapping = "on".equals(params.get("initialMapping"));
+            boolean substringAllowed = "on".equals(params.get("substringAllowed"));
             String fieldToCompare = "_c_" + Config.MERGE_FIELD; // we run it on the canon version of the name, not the tokenized, because that causes too many merges
-            algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency);
+            algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency, substringAllowed, initialMapping);
         }
 
         // this is where the groups are generated

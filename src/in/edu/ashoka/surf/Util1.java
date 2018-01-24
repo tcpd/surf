@@ -72,6 +72,16 @@ public class Util1 {
         return params;
     }
 
+    /** a safe parseInt that doesn't care about NumberFormatException, returns defaultVal instead */
+    public static int parseInt (String x, int defaultValue) {
+        try {
+            int result = Integer.parseInt (x);
+            return result;
+        } catch (NumberFormatException nfe) {
+            return defaultValue;
+        }
+    }
+
     public static Map<String, String> convertRequestToMap(HttpServletRequest request) throws UnsupportedEncodingException {
         Map<String, String> params = new LinkedHashMap<>();
         {

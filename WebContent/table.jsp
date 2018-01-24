@@ -6,6 +6,7 @@ import="java.util.*"
 %>
 <%@ page import="edu.stanford.muse.util.Util" %>
 <%@ page import="in.edu.ashoka.surf.Config" %>
+<%@ page import="in.edu.ashoka.surf.Util1" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
@@ -31,7 +32,14 @@ import="java.util.*"
     <script type="text/javascript"> if (!(typeof $().modal == 'function')) { document.write('<script type="text/javascript" src="js/bootstrap-3.1.1.min.js"><\/script>'); }</script>
 
     <script src="js/selectpicker.js"></script>
-
+    <style>
+        .warn-dup { color: red; }
+        .warn-gender { color: red; }
+        .consecutive::after { content: '\02191'; /* darr */ }
+        .special { background-color: limegreen; color:white;}
+        .special, .unspecial { padding: 3px; }
+        .insignificant-row { opacity: 0.7; color: gray;} /* specify opacity separately, so that if it is faded even if some other color overrides */
+    </style>
 	<title>Surf</title>
 </head>
 <body>
@@ -188,7 +196,34 @@ import="java.util.*"
         </tr>
 
         <%
-        for (List<Row> rowsForThisId: groupRows) {
+
+            // compute vals that occur more than once
+            Set<String> duplicatedColVals = new LinkedHashSet<>();
+            boolean inconsistentGender;
+            String dupColName = "Assembly_No"; // expected to be different for all rows of a merged record, if not different, year is given a warning class
+            String YEAR_COL = "Year";
+            String GENDER_COL = "Sex"; // expected to be consistent for a merged record, otherwise warning class added
+            String POSITION_COL = "Position"; // decorated with .special for special values
+            {
+                Set<String> seenVals = new LinkedHashSet<>();
+                Set<String> seenGenderVals = new LinkedHashSet<>();
+
+                for (List<Row> rowsForThisId : groupRows) {
+                    for (Row row : rowsForThisId) {
+                        String colVal = row.get(dupColName);
+                        if (seenVals.contains(colVal))
+                            duplicatedColVals.add(colVal);
+                        seenVals.add(colVal);
+
+                        colVal = row.get(GENDER_COL);
+                        seenGenderVals.add(colVal);
+                    }
+                }
+                inconsistentGender = (seenGenderVals.size() > 1);
+            }
+
+            int prev_ae = -1;
+            for (List<Row> rowsForThisId: groupRows) {
             // print out all rows for this id.
 
 		    for (int i = 0; i < rowsForThisId.size(); i++) {
@@ -219,7 +254,11 @@ import="java.util.*"
 				    tr_class = "merged-row";
 				if (firstRowForThisId)
 				    tr_class += " first-row-for-id";
-			%>
+                boolean rowInsignificant = Util1.parseInt(row.get("Position"), -1) > 5 && "IND".equals(row.get("Party"));
+                if (rowInsignificant)
+                    tr_class += " insignificant-row ";
+
+        %>
 
 			<tr class="<%=tr_class%> trow" data-id=<%=id%>>
 
@@ -228,9 +267,36 @@ import="java.util.*"
 				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
 				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td>
 
-                <%  for (String col: Config.supplementaryColumns) { %>
-                    <td class="cell-table"><%=Util.escapeHTML(row.get(col))%></td>
-                <% } %>
+                <%
+                    for (String col : Config.supplementaryColumns) {
+                        String classStr = "", textClass = "unspecial";
+                        // compute decorations (optional), for LD dataset only
+                        {
+                            boolean warn = false, warnGender = false, consecutive_aes = false;
+                            String colVal = row.get(col);
+                            if (col.equals(YEAR_COL)) {
+                                warn = duplicatedColVals.contains(row.get(dupColName));
+                                int ae = Util1.parseInt(row.get(dupColName), -1);
+                                consecutive_aes = (ae == prev_ae + 1);
+                                prev_ae = ae;
+                            }
+                            if (col.equals(GENDER_COL) && inconsistentGender) {
+                                warnGender = true;
+                            }
+                            classStr += warn ? " warn-dup " : "";
+                            classStr += warnGender ? " warn-gender " : "";
+                            classStr += consecutive_aes ? " consecutive " : "";
+
+                            if (col.equals(POSITION_COL)) {
+                                int pos = Util1.parseInt(colVal, -1);
+                                if (pos > 0 && pos <= 3)
+                                    textClass = "special";
+                            }
+                        }
+                        %>
+
+                        <td class="cell-table <%=classStr%>"> <span class="<%=textClass%>"><%=Util.escapeHTML(row.get(col))%></span></td>
+                    <% } %>
 <!--                <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td> -->
 
 				<td class="cell-table "></td>
@@ -516,6 +582,23 @@ import="java.util.*"
         });
     }
 
+    // from https://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport/7557433#7557433
+    function isElementInViewport (el) {
+
+        //special bonus for those using jQuery
+        if (typeof jQuery === "function" && el instanceof jQuery) {
+            el = el[0];
+        }
+
+        var rect = el.getBoundingClientRect();
+
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
+        );
+    }
 
 
     $('.select-button').click (select_all_handler);
@@ -531,6 +614,10 @@ import="java.util.*"
     $('.filter-button').click (function() { $('#filterModal').modal();});
     $('.filter-submit-button').click (filter_submit_handler);
     $('.help-button').click (function() { $('#helpModal').modal()});
+    $('input.select-checkbox').click (function(e) {
+        var $target = $(event.target);
+        alert($target.next().text());
+    });
 
 </script>
 </body>

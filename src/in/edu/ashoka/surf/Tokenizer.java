@@ -8,6 +8,7 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 
+import com.google.common.collect.Multisets;
 import edu.stanford.muse.util.Util;
 import in.edu.ashoka.surf.util.Timers;
 import org.apache.commons.logging.Log;
@@ -46,6 +47,11 @@ public class Tokenizer {
             }
         }
         log.info ("single word keys: " + nSingleWordKeys + " total tokens: " + tokens.size() + " unique: " + tokens.elementSet().size());
+
+        int i = 0;
+        for (String s: Multisets.copyHighestCountFirst(tokens).elementSet())
+            log.info (++i + " " + s + " " + tokens.count(s));
+
         return tokens;
     }
 
@@ -62,13 +68,23 @@ public class Tokenizer {
     private static List<String> splitToken (String s, Multiset<String> validTokens) {
         List<String> result = new ArrayList<>();
 
-        int bestSplit = 4; // min. splitweight
+        int bestSplit = Config.DEFAULT_MIN_SPLITWEIGHT; // min. splitweight
         String bestFirst = "", bestSecond = "";
         for (int i = 2; i <= s.length()-2; i++) {
             String first = s.substring(0, i);
             String second = s.substring(i);
+
+
             // first and second must be both at least 2 chars long
             int splitWeight = validTokens.count(first) + validTokens.count(second);
+
+            // we penalize splits that result in tokens of length just 2
+            // this is to prevent DUTA breaking up into DU TA
+            if (i == 2)
+                splitWeight /= 2;
+            if (i == s.length()-3)
+                splitWeight /= 2;
+
             if (splitWeight > bestSplit)
             {
                 bestSplit = splitWeight;
@@ -89,7 +105,12 @@ public class Tokenizer {
     }
 
     /** sets up canonicalized, retokenized and sorted-retokenized versions of the given field.
-     * e.g if field is Name, fields called _c_Name, _t_Name and _st_Name are added to all rows */
+     * e.g if field is Name, fields called _c_Name, _t_Name and _st_Name are added to all rows.
+     * We have to be careful about tokenization. It can have a disproportionate effect.
+     * BIREN DUTA => BIREN DUTA(canonicalization) => BI REN DU TA (retokenized) => BI REN DU TA (sorted) => BIDURENTA
+     * BIREN DATA => BIREN DATA => BIREN DATA => BIDATAREN
+     * These strings after sorting are very far away after tokenization and sorting.
+     * */
     static void setupDesiVersions(Collection<Row> allRows, String field)
     {
         String cfield = "_c_" + field;
@@ -161,7 +182,6 @@ public class Tokenizer {
 
         StringBuilder result = new StringBuilder();
 
-        // these are from Gilles
         List<String> tokens = Util.tokenize(s, " \t."); // very important to always tokenize on periods. M.F. SOLANKI should become M F SOLANKI, not MF SOLANKI
         for (int i=0; i<tokens.size(); i++) {
             String token = tokens.get(i);

@@ -29,30 +29,13 @@ public class Config {
     public static final int DEFAULT_EDIT_DISTANCE = 2;
     public static final int DEFAULT_MIN_TOKEN_OVERLAP = 2;
     public static final int DEFAULT_IGNORE_TOKEN_FREQUENCY = 200;
+    public static final int DEFAULT_MIN_SPLITWEIGHT = 10; // a token in a field will be split only if it's constituent parts have appeared independently > 10 times. (However, there is an additional factor of 2x needed if the fields are only of length 3)
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
             "[^A-Za-z\\s]", "",
-            "NAYAK", "NAIK",
-            "IYA", "IA", // # RAJORIA vs RAJORIYA
-            "AGRA", "AGAR", // AGRAWAL vs AGARWAL
-            "KER", "KAR", // SONKAR vs SONKER
-            "HAR", "HR", // e.g. VOHARA vs VOHRA
-         //   "HAT", "HT", // e.g. MAHATAB vs MAHTAB, but this breaks BHAT and makes it BT
-            "RAT", "RT", // e.g. BHARATENDRA vs BHARTENDRA
-            "RAJ", "RJ", // e.g. NEERJA vs NEERAJA
-            "SAL", "SL", // e.g. BHONSALE vs BHONSLE
-            "NAG", "NG", // e.g. WANAGE vs WANGE. Why, even HANAGAL vs HANGAL
 
-            // suffix removal, do this before phonetic conversions
-            "BAI$", "",
-            "BHAI$", "",
-            "BEN$", "",
-            "JI$", "",
-            "LAL$", "",
-            "KUMAR$", "",
-
-            // phonetic corrections
+            // remove aspirations. these should happen before things like RAT=>RT, etc. e.g DASHARATHA => DASARATA -> DASARAT
             "TH", "T",
             "V", "W",
             "GH", "G",
@@ -64,8 +47,35 @@ public class Config {
             "PH", "F",
             "SH", "S",
             "JH", "Z", // JHAVERI vs ZAVERI
+
+            // safe replacements
             "Z", "S",
             "Y", "I",
+
+            "NAYAK", "NAIK",
+            "IYA", "IA", // # RAJORIA vs RAJORIYA
+            "AGRA", "AGAR", // AGRAWAL vs AGARWAL
+            "KER", "KAR", // SONKAR vs SONKER
+            "HAR", "HR", // e.g. VOHARA vs VOHRA
+         //   "HAT", "HT", // e.g. MAHATAB vs MAHTAB, but this breaks BHAT and makes it BT
+            "RAT", "RT", // e.g. BHARATENDRA vs BHARTENDRA
+            "RAJ", "RJ", // e.g. NEERJA vs NEERAJA
+            "SAL", "SL", // e.g. BHONSALE vs BHONSLE
+            "(.)NAG(.)", "$1NG$2", // e.g. WANAGE vs WANGE. Why, even HANAGAL vs HANGAL. but only if it's in the middle of a word. We don't want to convert NAG to NG or ANANTNAG to ANANTNG NAGALAND to NGALAND
+
+            // could we convert the above to a general rule like consonant-vowel-consonant in the middle of a word can be converted to consonant-consonant, esp. if the vowel is A, E, U
+
+            // suffix removal, do this before phonetic conversions.
+            // but only if it has a minimum length. we don't want to replace SUKUMAR with SU or DULAL with DU.
+            "(...)BAI$", "$1",
+            "(...)BHAI$", "$1",
+            "(...)BEN$", "$1",
+            "(...)JI$", "$1",
+            "(...)LAL$", "$1",
+            "(...)KUMAR$", "$1",
+
+            // phonetic corrections
+
             "AU", "OU",
             "OO", "U",
             "EE", "I",

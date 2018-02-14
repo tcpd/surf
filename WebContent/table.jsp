@@ -375,6 +375,7 @@ import="java.util.*"
             $group.removeClass('reviewed')
             $('.reviewed-button', $group).text ('Mark as reviewed');
         }
+        window.last_name = ($($('td', $group)[2]).text());
     }
 
     function group_reviewed_handler (e) {
@@ -539,7 +540,7 @@ import="java.util.*"
                     $spinner.fadeOut();
                     if (o && o.status == 0) {
                         // could perhaps display a toast here
-                        window.location.reload();
+                        window.location = 'table?page=' + getParameterByName('page', window.location.href) + '&scrollTo=' + escape(window.last_name);
                     } else {
                         alert('Save failed!');
                     }
@@ -574,11 +575,11 @@ import="java.util.*"
                 if (o && o.status == 0) {
                     // could perhaps display a toast here
                 } else {
-                    alert('Filter failed!');
+                    alert('Merge failed!');
                 }
-                window.location = 'table?page=1';
+                window.location = 'table?page=1&scrollTo=' + escape(window.last_name);
             },
-            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: filter failed! ' + textStatus + ' ' + jqXHR.responseText);}
+            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: Merge failed! ' + textStatus + ' ' + jqXHR.responseText);}
         });
     }
 
@@ -600,6 +601,15 @@ import="java.util.*"
         );
     }
 
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
 
     $('.select-button').click (select_all_handler);
     $('.select-till-here-button').click (select_till_here_handler);
@@ -614,10 +624,32 @@ import="java.util.*"
     $('.filter-button').click (function() { $('#filterModal').modal();});
     $('.filter-submit-button').click (filter_submit_handler);
     $('.help-button').click (function() { $('#helpModal').modal()});
-    $('input.select-checkbox').click (function(e) {
-        var $target = $(event.target);
-        alert($target.next().text());
-    });
+
+    // try to scroll to area that was last clicked on the merge page
+    {
+        window.last_name = '';// this will track the name of the cell val next to the checkbox, in the last checkbox clicked
+        $('input.select-checkbox').click(function (e) {
+            var $target = $(event.target);
+            window.last_name = $target.closest('td').next().text()
+        });
+
+        var scrollToText = getParameterByName('scrollTo', window.location.href);
+
+        if (scrollToText) {
+            scrollToText = scrollToText.toLowerCase();
+            $('td').each(function (i, elem) {
+                var text = $(elem).text().toLowerCase();
+                if (text.indexOf(scrollToText) >= 0) {
+                    elem.scrollIntoView();
+                    alert ('scrolling to ' + scrollToText);
+                    return false;
+                }
+                return true;
+            });
+        }
+        ;
+    }
+
 
 </script>
 </body>

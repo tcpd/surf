@@ -182,7 +182,8 @@ public class MergeManager {
 
             boolean initialMapping = "on".equals(params.get("initialMapping"));
             boolean substringAllowed = "on".equals(params.get("substringAllowed"));
-            String fieldToCompare = "_c_" + Config.MERGE_FIELD; // we run it on the canon version of the name, not the tokenized, because that causes too many merges
+//            String fieldToCompare = "_c_" + Config.MERGE_FIELD; // we run it on the canon version of the name, not the tokenized, because that causes too many merges
+            String fieldToCompare = "_st_" + Config.MERGE_FIELD; // we run it on tokenized version of the name now that we have tightened it. go back to _c_name if this causes too many matches
             algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency, substringAllowed, initialMapping);
         }
 

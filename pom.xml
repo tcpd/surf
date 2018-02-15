@@ -52,6 +52,12 @@
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
         </dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>4.10.0.201712302008-r</version>
+		</dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>

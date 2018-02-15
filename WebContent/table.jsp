@@ -34,6 +34,7 @@ import="java.util.*"
     <script src="js/selectpicker.js"></script>
     <style>
         .warn-dup { color: red; }
+        .warn { background-color: red; padding: 3px; color: white; }
         .warn-gender { color: red; }
         .consecutive::after { content: '\02191'; /* darr */ }
         .special { background-color: limegreen; color:white;}
@@ -204,6 +205,8 @@ import="java.util.*"
             String YEAR_COL = "Year";
             String GENDER_COL = "Sex"; // expected to be consistent for a merged record, otherwise warning class added
             String POSITION_COL = "Position"; // decorated with .special for special values
+            String POLL_NO_COL = "Poll_No";
+
             {
                 Set<String> seenVals = new LinkedHashSet<>();
                 Set<String> seenGenderVals = new LinkedHashSet<>();
@@ -291,6 +294,13 @@ import="java.util.*"
                                 int pos = Util1.parseInt(colVal, -1);
                                 if (pos > 0 && pos <= 3)
                                     textClass = "special";
+                            }
+
+                            if (col.equals(POLL_NO_COL)) {
+                                int x = 1; // warn by default
+                                try { x = Integer.parseInt(row.get(col)); } catch (Exception e) { }
+                                if (x > 0)
+                                    textClass = "warn";
                             }
                         }
                         %>

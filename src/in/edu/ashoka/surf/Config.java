@@ -6,21 +6,19 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /*
-VIP class. This class has constants/settings that generally do not change during an ePADD execution, and are set only at startup.
+VIP class. This class has constants/settings that generally do not change during a surf execution, and are set only at startup.
 The settings can be public static fields of the Config class and can be read (but should not be written) directly by the rest of the code.
-The settings are read by the properties in <user home dir>/epadd.properties (or the file specified by -Depadd.properties=<file>)
+The settings are read by the properties in <user home dir>/surf.properties (or the file specified by -surf.properties=<file>)
 Some settings have a default.
 
-Similarly, resource files should be read only through this class. Resource files are not expected to change during one execution of epadd.
+Similarly, resource files should be read only through this class. Resource files are not expected to change during one execution of surf.
  */
 public class Config {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
     // replacements applied at a per-token level
 
     public static String admin = "hangal@ashoka.edu.in";
@@ -94,7 +92,7 @@ public class Config {
 //            "(.+)A$", "\\1"
     };
 
-    static String ignoreTokens[] = new String[] {"MR", "MRS", "PROF", "DR",
+    private static final String[] ignoreTokens = new String[] {"MR", "MRS", "PROF", "DR",
             "SHRI", "SMT", "SHRIMATI", "KM", "SUSRI",
             "ENG", "ADV", "ADVOCATE",
             "COL", "GENERAL", "GEN", "RETD", "RETIRED",
@@ -107,11 +105,12 @@ public class Config {
     static boolean removeSuccessiveSameCharacters = true;
 
     // these will be customized per dataset, or even by the user at run time
-    public static String[] supplementaryColumns = new String[]{"Year", "Party", "Position", "Sex", "Statename", "Votes"}; // supplementary columns to display. These are emitted as is, without any special processing
+    public static String[] supplementaryColumns = new String[]{"Election_Type","Year", "Party", "Position", "Sex", "Statename", "Votes", "Poll_No"}; // supplementary columns to display. These are emitted as is, without any special processing
     public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
 
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
-    public static Map<String, String> keyToPath  = new LinkedHashMap<>(), keyToDescription = new LinkedHashMap<>();
+    public static Map<String, String> keyToPath  = new LinkedHashMap<>();
+    public static Map<String, String> keyToDescription = new LinkedHashMap<>();
     public static Properties gitProps = null;
 
     static {
@@ -200,7 +199,7 @@ public class Config {
      * Path components are always separated by forward slashes, just like resource paths in Java.
      * First looks in settings folder, then on classpath (e.g. inside war's WEB-INF/classes).
      **/
-    public static InputStream getResourceAsStream(String path) {
+    private static InputStream getResourceAsStream(String path) {
 
         InputStream is = in.edu.ashoka.surf.Config.class.getClassLoader().getResourceAsStream(path);
         if (is == null)

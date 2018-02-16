@@ -108,7 +108,7 @@ public class Config {
     public static String[] supplementaryColumns = new String[]{"Election_Type","Year", "Party", "Position", "Sex", "Statename", "Votes", "Poll_No"}; // supplementary columns to display. These are emitted as is, without any special processing
     public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
 
-    private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of ePADD
+    private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of surf
     public static Map<String, String> keyToPath  = new LinkedHashMap<>();
     public static Map<String, String> keyToDescription = new LinkedHashMap<>();
     public static Properties gitProps = null;
@@ -191,6 +191,24 @@ public class Config {
             String val = System.getProperty (key);
             if (val != null && val.length() > 0)
                 props.setProperty(key, val);
+        }
+
+        {
+            String val = props.getProperty("show-columns");
+            if (!Util.nullOrEmpty(val)) {
+                supplementaryColumns = val.split(",");
+                for (int i = 0; i < supplementaryColumns.length; i++)
+                    supplementaryColumns[i] = supplementaryColumns[i].trim();
+            }
+        }
+
+        {
+            String val = props.getProperty("sort-columns");
+            if (!Util.nullOrEmpty(val)) {
+                sortColumns = val.split(",");
+                for (int i = 0; i < supplementaryColumns.length; i++)
+                    sortColumns[i] = sortColumns[i].trim();
+            }
         }
         return props;
     }

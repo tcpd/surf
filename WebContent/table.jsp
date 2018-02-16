@@ -651,7 +651,7 @@ import="java.util.*"
                 var text = $(elem).text().toLowerCase();
                 if (text.indexOf(scrollToText) >= 0) {
                     elem.scrollIntoView();
-                    alert ('scrolling to ' + scrollToText);
+                   // alert ('scrolling to ' + scrollToText);
                     return false;
                 }
                 return true;

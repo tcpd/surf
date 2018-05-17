@@ -11,8 +11,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class MatchPredicate {
-    final String matchValue;
-    final String field;
+    private final String matchValue;
+    private final String field;
     public MatchPredicate(String field, String value){
         this.matchValue = value;
         this.field = field;
@@ -24,14 +24,14 @@ class MatchPredicate {
 }
 
 public class IncumbencyStats {
-    public static String NEW_LINE_SEPARATOR = "\n";
-    static CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
+    private static final String NEW_LINE_SEPARATOR = "\n";
+    private static final CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
 
-    public static PrintStream out = System.out;
+    private static final PrintStream out = System.out;
 
-    static Predicate<Row> winners_filter = x -> "1".equals (x.get("Position"));
-    static Predicate<Row> non_winners_filter = x -> !"1".equals (x.get("Position"));
-    static Multimap<String, Row> pid_to_rows;
+    private static final Predicate<Row> winners_filter = x -> "1".equals (x.get("Position"));
+    private static final Predicate<Row> non_winners_filter = x -> !"1".equals (x.get("Position"));
+    private static Multimap<String, Row> pid_to_rows;
     public static void doPartyStuff (Dataset d, int prev_assembly_no) throws IOException {
         MatchPredicate prevAssemblyFilter = new MatchPredicate("Assembly_No", Integer.toString(prev_assembly_no));
         MatchPredicate thisAssemblyFilter = new MatchPredicate("Assembly_No", Integer.toString(prev_assembly_no+1));
@@ -172,12 +172,11 @@ public class IncumbencyStats {
                 lostMLAs.printRecord(record);
             } else {
                 if (pid_to_this.get(pid_prev_winner).size() == 0) {
+                    // don't need the assembly we're looking at
                     List<Integer> other_assemblies_for_this_pid = pid_to_rows.get(pid_prev_winner).stream()
                             .map(r -> Integer.parseInt(r.get("Assembly_No")))
-                            .filter (x -> x!= prev_assembly_no) // don't need the assembly we're looking at
-                            .collect(Collectors.toList());
+                            .filter(x -> x != prev_assembly_no).sorted().collect(Collectors.toList());
 
-                    Collections.sort(other_assemblies_for_this_pid);
                     String other_assemblies_for_this_pid_str = other_assemblies_for_this_pid.stream().map(x -> Integer.toString(x)).collect(Collectors.joining(","));
                     boolean in_other_assemblies = other_assemblies_for_this_pid_str.length() > 0;
 

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 class MatchPredicate {
     private final String matchValue;
     private final String field;
-    public MatchPredicate(String field, String value){
+    MatchPredicate(String field, String value){
         this.matchValue = value;
         this.field = field;
     }

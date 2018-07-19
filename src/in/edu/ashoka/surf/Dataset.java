@@ -143,7 +143,7 @@ public class Dataset implements Serializable{
         return datasetMap.get(filename);
     }
 
-    private Dataset (String filename) throws IOException {
+    Dataset(String filename) throws IOException {
 
         //TRY Backing up data after given interwell, this is a task which will continue running as a seperate thread
         timer = new Timer();

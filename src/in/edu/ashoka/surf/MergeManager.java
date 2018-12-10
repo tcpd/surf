@@ -27,7 +27,8 @@ public class MergeManager {
     public enum GroupViewControl {
         ALL_GROUPS, /* this will show all groups, including singleton rows */
         GROUPS_WITH_TWO_OR_MORE_IDS, /* show all rows in a group, under which any row matches filter */
-        GROUPS_WITH_TWO_OR_MORE_ROWS
+        GROUPS_WITH_TWO_OR_MORE_ROWS,
+        GROUPS_WITH_ONE_OR_MORE_ROWS
     } /* this will show a group even if it only has 1 id, but multiple rows for that id. useful to see all id's that have been merged */
 
     /* Next, a filter is applied to rows in the groups selected for showing. */
@@ -386,6 +387,9 @@ public class MergeManager {
                 switch (gvc) {
                     case GROUPS_WITH_TWO_OR_MORE_ROWS:
                         groupWillBeShown = group.stream().filter(filter::passes).limit(2).count() >= 2; // limit(2) to ensure early out at finding the first row passing the filter
+                        break;
+                    case GROUPS_WITH_ONE_OR_MORE_ROWS:
+                        groupWillBeShown = group.stream().filter(filter::passes).limit(1).count() >= 1; // limit(2) to ensure early out at finding the first row passing the filter
                         break;
                     case GROUPS_WITH_TWO_OR_MORE_IDS:
                         Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter

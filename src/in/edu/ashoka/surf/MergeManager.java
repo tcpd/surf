@@ -28,7 +28,8 @@ public class MergeManager {
         ALL_GROUPS, /* this will show all groups, including singleton rows */
         GROUPS_WITH_TWO_OR_MORE_IDS, /* show all rows in a group, under which any row matches filter */
         GROUPS_WITH_TWO_OR_MORE_ROWS,
-        GROUPS_WITH_ONE_OR_MORE_ROWS
+        GROUPS_WITH_ONE_OR_MORE_ROWS,
+        GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS
     } /* this will show a group even if it only has 1 id, but multiple rows for that id. useful to see all id's that have been merged */
 
     /* Next, a filter is applied to rows in the groups selected for showing. */
@@ -394,6 +395,11 @@ public class MergeManager {
                     case GROUPS_WITH_TWO_OR_MORE_IDS:
                         Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
                         groupWillBeShown = (idsInGroup.size() >= 2);
+                        break;
+                    case GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS:
+                        Collection<Row> tempGroup = group.stream().filter(filter::passes).collect(Collectors.toList());
+                        Set<String> idsInGroupWithOneOrMoreRows = tempGroup.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
+                        groupWillBeShown = (idsInGroupWithOneOrMoreRows.size() >= 2);
                         break;
                 }
 

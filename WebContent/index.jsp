@@ -38,10 +38,19 @@
 		</select>
 	</div>
 	<br/>
-
 	<div class="submit-button">
-  <button type="submit" class="btn btn-default">Submit</button>
-</div>
+		<button type="submit" class="btn btn-default">Submit</button>
+	</div>
+	<br/>
+</form>
+<p class="text-center" style="margin: auto">OR</p>
+<form action="custom-dataset" method="get">
+	<div class="form-group">
+	</div>
+	<div class="submit-button">
+		<button type="submit" class="btn btn-default">Read your own t2 Dataset</button>
+	</div>
+	<br/>
 </form>
 </div>						
 </body>

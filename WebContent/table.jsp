@@ -157,9 +157,10 @@ import="java.util.*"
             <thead>
             <tr class="table-row">
                 <th class="cell-table"></th>
-                <th class="cell-table">Name</th>
+                <th class="cell-table">Name</th> 
+                <%-- ask prof about this. why is this hardcoded? --%>
                 <th class="cell-table">Constituency</th>
-                <% for (String col: Config.supplementaryColumns) { %>
+                <% for (String col: Config.actualColumns.get(session.getAttribute("datasetKey"))) { %>
                     <th class="cell-table"><%=col%></th>
                 <% } %>
 <!--                <th class="cell-table ">Comments</th> -->
@@ -271,7 +272,7 @@ import="java.util.*"
 				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td>
 
                 <%
-                    for (String col : Config.supplementaryColumns) {
+                    for (String col : Config.actualColumns.get(session.getAttribute("datasetKey"))) {
                         String classStr = "", textClass = "unspecial";
                         // compute decorations (optional), for LD dataset only
                         {

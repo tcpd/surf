@@ -16,7 +16,27 @@
         <servlet-name>table</servlet-name>
         <url-pattern>/table</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>custom-dataset</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.customServlet</servlet-class>
+        <!-- <jsp-file>/custom-dataset.jsp</jsp-file> -->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>custom-dataset</servlet-name>
+        <url-pattern>/custom-dataset</url-pattern>
+    </servlet-mapping>
 
+    <servlet>
+        <servlet-name>columnUpdate</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.columnUpdateServlet</servlet-class>
+        <!-- <jsp-file>/custom-dataset.jsp</jsp-file> -->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>columnUpdate</servlet-name>
+        <url-pattern>/columnUpdate</url-pattern>
+    </servlet-mapping>
+    
     <servlet>
         <servlet-name>select-op</servlet-name>
         <jsp-file>/select-op.jsp</jsp-file>

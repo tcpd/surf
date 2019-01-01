@@ -269,10 +269,12 @@ import="java.util.*"
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
 				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
-				<td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td>
+				<%-- <td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td> --%>
 
                 <%
                     for (String col : Config.actualColumns.get(session.getAttribute("datasetKey"))) {
+                        if(col.equalsIgnoreCase(Config.MERGE_FIELD))
+                            continue;
                         String classStr = "", textClass = "unspecial";
                         // compute decorations (optional), for LD dataset only
                         {

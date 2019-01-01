@@ -67,6 +67,7 @@ public class customServlet extends HttpServlet {
         filePart.write(System.getProperty("user.home")+File.separator+"Surf Data"+File.separator+name);
         BufferedReader fileContent = new BufferedReader(new FileReader(System.getProperty("user.home")+File.separator+"Surf Data"+File.separator+name));
         String headers = fileContent.readLine();
+        headers = headers.replaceAll("\"", "");
         if(!headerFlag)
         {
             String colNames[] = headers.split(",");

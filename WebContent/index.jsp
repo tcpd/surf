@@ -48,7 +48,7 @@
 	<div class="form-group">
 	</div>
 	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Read your own t2 Dataset</button>
+		<button type="submit" class="btn btn-default">Read your own Dataset</button>
 	</div>
 	<br/>
 </form>

@@ -306,10 +306,10 @@ public class Config {
             try 
             {   
                 FileWriter fw = new FileWriter(PROPS_FILE, true);
-                fw.write(System.lineSeparator());
+                fw.write(System.lineSeparator()+key+"_Columns=");
                 for(int i=0; i<cols.length-1; i++)
                     fw.write(cols[i]+",");
-                fw.write(cols[cols.length]);
+                fw.write(cols[cols.length-1]);
                 fw.close();
             } 
             catch (Exception e) 

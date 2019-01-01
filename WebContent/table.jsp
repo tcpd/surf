@@ -157,9 +157,9 @@ import="java.util.*"
             <thead>
             <tr class="table-row">
                 <th class="cell-table"></th>
-                <th class="cell-table">Name</th> 
-                <%-- ask prof about this. why is this hardcoded? --%>
-                <th class="cell-table">Constituency</th>
+                <%-- <th class="cell-table">Name</th> 
+                <%-- ask prof about this. why is this hardcoded? 
+                <th class="cell-table">Constituency</th> --%>
                 <% for (String col: Config.actualColumns.get(session.getAttribute("datasetKey"))) { %>
                     <th class="cell-table"><%=col%></th>
                 <% } %>

@@ -27,8 +27,9 @@
         <form method="post" action="columnUpdate">
         <%
             // Set up dataset in the session
-            Config.createDatasets();
+            
             Dataset dataset = MergeServlet.loadDataset(request);
+            Config.refreshCols((String) session.getAttribute("datasetKey"));
             session.setAttribute("dataset", dataset);
 
             if (dataset != null) {

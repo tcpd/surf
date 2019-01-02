@@ -322,4 +322,24 @@ public class Config {
             log.warn("Surf properties file " + PROPS_FILE + " does not exist or is not readable");
         }
     }
+
+
+public static void refreshCols(String datasetKey)
+    {
+        Properties props = readProperties();
+        gitProps = new Properties();
+        try { gitProps.load(getResourceAsStream("git.properties")); }
+        catch (Exception e) { Util.print_exception("unable to load git.properties", e, log); }
+        String cols="";
+        for (String key: props.stringPropertyNames()) {
+            
+            if(key.substring(0,key.lastIndexOf("_")).equalsIgnoreCase(datasetKey))
+            {
+                if (key.endsWith("_Columns"))
+                    cols = props.getProperty(key);
+            }
+        }
+        ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(cols.split(",")));
+        actualColumns.put(datasetKey, arrayList);            
+    }
 }

@@ -82,7 +82,7 @@ public class MergeServlet extends HttpServlet {
 	    if (datasetKey != null) {
 			String path = Config.keyToPath.get(datasetKey);
             Dataset d = Dataset.getDataset(path);
-            Config.sortColumns = Config.actualSortColumns.get(datasetKey).toArray(new String[Config.actualSortColumns.get(datasetKey).size()]);
+            // Config.sortColumns = Config.actualSortColumns.get(datasetKey).toArray(new String[Config.actualSortColumns.get(datasetKey).size()]);
             // log.warn("Sort Params="+Config.sortColumns[0]);
             d.description = Config.keyToDescription.get(datasetKey);
             log.info ("Dataset read from path " + path + " with " + d.getRows().size() + " rows");

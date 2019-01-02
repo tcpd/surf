@@ -33,17 +33,25 @@ public class columnUpdateServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String colToSortBy = "";
-        for (String col: Config.actualColumns.get(session.getAttribute("datasetKey")))
+        boolean flag = false;
+        String datasetKey = (String) session.getAttribute("datasetKey");
+        for (String col: Config.actualColumns.get(datasetKey))
         {
-            if(request.getParameter(col+"Sort")==null)
+            if(request.getParameter(col+"Sort")!=null)
             {
                 colToSortBy = colToSortBy + col + ",";
+                flag = true;
             }
         }
-        Config.sortColumns = new String[colToSortBy.split(",").length];
-        Config.sortColumns = colToSortBy.split(",");
+        if(flag)
+        {
+            Config.sortColumns = new String[colToSortBy.split(",").length];
+            Config.sortColumns = colToSortBy.split(",");
+        }
+        else
+            Config.actualSortColumns.get(datasetKey).toArray(new String[Config.actualSortColumns.get(datasetKey).size()]);
         String colsToRemove = "";
-        for (String col: Config.actualColumns.get(session.getAttribute("datasetKey")))
+        for (String col: Config.actualColumns.get(datasetKey))
         {
             if(request.getParameter(col)==null)
             {
@@ -52,7 +60,7 @@ public class columnUpdateServlet extends HttpServlet {
         }
         String colsToRemoveArr[] = colsToRemove.split(",");
         for(int i=0; i<colsToRemoveArr.length; i++)
-            Config.actualColumns.get(session.getAttribute("datasetKey")).remove(colsToRemoveArr[i]);
+            Config.actualColumns.get(datasetKey).remove(colsToRemoveArr[i]);
         request.getRequestDispatcher("select-op").forward(request, response);
 	}
 

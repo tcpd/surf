@@ -16,6 +16,9 @@
 	<script src="js/jquery-1.12.1.min.js"></script>
 	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="js/selectpicker.js"></script>
+    <script type="text/javascript">if(performance.navigation.type == 2 || performance.navigation.type == 255){
+   location.reload(true);
+    }</script>
 
 </head>
 <body>
@@ -27,9 +30,9 @@
         <form method="post" action="columnUpdate">
         <%
             // Set up dataset in the session
-            
             Dataset dataset = MergeServlet.loadDataset(request);
-            Config.refreshCols((String) session.getAttribute("datasetKey"));
+            String datasetKey = (String) session.getAttribute("datasetKey");
+            Config.refreshCols(datasetKey);
             session.setAttribute("dataset", dataset);
 
             if (dataset != null) {
@@ -66,18 +69,18 @@
                 <br/>
                 <label for="columnName">Column to merge:</label>
                 <select class="form-control selectpicker" id="columnName" name="columnName">
-                    <% for (String col: Config.actualColumns.get(session.getAttribute("datasetKey"))) { %>
+                    <% for (String col: Config.actualColumns.get(datasetKey)) { %>
                         <option value="<%=col%>"><%=col%></option>
                     <% } %>
                 </select>
                 <br>
                 <br>
                 <label>Columns to show:</label>
-                <% for (String col: Config.actualColumns.get(session.getAttribute("datasetKey"))) { %>
+                <% for (String col: Config.actualColumns.get(datasetKey)) { %>
                     <div style="margin: 5px;"><input checked type="checkbox" name="<%=col%>" value="<%=col%>"> <%=col%> </div>
                 <% } %>
                 <label>Columns to sort by:</label>
-                <% for (String col: Config.actualColumns.get(session.getAttribute("datasetKey"))) { %>
+                <% for (String col: Config.actualColumns.get(datasetKey)) { %>
                     <div style="margin: 5px;"><input type="checkbox" name="<%=col%>Sort" value="<%=col%>Sort"> <%=col%> </div>
                 <% } %>
 

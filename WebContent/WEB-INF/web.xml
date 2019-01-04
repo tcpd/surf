@@ -20,7 +20,6 @@
     <servlet>
         <servlet-name>custom-dataset</servlet-name>
         <servlet-class>in.edu.ashoka.surf.customServlet</servlet-class>
-        <!-- <jsp-file>/custom-dataset.jsp</jsp-file> -->
     </servlet>
     <servlet-mapping>
         <servlet-name>custom-dataset</servlet-name>
@@ -30,11 +29,19 @@
     <servlet>
         <servlet-name>columnUpdate</servlet-name>
         <servlet-class>in.edu.ashoka.surf.columnUpdateServlet</servlet-class>
-        <!-- <jsp-file>/custom-dataset.jsp</jsp-file> -->
     </servlet>
     <servlet-mapping>
         <servlet-name>columnUpdate</servlet-name>
         <url-pattern>/columnUpdate</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>columnViewUpdate</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.columnViewUpdate</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>columnViewUpdate</servlet-name>
+        <url-pattern>/columnViewUpdate</url-pattern>
     </servlet-mapping>
     
     <servlet>

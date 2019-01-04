@@ -8,7 +8,12 @@ import="java.util.*"
 <%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ page import="in.edu.ashoka.surf.Util1" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="org.apache.commons.logging.Log" %>
+<%@ page import="org.apache.commons.logging.LogFactory" %>
 
+<%
+Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,7 +35,24 @@ import="java.util.*"
 
     <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type="text/javascript"> if (!(typeof $().modal == 'function')) { document.write('<script type="text/javascript" src="js/bootstrap-3.1.1.min.js"><\/script>'); }</script>
-
+    <%String key = (String) session.getAttribute("datasetKey");%>
+    
+    <script type="text/javascript">
+    function checkBox()
+    {
+        <% for (String col: Config.actualColumns.get(key)) {%>
+        var check = document.getElementById("<%=col%>"+"Table");
+        if(check)
+        {
+            if(document.getElementById("<%=col%>"))
+            {
+                document.getElementById("<%=col%>").setAttribute("checked", "true");
+                console.log(check+" IN");
+            }   
+        }
+        <% } %>
+    }
+    </script>
     <script src="js/selectpicker.js"></script>
     <style>
         .warn-dup { color: red; }
@@ -81,6 +103,34 @@ import="java.util.*"
                     </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="colSelectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Columns to Show</h4>
+            </div>
+            <div class="modal-body">
+            <form method="post" action="columnViewUpdate">
+                <label>Columns to show:</label>
+                <% for (String col: Config.actualColumns.get(key)) { %>
+                    <div style="margin: 5px;"><input type="checkbox" name="<%=col%>" id="<%=col%>" value="<%=col%>"> <%=col%> </div>
+                <% } %>
+                <%-- <label>Columns to sort by:</label>
+                <% for (String col: Config.actualColumns.get(key)) { %>
+                    <div style="margin: 5px;"><input type="checkbox" name="<%=col%>Sort" value="<%=col%>Sort"> <%=col%> </div>
+                <% } %> --%>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" style="margin:0 auto; display:table;">OK</button>
+            </div>
+            </form>
             </div>
         </div>
     </div>
@@ -141,6 +191,7 @@ import="java.util.*"
 
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
+                <li><button style="margin-left:40px;" onclick="checkBox();" class="btn btn-default colSelect-button" type="button">Column Select <i style="display:none" class="fa fa-spin fa-spinner"></i></button></li>
                 <li><button style="margin-left:40px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button></li>
                 <li><button class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span>Across Groups <input class="across-groups" type="Checkbox"></span></li>
                 <li><button class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button></li>
@@ -160,8 +211,8 @@ import="java.util.*"
                 <%-- <th class="cell-table">Name</th> 
                 <%-- ask prof about this. why is this hardcoded? 
                 <th class="cell-table">Constituency</th> --%>
-                <% for (String col: Config.actualColumns.get(session.getAttribute("datasetKey"))) { %>
-                    <th class="cell-table"><%=col%></th>
+                <% for (String col: Config.showCols) { %>
+                    <th class="cell-table" id="<%=col%>Table" name="<%=col%>Table"><%=col%></th>
                 <% } %>
 <!--                <th class="cell-table ">Comments</th> -->
             </tr>
@@ -188,8 +239,7 @@ import="java.util.*"
                 <button data-groupId="<%=gid%>" class="select-button" type="button" id="select-all" >Select all</button>
                 <button data-groupId="<%=gid%>" class="reviewed-button" type="button" id="done-all">Mark as <%=isReviewed ? "unreviewed" : "reviewed"%></button>
 
-                <% if (!firstGroup) { // don't show "till above" buttons for first group %>
-
+                <% if (!firstGroup) { %> <%-- don't show "till above" buttons for first group --%>
                     <button data-groupId="<%=gid%>" class="reviewed-till-here-button" style="float: right; margin-right: 10px" type="button">Mark reviewed till here</button>
                     <button data-groupId="<%=gid%>" class="select-till-here-button" style="float: right; margin-right: 10px" type="button">Select till here</button>
                 <% } %>
@@ -272,7 +322,7 @@ import="java.util.*"
 				<%-- <td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td> --%>
 
                 <%
-                    for (String col : Config.actualColumns.get(session.getAttribute("datasetKey"))) {
+                    for (String col : Config.showCols) {
                         if(col.equalsIgnoreCase(Config.MERGE_FIELD))
                             continue;
                         String classStr = "", textClass = "unspecial";
@@ -596,6 +646,36 @@ import="java.util.*"
         });
     }
 
+    function col_show_handler (e) {
+        var post_data = {
+            filterOnly: true,
+            filterSpec: $('#filterSpec').val(),
+            sortOrder: $('#sortOrder').val(),
+            groupViewControlSpec: $('#groupViewControlSpec').val(),
+            rowViewControlSpec: $('#rowViewControlSpec').val()
+        };
+
+        var $spinner = $('.filter-spinner');
+        $spinner.fadeIn();
+
+        $.ajax ({
+            type: 'POST',
+            url: 'ajax/run-merge',
+            datatype: 'json',
+            data: post_data,
+            success: function(o) {
+                $spinner.fadeOut();
+                if (o && o.status == 0) {
+                    // could perhaps display a toast here
+                } else {
+                    alert('Merge failed!');
+                }
+                window.location = 'table?page=1&scrollTo=' + escape(window.last_name);
+            },
+            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: Merge failed! ' + textStatus + ' ' + jqXHR.responseText);}
+        });
+    }
+
     // from https://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport/7557433#7557433
     function isElementInViewport (el) {
 
@@ -636,6 +716,7 @@ import="java.util.*"
     $('.unmerge-button').click (save_handler);
     $('.filter-button').click (function() { $('#filterModal').modal();});
     $('.filter-submit-button').click (filter_submit_handler);
+    $('.colSelect-button').click (function() { $('#colSelectModal').modal();});
     $('.help-button').click (function() { $('#helpModal').modal()});
 
     // try to scroll to area that was last clicked on the merge page

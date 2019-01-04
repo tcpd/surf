@@ -5,25 +5,22 @@ import java.io.IOException;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.*;
 import javax.servlet.http.Part;
 
 import in.edu.ashoka.surf.Config;
 
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 @MultipartConfig
 public class customServlet extends HttpServlet {
-    private static Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
+    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
 
     public customServlet() {
         super();

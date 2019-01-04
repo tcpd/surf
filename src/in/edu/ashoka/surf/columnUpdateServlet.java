@@ -12,17 +12,16 @@ import javax.servlet.annotation.*;
 
 import in.edu.ashoka.surf.Config;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+
 @MultipartConfig
 public class columnUpdateServlet extends HttpServlet {
-    private static Log log = LogFactory.getLog(in.edu.ashoka.surf.columnUpdateServlet.class);
 
+    private static Log log = LogFactory.getLog(in.edu.ashoka.surf.columnUpdateServlet.class);
     public columnUpdateServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -49,18 +48,24 @@ public class columnUpdateServlet extends HttpServlet {
             Config.sortColumns = colToSortBy.split(",");
         }
         else
-            Config.actualSortColumns.get(datasetKey).toArray(new String[Config.actualSortColumns.get(datasetKey).size()]);
-        String colsToRemove = "";
+            Config.sortColumns = Config.actualSortColumns.get(datasetKey).toArray(new String[Config.actualSortColumns.get(datasetKey).size()]);
+        flag = false;
+        String colsToShow = "";
         for (String col: Config.actualColumns.get(datasetKey))
         {
-            if(request.getParameter(col)==null)
+            if(request.getParameter(col)!=null)
             {
-                colsToRemove = colsToRemove + col + ",";
+                colsToShow = colsToShow + col + ",";
+                flag = true;
             }
         }
-        String colsToRemoveArr[] = colsToRemove.split(",");
-        for(int i=0; i<colsToRemoveArr.length; i++)
-            Config.actualColumns.get(datasetKey).remove(colsToRemoveArr[i]);
+        if(flag)
+        {
+            Config.showCols = new String[colsToShow.split(",").length];
+            Config.showCols = colsToShow.split(",");
+        }
+        else
+            Config.showCols = Config.actualColumns.get(datasetKey).subList(0,1).toArray(new String[1]);
         request.getRequestDispatcher("select-op").forward(request, response);
 	}
 

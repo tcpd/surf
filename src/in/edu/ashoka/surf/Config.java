@@ -107,14 +107,14 @@ public class Config {
 
     // these will be customized per dataset, or even by the user at run time
     public static String[] supplementaryColumns = new String[]{"Election_Type","Year", "Party", "Position", "Sex", "Statename", "Votes", "Poll_No"}; // supplementary columns to display. These are emitted as is, without any special processing
-    public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
-    public static Map<String, List<String>> actualColumns =  new LinkedHashMap<>();
+    //public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
+    public static String[] sortColumns;
+    public static String[] showCols;
+    public static Map<String, List<String>> actualColumns =  new LinkedHashMap<>(); 
     public static Map<String, List<String>> actualSortColumns =  new LinkedHashMap<>();
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of surf
     public static Map<String, String> keyToPath  = new LinkedHashMap<>();
     public static Map<String, String> keyToDescription = new LinkedHashMap<>();
-    public static Map<String, String> keyToColumns = new LinkedHashMap<>();
-    public static Map<String, String> keyToSortColumns = new LinkedHashMap<>();
     public static Properties gitProps = null;
 
     static {
@@ -139,9 +139,16 @@ public class Config {
             if (key.endsWith("_Description"))
                 keyToDescription.put(key.replace("_Description", ""), props.getProperty(key));
             if (key.endsWith("_Columns"))
-                keyToColumns.put(key.replace("_Columns", ""), props.getProperty(key));
+            {
+                //keyToColumns.put(key.replace("_Columns", ""), props.getProperty(key));
+                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(props.getProperty(key).split(",")));
+                actualColumns.put(key.replace("_Columns", ""), arrayList);
+            }
             if (key.endsWith("_SortBy"))
-                keyToColumns.put(key.replace("_SortBy", ""), props.getProperty(key));
+            {
+                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(props.getProperty(key).split(",")));
+                actualSortColumns.put(key.replace("_SortBy", ""), arrayList);
+            }
         }
 
         // do some sanity checking on each key
@@ -161,31 +168,19 @@ public class Config {
                 iter.remove();
                 log.warn("File for dataset with key " + key + " is not readable. Path = " + path);
             }
-
-            String columns = keyToColumns.get(key);
-            if (columns==null)
+            
+            if (actualColumns.get(key).isEmpty())
             {
                 log.warn("Columns for dataset with key " + key + " are not specified. Reverting to supplementary columns.");
                 ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(supplementaryColumns));
                 actualColumns.put(key, arrayList);
                 writeColumns(key, supplementaryColumns);
             }
-            else
-            {
-                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(columns.split(",")));
-                actualColumns.put(key, arrayList);            
-            }
 
-            String sortBy = keyToSortColumns.get(key);
-            if (sortBy==null)
+            if (actualSortColumns.get(key).isEmpty())
             {
                 log.warn("Sorting rule for dataset with key " + key + " is not specified. Reverting to default sorting.");
                 ArrayList<String> arrayList = new ArrayList<String>(actualColumns.get(key).subList(0, 1));
-                actualSortColumns.put(key, arrayList);
-            }
-            else
-            {
-                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(sortBy.split(",")));
                 actualSortColumns.put(key, arrayList);
             }
         }
@@ -269,9 +264,11 @@ public class Config {
         String pathLabel = name.substring(0, name.lastIndexOf(".")) + "_Path=";
         String descLabel = name.substring(0, name.lastIndexOf(".")) + "_Description=";
         String colLabel = name.substring(0, name.lastIndexOf(".")) + "_Columns=";
+        String sortLabel = name.substring(0, name.lastIndexOf(".")) + "_SortBy=";
         String newPath = pathLabel.concat(path.replaceAll("\\\\", "\\\\\\\\")); //hacky fix for windows
         String newDesc = descLabel.concat(desc);
         String newCol = colLabel.concat(headers);
+        String newSortCol = sortLabel.concat(headers.substring(0,headers.indexOf(",")));
 
         // PROPS_FILE is where the config is read from.
         // default <HOME>/surf.properties, but can be overridden by system property surf.properties
@@ -283,7 +280,7 @@ public class Config {
             log.info("Updating configuration in: " + PROPS_FILE);
             try {   
                 FileWriter fw = new FileWriter(PROPS_FILE, true);
-                fw.write(System.lineSeparator()+newPath+System.lineSeparator()+newDesc+System.lineSeparator()+newCol);
+                fw.write(System.lineSeparator()+newPath+System.lineSeparator()+newDesc+System.lineSeparator()+newCol+System.lineSeparator()+newSortCol);
                 fw.close();
             } catch (Exception e) {
                 log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
@@ -333,10 +330,9 @@ public static void refreshCols(String datasetKey)
         String cols="";
         for (String key: props.stringPropertyNames()) {
             
-            if(key.substring(0,key.lastIndexOf("_")).equalsIgnoreCase(datasetKey))
+            if(key.equalsIgnoreCase(datasetKey+"_Columns"))
             {
-                if (key.endsWith("_Columns"))
-                    cols = props.getProperty(key);
+                cols = props.getProperty(key);
             }
         }
         ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(cols.split(",")));

@@ -43,6 +43,15 @@
         <servlet-name>columnViewUpdate</servlet-name>
         <url-pattern>/columnViewUpdate</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>downloadServlet</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.downloadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>downloadServlet</servlet-name>
+        <url-pattern>/downloadServlet</url-pattern>
+    </servlet-mapping>
     
     <servlet>
         <servlet-name>select-op</servlet-name>

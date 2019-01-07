@@ -11,9 +11,6 @@ import="java.util.*"
 <%@ page import="org.apache.commons.logging.Log" %>
 <%@ page import="org.apache.commons.logging.LogFactory" %>
 
-<%
-Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
-%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -47,7 +44,6 @@ Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
             if(document.getElementById("<%=col%>"))
             {
                 document.getElementById("<%=col%>").setAttribute("checked", "true");
-                console.log(check+" IN");
             }   
         }
         <% } %>
@@ -122,10 +118,6 @@ Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
                 <% for (String col: Config.actualColumns.get(key)) { %>
                     <div style="margin: 5px;"><input type="checkbox" name="<%=col%>" id="<%=col%>" value="<%=col%>"> <%=col%> </div>
                 <% } %>
-                <%-- <label>Columns to sort by:</label>
-                <% for (String col: Config.actualColumns.get(key)) { %>
-                    <div style="margin: 5px;"><input type="checkbox" name="<%=col%>Sort" value="<%=col%>Sort"> <%=col%> </div>
-                <% } %> --%>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" style="margin:0 auto; display:table;">OK</button>
@@ -640,36 +632,6 @@ Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
     }
 
     function filter_submit_handler (e) {
-        var post_data = {
-            filterOnly: true,
-            filterSpec: $('#filterSpec').val(),
-            sortOrder: $('#sortOrder').val(),
-            groupViewControlSpec: $('#groupViewControlSpec').val(),
-            rowViewControlSpec: $('#rowViewControlSpec').val()
-        };
-
-        var $spinner = $('.filter-spinner');
-        $spinner.fadeIn();
-
-        $.ajax ({
-            type: 'POST',
-            url: 'ajax/run-merge',
-            datatype: 'json',
-            data: post_data,
-            success: function(o) {
-                $spinner.fadeOut();
-                if (o && o.status == 0) {
-                    // could perhaps display a toast here
-                } else {
-                    alert('Merge failed!');
-                }
-                window.location = 'table?page=1&scrollTo=' + escape(window.last_name);
-            },
-            error: function (jqXHR, textStatus, errorThrown) { $spinner.fadeOut(); alert ('Warning: Merge failed! ' + textStatus + ' ' + jqXHR.responseText);}
-        });
-    }
-
-    function col_show_handler (e) {
         var post_data = {
             filterOnly: true,
             filterSpec: $('#filterSpec').val(),

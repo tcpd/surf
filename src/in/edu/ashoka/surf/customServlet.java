@@ -76,7 +76,6 @@ public class customServlet extends HttpServlet {
                     headers=headers+",";
             } 
         }
-        log.warn(headers);
         fileContent.close();
         Config.updateConfig(System.getProperty("user.home")+File.separator+"Surf Data"+File.separator+name, descript, name, headers);
         request.getRequestDispatcher("index.jsp").include(request, response);

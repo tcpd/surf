@@ -29,13 +29,6 @@
 <div class="user-input">
 <form onsubmit="return sanityCheck();" name="myform" id="myform" action="custom-dataset" method="post" enctype = "multipart/form-data">
 	<div class="form-group">
-		<%-- <label for="path">Path</label>
-		<input class="form-control" type="text" placeholder="C:\\Users\\Archit\\Downloads\\MZ_surf_ws.csv" id="path">
-        <br/> --%>
-		<%-- <label class="btn btn-primary" for="myfile" style="background-color: white; color: black; border-color: #ccc">
-		<input id="myfile" type="file" style="display:none; margin: auto; background: #0c218a;">
-		Upload your Dataset
-		</label> --%>
 		<div>
 			<p style="margin: 0px; font-weight: 600; padding-bottom: 4px">Upload your dataset</p>
 			<label class="btn btn-primary" for="myfile" style="background-color: white; color: #a59faf; border-color: #a59faf;">

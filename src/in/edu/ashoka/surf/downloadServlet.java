@@ -27,7 +27,6 @@ public class downloadServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/plain");
-        log.warn("Inside Servlet");
         HttpSession session = request.getSession();
         String key = (String) session.getAttribute("datasetKey");
         response.setHeader("Content-disposition", "attachment; filename="+key+"_surf.csv");
@@ -43,7 +42,6 @@ public class downloadServlet extends HttpServlet {
             while ((numBytesRead = file.read(buffer)) > 0) 
                 out.write(buffer, 0, numBytesRead);
             file.close();
-            log.warn("read file");
             out.close();
         }
     }

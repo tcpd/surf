@@ -226,7 +226,11 @@ import="java.util.*"
                 <%-- <th class="cell-table">Name</th> 
                 <%-- ask prof about this. why is this hardcoded? 
                 <th class="cell-table">Constituency</th> --%>
+                <%String mcol = Config.MERGE_FIELD;%>
+                <th class="cell-table" id="<%=mcol%>Table" name="<%=mcol%>Table"><%=mcol%></th>
                 <% for (String col: Config.showCols) { %>
+                <% if(col.equalsIgnoreCase(Config.MERGE_FIELD))
+                        continue;%>
                     <th class="cell-table" id="<%=col%>Table" name="<%=col%>Table"><%=col%></th>
                 <% } %>
 <!--                <th class="cell-table ">Comments</th> -->

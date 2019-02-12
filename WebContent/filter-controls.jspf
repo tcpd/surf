@@ -40,7 +40,7 @@ if (Util.nullOrEmpty(filterSpec)) { placeholder = "No filter is set. All rows ma
     <label for="groupViewControlSpec">Clusters to show:</label>
     <select class="form-control selectpicker" id="groupViewControlSpec" name="groupViewControlSpec">
         <option <%=MergeManager.GroupViewControl.GROUPS_WITH_ONE_OR_MORE_ROWS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_ONE_OR_MORE_ROWS%>">Clusters with one or more rows matching filter</option>
-
+        <option <%=MergeManager.GroupViewControl.GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS%>">Clusters with one or more rows and two or more IDs matching filter</option>
         <option <%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_ROWS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_ROWS%>">Clusters with two or more rows matching filter</option>
         <option <%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_IDS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_IDS%>">Clusters with two or more IDs matching filter</option>
         <option <%=MergeManager.GroupViewControl.ALL_GROUPS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.ALL_GROUPS%>">All clusters</option>

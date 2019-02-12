@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.FileWriter;
 import java.util.*;
 
 /*
@@ -106,19 +107,27 @@ public class Config {
 
     // these will be customized per dataset, or even by the user at run time
     public static String[] supplementaryColumns = new String[]{"Election_Type","Year", "Party", "Position", "Sex", "Statename", "Votes", "Poll_No"}; // supplementary columns to display. These are emitted as is, without any special processing
-    public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
-
+    //public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
+    public static String[] sortColumns;
+    public static String[] showCols;
+    public static Map<String, List<String>> actualColumns =  new LinkedHashMap<>(); 
+    public static Map<String, List<String>> actualSortColumns =  new LinkedHashMap<>();
     private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of surf
     public static Map<String, String> keyToPath  = new LinkedHashMap<>();
     public static Map<String, String> keyToDescription = new LinkedHashMap<>();
     public static Properties gitProps = null;
 
     static {
+        createDatasets();
+    }
+
+    public static void createDatasets()
+    {
         Properties props = readProperties();
         gitProps = new Properties();
         try { gitProps.load(getResourceAsStream("git.properties")); }
         catch (Exception e) { Util.print_exception("unable to load git.properties", e, log); }
-
+        // new File("/path/directory").mkdirs();
         // props file should like like:
         // UP_Path: /Users/user/foo/bar/...
         // UP_Description: This is the dataset for UP
@@ -129,6 +138,17 @@ public class Config {
                 keyToPath.put(key.replace("_Path", ""), props.getProperty(key));
             if (key.endsWith("_Description"))
                 keyToDescription.put(key.replace("_Description", ""), props.getProperty(key));
+            if (key.endsWith("_Columns"))
+            {
+                //keyToColumns.put(key.replace("_Columns", ""), props.getProperty(key));
+                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(props.getProperty(key).split(",")));
+                actualColumns.put(key.replace("_Columns", ""), arrayList);
+            }
+            if (key.endsWith("_SortBy"))
+            {
+                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(props.getProperty(key).split(",")));
+                actualSortColumns.put(key.replace("_SortBy", ""), arrayList);
+            }
         }
 
         // do some sanity checking on each key
@@ -148,11 +168,26 @@ public class Config {
                 iter.remove();
                 log.warn("File for dataset with key " + key + " is not readable. Path = " + path);
             }
+            
+            if (actualColumns.get(key).isEmpty())
+            {
+                log.warn("Columns for dataset with key " + key + " are not specified. Reverting to supplementary columns.");
+                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(supplementaryColumns));
+                actualColumns.put(key, arrayList);
+                writeColumns(key, supplementaryColumns);
+            }
+
+            if (actualSortColumns.get(key).isEmpty())
+            {
+                log.warn("Sorting rule for dataset with key " + key + " is not specified. Reverting to default sorting.");
+                ArrayList<String> arrayList = new ArrayList<String>(actualColumns.get(key).subList(0, 1));
+                actualSortColumns.put(key, arrayList);
+            }
         }
 
         // lock these maps so there is no chance of accidental change
-        keyToPath = Collections.unmodifiableMap(keyToPath);
-        keyToDescription = Collections.unmodifiableMap(keyToDescription);
+        // keyToPath = Collections.unmodifiableMap(keyToPath);
+        // keyToDescription = Collections.unmodifiableMap(keyToDescription);
 
         {
             log.info("------------- Available datasets -----------------");
@@ -193,23 +228,23 @@ public class Config {
                 props.setProperty(key, val);
         }
 
-        {
-            String val = props.getProperty("show-columns");
-            if (!Util.nullOrEmpty(val)) {
-                supplementaryColumns = val.split(",");
-                for (int i = 0; i < supplementaryColumns.length; i++)
-                    supplementaryColumns[i] = supplementaryColumns[i].trim();
-            }
-        }
+        // {
+        //     String val = props.getProperty("show-columns");
+        //     if (!Util.nullOrEmpty(val)) {
+        //         supplementaryColumns = val.split(",");
+        //         for (int i = 0; i < supplementaryColumns.length; i++)
+        //             supplementaryColumns[i] = supplementaryColumns[i].trim();
+        //     }
+        // }
 
-        {
-            String val = props.getProperty("sort-columns");
-            if (!Util.nullOrEmpty(val)) {
-                sortColumns = val.split(",");
-                for (int i = 0; i < supplementaryColumns.length; i++)
-                    sortColumns[i] = sortColumns[i].trim();
-            }
-        }
+        // {
+        //     String val = props.getProperty("sort-columns");
+        //     if (!Util.nullOrEmpty(val)) {
+        //         sortColumns = val.split(",");
+        //         for (int i = 0; i < supplementaryColumns.length; i++)
+        //             sortColumns[i] = sortColumns[i].trim();
+        //     }
+        // }
         return props;
     }
 
@@ -223,5 +258,84 @@ public class Config {
         if (is == null)
             log.warn ("UNABLE TO READ RESOURCE FILE: " + path);
         return is;
+    }
+
+    public static void updateConfig(String path, String desc, String name, String headers){
+        String pathLabel = name.substring(0, name.lastIndexOf(".")) + "_Path=";
+        String descLabel = name.substring(0, name.lastIndexOf(".")) + "_Description=";
+        String colLabel = name.substring(0, name.lastIndexOf(".")) + "_Columns=";
+        String sortLabel = name.substring(0, name.lastIndexOf(".")) + "_SortBy=";
+        String newPath = pathLabel.concat(path.replaceAll("\\\\", "\\\\\\\\")); //hacky fix for windows
+        String newDesc = descLabel.concat(desc);
+        String newCol = colLabel.concat(headers);
+        String newSortCol = sortLabel.concat(headers.substring(0,headers.indexOf(",")));
+
+        // PROPS_FILE is where the config is read from.
+        // default <HOME>/surf.properties, but can be overridden by system property surf.properties
+        String propsFile = System.getProperty("surf.properties");
+        if (propsFile != null)
+            PROPS_FILE = propsFile;
+        File f = new File(PROPS_FILE);
+        if (f.exists() && f.canRead()) {
+            log.info("Updating configuration in: " + PROPS_FILE);
+            try {   
+                FileWriter fw = new FileWriter(PROPS_FILE, true);
+                fw.write(System.lineSeparator()+newPath+System.lineSeparator()+newDesc+System.lineSeparator()+newCol+System.lineSeparator()+newSortCol);
+                fw.close();
+            } catch (Exception e) {
+                log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
+            }
+        } else {
+            log.warn("Surf properties file " + PROPS_FILE + " does not exist or is not readable");
+        }
+        createDatasets();
+    }
+
+    private static void writeColumns(String key, String[] cols)
+    {
+        String propsFile = System.getProperty("surf.properties");
+        if (propsFile != null)
+            PROPS_FILE = propsFile;
+        File f = new File(PROPS_FILE);
+        if (f.exists() && f.canRead())
+        {
+            log.info("Updating configuration in: " + PROPS_FILE);
+            try 
+            {   
+                FileWriter fw = new FileWriter(PROPS_FILE, true);
+                fw.write(System.lineSeparator()+key+"_Columns=");
+                for(int i=0; i<cols.length-1; i++)
+                    fw.write(cols[i]+",");
+                fw.write(cols[cols.length-1]);
+                fw.close();
+            } 
+            catch (Exception e) 
+            {
+                log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
+            }
+        } 
+        else 
+        {
+            log.warn("Surf properties file " + PROPS_FILE + " does not exist or is not readable");
+        }
+    }
+
+
+public static void refreshCols(String datasetKey)
+    {
+        Properties props = readProperties();
+        gitProps = new Properties();
+        try { gitProps.load(getResourceAsStream("git.properties")); }
+        catch (Exception e) { Util.print_exception("unable to load git.properties", e, log); }
+        String cols="";
+        for (String key: props.stringPropertyNames()) {
+            
+            if(key.equalsIgnoreCase(datasetKey+"_Columns"))
+            {
+                cols = props.getProperty(key);
+            }
+        }
+        ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(cols.split(",")));
+        actualColumns.put(datasetKey, arrayList);            
     }
 }

@@ -209,6 +209,16 @@ public class Config {
             PROPS_FILE = propsFile;
 
         File f = new File(PROPS_FILE);
+        if(!f.exists())
+        {
+            String npath = System.getProperty("user.home") + File.separator + "surf.properties";
+            File file = new File(npath);
+            try{file.createNewFile();}
+            catch(Exception e){
+                log.warn("Unable to create surf.properties");
+            }
+        }
+        f = new File(PROPS_FILE);
         if (f.exists() && f.canRead()) {
             log.info("Reading configuration from: " + PROPS_FILE);
             try {
@@ -276,6 +286,16 @@ public class Config {
         if (propsFile != null)
             PROPS_FILE = propsFile;
         File f = new File(PROPS_FILE);
+        if(!f.exists())
+        {
+            String npath = System.getProperty("user.home") + File.separator + "surf.properties";
+            File file = new File(npath);
+            try{file.createNewFile();}
+            catch(Exception e){
+                log.warn("Unable to create surf.properties");
+            }
+        }
+        f = new File(PROPS_FILE);
         if (f.exists() && f.canRead()) {
             log.info("Updating configuration in: " + PROPS_FILE);
             try {   

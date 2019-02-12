@@ -28,14 +28,14 @@ public class customServlet extends HttpServlet {
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html");
+        response.setContentType("text/html; charset=UTF-8");
         if(!(new File(System.getProperty("user.home")+File.separator+"Surf Data").exists()))
             new File(System.getProperty("user.home")+File.separator+"Surf Data").mkdirs();
         request.getRequestDispatcher("custom-dataset.jsp").include(request, response);
     }
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html");
+        response.setContentType("text/html; charset=UTF-8");
         String descript = request.getParameter("desc");
         boolean headerFlag = Boolean.parseBoolean(request.getParameter("head"));
         Part filePart = request.getPart("myfile");

@@ -30,7 +30,7 @@
 <div class="user-input">
 <form action="read-dataset" method="get">
 	<div class="form-group">
-		<label for="datasetKey">Dataset</label>
+		<label for="datasetKey">Select Dataset</label>
 		<select id="datasetKey" class="form-control selectpicker" name="datasetKey"> <!-- called state for historical reasons, TOFIX -->
 		<% for (String key: Config.keyToDescription.keySet()) { %>
 			<option value="<%=key%>"><%=Config.keyToDescription.get(key)%></option>
@@ -48,7 +48,7 @@
 	<div class="form-group">
 	</div>
 	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Read your own Dataset</button>
+		<button type="submit" class="btn btn-default">Upload your own Dataset</button>
 	</div>
 	<br/>
 </form>

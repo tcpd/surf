@@ -15,23 +15,23 @@ import="java.util.*"
 <html>
 <head>
 	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
-    <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
+    <link href="/css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <!--	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
 
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
     <!-- Optional theme -->
-    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
 
-    <link rel="stylesheet" type="text/css" href="css/main.css">
-	<link rel="stylesheet" type="text/css" href="css/surf.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+	<link rel="stylesheet" type="text/css" href="/css/surf.css">
 
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
-    <script type="text/javascript"> if (!window.jQuery) {document.write('<script type="text/javascript" src="js/jquery-1.12.1.min.js"><\/script>');}</script>
+    <script type="text/javascript"> if (!window.jQuery) {document.write('<script type="text/javascript" src="/js/jquery-1.12.1.min.js"><\/script>');}</script>
 
     <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script type="text/javascript"> if (!(typeof $().modal == 'function')) { document.write('<script type="text/javascript" src="js/bootstrap-3.1.1.min.js"><\/script>'); }</script>
+    <script type="text/javascript"> if (!(typeof $().modal == 'function')) { document.write('<script type="text/javascript" src="/js/bootstrap-3.1.1.min.js"><\/script>'); }</script>
     <%String key = (String) session.getAttribute("datasetKey");%>
     
     <script type="text/javascript">
@@ -49,7 +49,7 @@ import="java.util.*"
         <% } %>
     }
     </script>
-    <script src="js/selectpicker.js"></script>
+    <script src="/js/selectpicker.js"></script>
     <style>
         .warn-dup { color: red; }
         .warn { background-color: red; padding: 3px; color: white; }

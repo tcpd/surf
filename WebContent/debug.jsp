@@ -13,11 +13,11 @@
 	
 	<link rel="icon" type="image/png" href="images/epadd-favicon.png">
 	
-	<link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
 
-	<script src="/js/jquery.js" type="text/javascript"></script>
-	<script src="/js/jquery/jquery.tools.min.js" type="text/javascript"></script>
-	<script type="text/javascript" src="/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script src="js/jquery.js" type="text/javascript"></script>
+	<script src="js/jquery/jquery.tools.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
 
 </head>
 <body class="color:gray;background-color:white;">

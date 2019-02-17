@@ -430,7 +430,9 @@ public class SurfExcel {
         for (Row r: allRows)
         {
             if (r.get(Config.ID_FIELD).equals(""))
-                r.set (Config.ID_FIELD, Integer.toString(i++));
+            {
+                r.set(Config.ID_FIELD, Integer.toString(i++));
+            }
         }
 	}
 

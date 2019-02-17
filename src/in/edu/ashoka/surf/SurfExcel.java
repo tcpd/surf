@@ -428,7 +428,10 @@ public class SurfExcel {
 
         int i = 1;
         for (Row r: allRows)
-            r.set (Config.ID_FIELD, Integer.toString(i++));
+        {
+            if (r.get(Config.ID_FIELD).equals(""))
+                r.set (Config.ID_FIELD, Integer.toString(i++));
+        }
 	}
 
 

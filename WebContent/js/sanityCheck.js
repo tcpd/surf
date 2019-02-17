@@ -7,6 +7,11 @@ function sanityCheck()
         alert("Please enter a csv file!");
         return false;
     }
+
+    if (document.myform.desc.value === '') {
+        alert ("Please provide a description");
+        return false;
+    }
     return true;
 }
 
@@ -21,7 +26,7 @@ function sanityCheck2()
     }
     else
     {
-        alert("File successfully uploaded!");
+        alert("Good, that file works!");
     }
     return true;
 }

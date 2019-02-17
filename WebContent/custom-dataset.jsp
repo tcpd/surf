@@ -38,10 +38,10 @@
 		</div>
         <br/>
 		<label for="head">Has Headers?</label><br>
-		<input type="radio" id="head" name="head" value="true"> Yes<br>
-		<input type="radio" id="head" name="head" value="false"> No<br>
+		<input id="head" type="radio" name="head" checked="checked"> Yes<br>
+		<input type="radio" name="head" value="false"> No<br>
 		<br>
-        <label for="desc">Description</label>
+        <label for="desc">Description (required)</label>
         <input class="form-control" type="text" placeholder="Description" id="desc" name="desc">
 	</div>
 	<br/>

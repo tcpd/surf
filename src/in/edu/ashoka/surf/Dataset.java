@@ -102,7 +102,7 @@ public class Dataset implements Serializable{
             addToColumnsToSave(col);
     }
 
-    //check whether reading the file for the first time, i.e. no id's have been assigned yet.
+    //check whether any row has an ID field that is empty. returns true if even one row does not have an ID field
     public boolean hasIds(){
         Collection<Row> allRows = getRows();
         for (Row row:allRows) {

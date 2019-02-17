@@ -422,16 +422,23 @@ public class SurfExcel {
         return result;
     }
 
-    /*This method tries to generate values for ID */
+    /* This method generates non-clashing values in the ID field for all rows that have an empty ID */
 	public static void assignUnassignedIds(Collection<Row> allRows) {
 		// any row which doesn't have an id assigned to it. Should be assigned one here. Each row is assigned a unique number
+
+        Set<String> existingIds = allRows.stream().map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet());
 
         int i = 1;
         for (Row r: allRows)
         {
-            if (r.get(Config.ID_FIELD).equals(""))
+            if (Util.nullOrEmpty(r.get(Config.ID_FIELD)))
             {
-                r.set(Config.ID_FIELD, Integer.toString(i++));
+                // look for the next available ID that is not used
+                while (existingIds.contains(Integer.toString(i)))
+                    i++;
+
+                r.set(Config.ID_FIELD, Integer.toString(i));
+                i++;
             }
         }
 	}

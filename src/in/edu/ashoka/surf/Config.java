@@ -29,6 +29,8 @@ public class Config {
     public static final int DEFAULT_MIN_TOKEN_OVERLAP = 2;
     public static final int DEFAULT_IGNORE_TOKEN_FREQUENCY = 200;
     public static final int DEFAULT_MIN_SPLITWEIGHT = 10; // a token in a field will be split only if it's constituent parts have appeared independently > 10 times. (However, there is an additional factor of 2x needed if the fields are only of length 3)
+    public static final int DEFAULT_STREAK_LENGTH = 5;
+    public static final int DEFAULT_MAX_HOLES = 1;
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{

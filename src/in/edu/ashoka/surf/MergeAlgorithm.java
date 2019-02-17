@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,5 +22,6 @@ abstract public class MergeAlgorithm {
 
     MergeAlgorithm (Dataset dataset) {
         this.dataset = dataset;
+        classes = new ArrayList<>();
     }
 }

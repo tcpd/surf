@@ -14,6 +14,7 @@ import="java.util.*"
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/png" href="images/surf-favicon.png">
 	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
     <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
 
@@ -58,6 +59,7 @@ import="java.util.*"
         .special { background-color: limegreen; color:white;}
         .special, .unspecial { padding: 3px; }
         .insignificant-row { opacity: 0.7; color: gray;} /* specify opacity separately, so that if it is faded even if some other color overrides */
+        td { padding: 0px 5px;}
     </style>
 	<title>Surf</title>
 </head>

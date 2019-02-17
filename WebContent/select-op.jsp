@@ -7,7 +7,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Surf</title>
-	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/surf-favicon.png">
+
+    <link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
     <link href="css/fonts/font-awesome/css/font-awesome-4.7.min.css" rel="stylesheet">
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -39,6 +41,7 @@
 		<select class="form-control selectpicker" id="algorithm" name="algorithm">
             <option value="editDistance">Edit distance</option>
 			<option value="compatibleNames">Compatible names</option>
+            <option value="streaks">Streaks</option>
             <option value="allNames">All names</option>
 		</select>
         <br/>
@@ -79,6 +82,54 @@
         </div>
             <hr/>
         </div>
+
+        <div class="div-streak-alg-controls" style="display:none">
+            <div class="div-streakColumn">
+                <label for="streakFieldName">Streak column</label>
+                <select  class="form-control selectpicker" id="streakFieldName" name="streakFieldName">
+                    <option value="">None</option>
+                    <%
+                        for (String col: dataset.getColumnDisplayNames()) {
+                            if (col.equalsIgnoreCase(mergeCol) || col.equals(Config.ID_FIELD))
+                                continue;
+                    %>
+                    <option value="<%=col%>"><%=col%></option>
+                    <% } %>
+                </select>
+                <span class="help">Streak column</span>
+            </div>
+
+            <div class="div-streakLength">
+                <label for="streakLength">Streak length</label>
+                <input type="text" class="form-control" id="streakLength" name="streakLength" value="<%=Config.DEFAULT_STREAK_LENGTH%>">
+                <span class="help">Try to find streaks of this length</span>
+            </div>
+
+            <div class="div-maxHoles">
+                <label for="maxHoles">Max. holes in streak</label>
+                <input type="text" class="form-control" id="maxHoles" name="maxHoles" value="<%=Config.DEFAULT_MAX_HOLES%>">
+                <span class="help">Allow these many holes in the streak</span>
+            </div>
+
+            <div class="div-secondaryColumn">
+                <label for="secondaryFieldName">Secondary column</label>
+                <select  class="form-control selectpicker" id="secondaryFieldName" name="secondaryFieldName">
+                    <option value="">None</option>
+                    <%
+                        for (String col: dataset.getColumnDisplayNames()) {
+                            if (col.equalsIgnoreCase(mergeCol) || col.equals(Config.ID_FIELD))
+                                continue;
+                    %>
+                    <option value="<%=col%>"><%=col%></option>
+                    <% } %>
+                </select>
+                <span class="help">Secondary field</span>
+            </div>
+            <br/>
+
+            <hr/>
+        </div>
+
     </div>
 
     <div class="form-group">
@@ -87,7 +138,7 @@
             <option value="">None</option>
             <%
                 for (String col: dataset.getColumnDisplayNames()) {
-                    if (col.equalsIgnoreCase(mergeCol))
+                    if (col.equalsIgnoreCase(mergeCol) || col.equals(Config.ID_FIELD))
                         continue;
             %>
             <option value="<%=col%>"><%=col%></option>
@@ -150,6 +201,12 @@
             $('.div-compat-alg-controls').show();
         } else {
             $('.div-compat-alg-controls').hide();
+        }
+
+        if (alg === 'streaks') {
+            $('.div-streak-alg-controls').show();
+        } else {
+            $('.div-streaks-alg-controls').hide();
         }
     };
 

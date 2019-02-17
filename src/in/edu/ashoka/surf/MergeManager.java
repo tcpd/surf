@@ -187,8 +187,14 @@ public class MergeManager {
 //            String fieldToCompare = "_c_" + Config.MERGE_FIELD; // we run it on the canon version of the name, not the tokenized, because that causes too many merges
             String fieldToCompare = "_st_" + Config.MERGE_FIELD; // we run it on tokenized version of the name now that we have tightened it. go back to _c_name if this causes too many matches
             algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency, substringAllowed, initialMapping);
-        }
+        } else if (algo.equals("streaks")) {
+            String streakFieldName = params.get("streakFieldName");
+            int streakLength = Integer.parseInt(params.get("streakLength"));
+            int maxHoles = Integer.parseInt(params.get("maxHoles"));
+            String secondaryFieldName = params.get("secondaryFieldName");
 
+            algorithm = new StreakMergeAlgorithm(d, filter, streakFieldName, streakLength, maxHoles, secondaryFieldName);
+        }
         // this is where the groups are generated
         groups = algorithm.run();
         rowToLabels.clear(); // remove all the old labels the moment a new alg. is run

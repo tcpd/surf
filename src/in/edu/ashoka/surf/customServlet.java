@@ -1,10 +1,14 @@
 package in.edu.ashoka.surf;
 
 import java.io.IOException;
-
+import java.util.Iterator;
+import java.util.Map;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
+
+import java.nio.charset.Charset;
+import org.apache.commons.csv.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -54,7 +58,10 @@ public class customServlet extends HttpServlet {
         {
             if(str.trim().startsWith("filename"))
             {
-                filename=str.substring(str.indexOf("=")+2,str.length()-1);
+                //https://stackoverflow.com/questions/11838674/how-to-read-property-name-with-spaces-in-java
+                //Config.java line 238 stringPropertyNames takes whitespaces, '=' and ';' as delimiters.
+                //So regex replace everything other than alphabets, numbers and dots to be safe
+                filename=str.substring(str.indexOf("=")+2,str.length()-1).replaceAll("[^a-zA-Z0-9.]", "_");
             }
         }
 
@@ -74,20 +81,35 @@ public class customServlet extends HttpServlet {
 
         filePart.write(fileToWrite);
 
-        BufferedReader fileContent = new BufferedReader(new FileReader(Config.SURF_HOME + File.separator + filename));
-        String firstLine = fileContent.readLine();
-        firstLine = firstLine.replaceAll("\"", ""); // isn't this unsafe?
-        fileContent.close();
+        // BufferedReader fileContent = new BufferedReader(new FileReader(Config.SURF_HOME + File.separator + filename));
+        String firstLine = "";
+            CSVParser parse = CSVParser.parse(new File(Config.SURF_HOME + File.separator + filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
+            Map<String, Integer> headers = parse.getHeaderMap();
+            int length=headers.size();
+            if(length==0)
+            {
+                log.warn("0 columns!");
+                return;
+            }
+            int flag=0;
+            for(String key : headers.keySet())
+            {
+                firstLine+=key;
+                if (flag < length - 1)
+                    firstLine = firstLine + ",";
+                flag++;
+            }
 
+        //firstLine = firstLine.replaceAll("\"", ""); // isn't this unsafe?
+        //fileContent.close();
         {
             boolean hasHeaders = Boolean.parseBoolean(request.getParameter("head"));
             if (!hasHeaders) {
                 log.warn("Warning: no headers, creating dummy ones for file " + filename);
-                String colNames[] = firstLine.split(",");
                 firstLine = "";
-                for (int i = 0; i < colNames.length; i++) {
+                for (int i = 0; i < length; i++) {
                     firstLine = firstLine + "col" + Integer.toString(i);
-                    if (i < colNames.length - 1)
+                    if (i < length - 1)
                         firstLine = firstLine + ",";
                 }
             }

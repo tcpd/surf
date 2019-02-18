@@ -1,10 +1,3 @@
-<%@ page import="in.edu.ashoka.surf.Config" %>
-<!--Outside Views-->
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql" %>
-<%@ taglib prefix="x" uri="http://java.sun.com/jsp/jstl/xml" %>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,7 +31,7 @@
 		</div>
         <br/>
 		<label for="head">Has Headers?</label><br>
-		<input id="head" type="radio" name="head" checked="checked"> Yes<br>
+		<input id="head" type="radio" name="head" value="true" checked="checked"> Yes<br>
 		<input type="radio" name="head" value="false"> No<br>
 		<br>
         <label for="desc">Description (required)</label>

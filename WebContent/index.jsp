@@ -44,12 +44,13 @@
 	</div>
 	<br/>
 </form>
+	<hr/>
 <p class="text-center" style="margin: auto">OR</p>
 <form action="custom-dataset" method="get">
 	<div class="form-group">
 	</div>
 	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Upload your own Dataset</button>
+		<button type="submit" class="btn btn-default">Upload a new Dataset</button>
 	</div>
 	<br/>
 </form>

@@ -117,7 +117,7 @@ public class LoggingFilter implements javax.servlet.Filter {
 	}
 
 	@Override
-	public void init(FilterConfig arg0) throws ServletException {
+	public void init(FilterConfig arg0) {
 		log.info("Filter LoggingFilter initialized");
 		// TODO Auto-generated method stub		
 	}

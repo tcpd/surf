@@ -31,6 +31,7 @@ public class Config {
     public static final int DEFAULT_MIN_SPLITWEIGHT = 10; // a token in a field will be split only if it's constituent parts have appeared independently > 10 times. (However, there is an additional factor of 2x needed if the fields are only of length 3)
     public static final int DEFAULT_STREAK_LENGTH = 5;
     public static final int DEFAULT_MAX_HOLES = 1;
+    public static final String SURF_HOME = System.getProperty("user.home")+File.separator+"Surf Data";
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
@@ -272,37 +273,42 @@ public class Config {
         return is;
     }
 
-    public static void updateConfig(String path, String desc, String name, String headers){
-        String pathLabel = name.substring(0, name.lastIndexOf(".")) + "_Path=";
-        String descLabel = name.substring(0, name.lastIndexOf(".")) + "_Description=";
-        String colLabel = name.substring(0, name.lastIndexOf(".")) + "_Columns=";
-        String sortLabel = name.substring(0, name.lastIndexOf(".")) + "_SortBy=";
-        String newPath = pathLabel.concat(path.replaceAll("\\\\", "\\\\\\\\")); //hacky fix for windows
-        String newDesc = descLabel.concat(desc);
-        String newCol = colLabel.concat(headers);
-        String newSortCol = sortLabel.concat(headers.substring(0,headers.indexOf(",")));
+    public static void addDatasetToConfig(String path, String desc, String name, String headers) {
+        String key = name.substring(0, name.lastIndexOf("."));  // strip out the ext. after the last part (.csv) and use that as the key
+        String pathLabel = key + "_Path=";
+        String descLabel = key + "_Description=";
+        String colLabel = key + "_Columns=";
+        String sortLabel = key + "_SortBy=";
+
+        String pathValue = pathLabel.concat(path.replaceAll("\\\\", "\\\\\\\\")); //hacky fix for windows
+        String descriptionValue = descLabel.concat(desc);
+        String columnsValue = colLabel.concat(headers);
+        String sortColValue = sortLabel.concat(headers.substring(0,headers.indexOf(",")));
 
         // PROPS_FILE is where the config is read from.
         // default <HOME>/surf.properties, but can be overridden by system property surf.properties
         String propsFile = System.getProperty("surf.properties");
         if (propsFile != null)
             PROPS_FILE = propsFile;
+
         File f = new File(PROPS_FILE);
-        if(!f.exists())
-        {
+        if (!f.exists()) {
             String npath = System.getProperty("user.home") + File.separator + "surf.properties";
             File file = new File(npath);
-            try{file.createNewFile();}
-            catch(Exception e){
+            try {
+                file.createNewFile();
+                f = new File(PROPS_FILE);
+            } catch (Exception e) {
                 log.warn("Unable to create surf.properties");
+                return;
             }
         }
-        f = new File(PROPS_FILE);
+        
         if (f.exists() && f.canRead()) {
             log.info("Updating configuration in: " + PROPS_FILE);
             try {   
                 FileWriter fw = new FileWriter(PROPS_FILE, true);
-                fw.write(System.lineSeparator()+newPath+System.lineSeparator()+newDesc+System.lineSeparator()+newCol+System.lineSeparator()+newSortCol);
+                fw.write(System.lineSeparator()+pathValue+System.lineSeparator()+descriptionValue+System.lineSeparator()+columnsValue+System.lineSeparator()+sortColValue);
                 fw.close();
             } catch (Exception e) {
                 log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);

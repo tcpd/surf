@@ -9,9 +9,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
-import edu.stanford.muse.util.Util;
 import in.edu.ashoka.surf.util.Timers;
 import in.edu.ashoka.surf.util.UnionFindSet;
+import in.edu.ashoka.surf.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

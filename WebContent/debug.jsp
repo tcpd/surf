@@ -1,11 +1,8 @@
 <%@page contentType="text/html; charset=UTF-8"%>
-<%@page language="java" import="edu.stanford.muse.util.Log4JUtils"%>
-<%@page language="java" import="edu.stanford.muse.util.Util"%>
-<%@page language="java" import="edu.stanford.muse.util.Version"%>
-<%@page language="java" import="edu.stanford.muse.webapp.JSPHelper"%>
-<%@ page import="edu.stanford.muse.webapp.ModeConfig" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="in.edu.ashoka.surf.util.Util" %>
+<%@ page import="in.edu.ashoka.surf.util.Log4JUtils" %>
 <!DOCTYPE HTML>
 <html lang="en">
 <head>

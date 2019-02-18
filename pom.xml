@@ -77,14 +77,6 @@
 			<version>1.5</version>
 		</dependency>
 
-		<dependency>
-            <artifactId>..</artifactId>
-            <groupId>..</groupId>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/muse-1.0.0-SNAPSHOT-classes.jar</systemPath>
-            <version>1.0.0</version>
-        </dependency>
-        
         <dependency>
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>jstl</artifactId>

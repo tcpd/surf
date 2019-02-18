@@ -36,15 +36,6 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.7.5" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:1.5" level="project" />
-    <orderEntry type="module-library">
-      <library name="Maven: ..:..:1.0.0">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/muse-1.0.0-SNAPSHOT-classes.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="Maven: javax.servlet:jstl:1.2" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:javax.servlet-api:3.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.json:json:20160810" level="project" />

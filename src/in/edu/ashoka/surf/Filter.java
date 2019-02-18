@@ -3,7 +3,7 @@ package in.edu.ashoka.surf;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
-import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

@@ -1,8 +1,8 @@
 package in.edu.ashoka.surf;
 
 import com.google.common.collect.Multimap;
-import edu.stanford.muse.util.Pair;
-import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Pair;
+import in.edu.ashoka.surf.util.Util;
 
 import java.io.IOException;
 import java.util.*;

@@ -160,7 +160,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
             StringTokenizer st = new StringTokenizer(fieldVal, Tokenizer.DELIMITERS);
             while (st.hasMoreTokens()) {
                 String tok = st.nextToken();
-                if (tok.length() < 2)
+                if (tok.length() < 2 || ignoredTokens.contains(tok)) // don't create this map for the ignored tokens
                     continue;
                 tokenToFieldIdx.put(tok, i);
             }
@@ -177,12 +177,14 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
                 while (st.hasMoreTokens()) {
                     String tok = st.nextToken();
                     Collection<Integer> c = tokenToFieldIdx.get(tok);
+                    log.info ("for fieldval: " + fieldVal + " tokenToFieldIDx size for " + tok + " is " + c.size());
                     for (Integer j : c)
                         if (j > i)
                             idxsToCompareWith.add(j);
                 }
             }
 
+            log.info ("idxToCompareWith size for " + fieldVal + " is "  + idxsToCompareWith.size());
             for (int j : idxsToCompareWith) {
                 String field_i = filteredRows.get(i).get(primaryFieldName);
                 String field_j = filteredRows.get(j).get(primaryFieldName);

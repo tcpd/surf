@@ -2,15 +2,70 @@ package in.edu.ashoka.surf;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import edu.stanford.muse.webapp.JSPHelper;
+import in.edu.ashoka.surf.util.Util;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class Util1 {
+    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Util1.class);
+
+    public static final boolean RUNNING_ON_JETTY = false;
+
+    // key finding after a lot of experimentation with jetty and tomcat.
+    // make all pages UTF-8 encoded.
+    // setRequestEncoding("UTF-8") before reading any parameter
+    // even with this, with tomcat, GET requests are iso-8859-1.
+    // so convert in that case only...
+    // converts an array of strings from iso-8859-1 to utf8. useful for converting i18n chars in http request parameters
+    public static String convertRequestParamToUTF8(String param) throws UnsupportedEncodingException
+    {
+        if (RUNNING_ON_JETTY)
+        {
+            log.info("running on jetty: no conversion for " + param);
+            return param;
+        }
+        if (param == null)
+            return null;
+        String newParam = new String(param.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+        if (!newParam.equals(param))
+            log.info("Converted to utf-8: " + param + " -> " + newParam);
+        return newParam;
+    }
+
+    /**
+     * converts an array of strings from iso-8859-1 to utf8. useful for
+     * converting i18n chars in http request parameters.
+     * if throwExceptionIfUnsupportedEncoding is true, throws an exception,
+     * otherwise returns
+     */
+    private static String[] convertRequestParamsToUTF8(String params[], boolean throwExceptionIfUnsupportedEncoding) throws UnsupportedEncodingException
+    {
+        if (RUNNING_ON_JETTY)
+            return params;
+        if (params == null)
+            return null;
+
+        // newParams will contain only the strings that successfully can be converted to utf-8
+        // others will be reported and ignored
+        List<String> newParams = new ArrayList<>();
+        for (String param : params) {
+            try {
+                newParams.add(convertRequestParamToUTF8(param));
+            } catch (UnsupportedEncodingException e) {
+                log.warn("Unsupported encoding exception for " + param);
+                Util.print_exception(e, log);
+                if (throwExceptionIfUnsupportedEncoding)
+                    throw (e);
+                // else swallow it
+            }
+        }
+        return newParams.toArray(new String[newParams.size()]);
+    }
 
     static int editDistance(String word1, String word2) {
         int len1 = word1.length();
@@ -64,7 +119,7 @@ public class Util1 {
                     String[] vals = request.getParameterValues(param);
                     if (vals != null)
                         for (String val : vals)
-                            params.put(param, JSPHelper.convertRequestParamToUTF8(val));
+                            params.put(param, convertRequestParamToUTF8(val));
                 }
             }
         }
@@ -94,7 +149,7 @@ public class Util1 {
                     String[] vals = request.getParameterValues(param);
                     if (vals != null)
                         for (String val : vals)
-                            params.put(param, JSPHelper.convertRequestParamToUTF8(val));
+                            params.put(param, convertRequestParamToUTF8(val));
                 }
             }
         }

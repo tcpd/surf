@@ -10,9 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Multimap;
-
-import edu.stanford.muse.util.Pair;
-import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Pair;
+import in.edu.ashoka.surf.util.Util;
 
 public class Display {
     private static PrintStream out = System.out;

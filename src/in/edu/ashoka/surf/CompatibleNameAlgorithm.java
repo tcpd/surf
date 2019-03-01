@@ -1,9 +1,9 @@
 package in.edu.ashoka.surf;
 
 import com.google.common.collect.*;
-import edu.stanford.muse.util.Pair;
+import in.edu.ashoka.surf.util.Pair;
 import in.edu.ashoka.surf.util.UnionFindSet;
-import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

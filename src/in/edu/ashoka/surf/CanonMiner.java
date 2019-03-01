@@ -4,7 +4,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
-import edu.stanford.muse.util.Util;
+import in.edu.ashoka.surf.util.Util;
 
 import java.io.IOException;
 import java.io.PrintStream;

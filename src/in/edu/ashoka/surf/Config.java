@@ -10,7 +10,6 @@ import java.io.FileWriter;
 import java.util.*;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import org.apache.commons.*;
 
 /*
 VIP class. This class has constants/settings that generally do not change during a surf execution, and are set only at startup.

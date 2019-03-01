@@ -27,6 +27,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>overwrite</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.overwrite</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>overwrite</servlet-name>
+        <url-pattern>/overwrite</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>columnUpdate</servlet-name>
         <servlet-class>in.edu.ashoka.surf.columnUpdateServlet</servlet-class>
     </servlet>

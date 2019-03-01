@@ -1,11 +1,8 @@
 package in.edu.ashoka.surf;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 import java.nio.charset.Charset;
 import org.apache.commons.csv.*;
@@ -34,8 +31,10 @@ public class customServlet extends HttpServlet {
 
         // create the surf home dir if it doesn't exist
         if (!(new File(Config.SURF_HOME).exists()))
+        {
             new File(Config.SURF_HOME).mkdirs();
-
+            new File(Config.SURF_HOME+File.separator+"Temp").mkdirs();
+        }
         request.getRequestDispatcher("custom-dataset.jsp").include(request, response);
     }
 
@@ -72,13 +71,18 @@ public class customServlet extends HttpServlet {
             doGet(request, response);
             return;
         }
-
         // write the file, checking first if we're overwriting
         String fileToWrite = Config.SURF_HOME + File.separator + filename;
         if (new File(fileToWrite).exists()) {
             log.warn ("Warning: overwriting existing file: " + fileToWrite);
+            log.warn(filePart);
+            request.setAttribute("filename", filename);
+            request.setAttribute("desc", description);
+            request.setAttribute("head", Boolean.parseBoolean(request.getParameter("head")));
+            filePart.write(Config.SURF_HOME+File.separator+"Temp"+File.separator+filename);
+            request.getRequestDispatcher("warning.jsp").forward(request, response);
+            return;
         }
-
         filePart.write(fileToWrite);
 
         // BufferedReader fileContent = new BufferedReader(new FileReader(Config.SURF_HOME + File.separator + filename));

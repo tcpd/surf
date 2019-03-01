@@ -294,7 +294,6 @@ public class Config {
             PROPS_FILE = propsFile;
 
         File f = new File(PROPS_FILE);
-        File temp = new File(System.getProperty("user.home") + File.separator + "temp.properties");
         if (!f.exists()) {
             String npath = System.getProperty("user.home") + File.separator + "surf.properties";
             File file = new File(npath);
@@ -315,7 +314,6 @@ public class Config {
                 log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
             }
             boolean flag = false;
-            log.warn(nkey);
             for (String key: props.stringPropertyNames()) {
                 if(key.substring(0, key.lastIndexOf("_")).equals(nkey))
                 {

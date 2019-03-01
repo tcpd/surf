@@ -3,12 +3,14 @@ package in.edu.ashoka.surf;
 import edu.stanford.muse.util.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.FileWriter;
 import java.util.*;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import org.apache.commons.*;
 
 /*
 VIP class. This class has constants/settings that generally do not change during a surf execution, and are set only at startup.
@@ -274,12 +276,12 @@ public class Config {
     }
 
     public static void addDatasetToConfig(String path, String desc, String name, String headers) {
-        String key = name.substring(0, name.lastIndexOf("."));  // strip out the ext. after the last part (.csv) and use that as the key
-        String pathLabel = key + "_Path=";
-        String descLabel = key + "_Description=";
-        String colLabel = key + "_Columns=";
-        String sortLabel = key + "_SortBy=";
-
+        String nkey = name.substring(0, name.lastIndexOf("."));  // strip out the ext. after the last part (.csv) and use that as the key
+        String pathLabel = nkey + "_Path=";
+        String descLabel = nkey + "_Description=";
+        String colLabel = nkey + "_Columns=";
+        String sortLabel = nkey + "_SortBy=";
+        Properties props = new Properties();
         String pathValue = pathLabel.concat(path.replaceAll("\\\\", "\\\\\\\\")); //hacky fix for windows
         String descriptionValue = descLabel.concat(desc);
         String columnsValue = colLabel.concat(headers);
@@ -292,6 +294,7 @@ public class Config {
             PROPS_FILE = propsFile;
 
         File f = new File(PROPS_FILE);
+        File temp = new File(System.getProperty("user.home") + File.separator + "temp.properties");
         if (!f.exists()) {
             String npath = System.getProperty("user.home") + File.separator + "surf.properties";
             File file = new File(npath);
@@ -305,6 +308,33 @@ public class Config {
         }
         
         if (f.exists() && f.canRead()) {
+            try {
+                InputStream is = new FileInputStream(PROPS_FILE);
+                props.load(is);
+            } catch (Exception e) {
+                log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
+            }
+            boolean flag = false;
+            log.warn(nkey);
+            for (String key: props.stringPropertyNames()) {
+                if(key.substring(0, key.lastIndexOf("_")).equals(nkey))
+                {
+                    flag = true;
+                    props.remove(key);
+                }
+            }
+            if(flag)
+            {
+                try
+                {
+                    PrintWriter out = new PrintWriter(new FileWriter(PROPS_FILE), true);
+                    Files.lines(f.toPath()).filter(line -> !line.contains(nkey)).forEach(out::println);
+                    out.flush();
+                    out.close();
+                } catch (Exception e) {
+                    log.warn("Error deleting from props file\nException: "+e);
+                }
+            }
             log.info("Updating configuration in: " + PROPS_FILE);
             try {   
                 FileWriter fw = new FileWriter(PROPS_FILE, true);

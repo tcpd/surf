@@ -40,19 +40,30 @@
 	</div>
 	<br/>
 	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Submit</button>
+		<button type="submit" class="btn btn-default">Run Surf</button>
 	</div>
 	<br/>
 </form>
 	<hr/>
-<p class="text-center" style="margin: auto">OR</p>
 <form action="custom-dataset" method="get">
-	<div class="form-group">
-	</div>
 	<div class="submit-button">
 		<button type="submit" class="btn btn-default">Upload a new Dataset</button>
 	</div>
+</form>
+<hr>
+<form action="delete-dataset" method="post">
+	<div class="form-group">
+		<label for="delDataset">Select Dataset to Delete</label>
+		<select id="delDataset" class="form-control selectpicker" name="delDataset"> <!-- called state for historical reasons, TOFIX -->
+		<% for (String key: Config.keyToDescription.keySet()) { %>
+			<option value="<%=key%>"><%=Config.keyToDescription.get(key)%></option>
+		<% } %>
+		</select>
+	</div>
 	<br/>
+	<div class="submit-button">
+		<button type="submit" class="btn btn-default">Delete Selected Dataset</button>
+	</div>
 </form>
 </div>						
 </body>

@@ -118,7 +118,7 @@ public class customServlet extends HttpServlet {
                 }
             }
         }
-
+        parse.close();
         Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine);
         request.getRequestDispatcher("index.jsp").include(request, response);
 	}

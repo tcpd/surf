@@ -228,6 +228,7 @@ public class Config {
             try {
                 InputStream is = new FileInputStream(PROPS_FILE);
                 props.load(is);
+                is.close();
             } catch (Exception e) {
                 log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
             }
@@ -309,6 +310,7 @@ public class Config {
             try {
                 InputStream is = new FileInputStream(PROPS_FILE);
                 props.load(is);
+                is.close();
             } catch (Exception e) {
                 log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);
             }

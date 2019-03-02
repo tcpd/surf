@@ -27,6 +27,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>delete-dataset</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.delete</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>delete-dataset</servlet-name>
+        <url-pattern>/delete-dataset</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>overwrite</servlet-name>
         <servlet-class>in.edu.ashoka.surf.overwrite</servlet-class>
     </servlet>

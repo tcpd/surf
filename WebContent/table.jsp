@@ -377,7 +377,11 @@ pageEncoding="UTF-8"
                         }
                         %>
 
-                        <td class="cell-table <%=classStr%>"> <span class="<%=textClass%>"><%=Util.escapeHTML(row.get(col))%></span></td>
+                        <% if (col.equals("Constituency_Name")) { %>
+                            <td class="cell-table <%=classStr%>"> <a href="<%=pc_href%>"><span class="<%=textClass%>"><%=Util.escapeHTML(row.get(col))%></span></a>   </td>
+                        <% } else { %>
+                                <td class="cell-table <%=classStr%>"> <span class="<%=textClass%>"><%=Util.escapeHTML(row.get(col))%></span></td>
+                        <% } %>
                     <% } %>
 <!--                <td class="cell-table" id="comment-<%=row.get("ID")%>" style="height:2em;" onclick="commentHandler('comment-<%=id%>')"></td> -->
 

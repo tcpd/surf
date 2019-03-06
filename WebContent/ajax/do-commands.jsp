@@ -1,6 +1,6 @@
 <%@page language="java" contentType="application/json;charset=UTF-8"%>
 <%@page trimDirectiveWhitespaces="true"%>
-<%@ page import="in.edu.ashoka.surf.MergeManager"%><%@ page import="com.google.gson.GsonBuilder"%><%@ page import="com.google.gson.Gson"%><%@ page import="com.google.gson.JsonObject"%><%@ page import="edu.stanford.muse.util.Util"%>
+<%@ page import="in.edu.ashoka.surf.MergeManager"%><%@ page import="com.google.gson.GsonBuilder"%><%@ page import="com.google.gson.Gson"%><%@ page import="com.google.gson.JsonObject"%><%@ page import="in.edu.ashoka.surf.util.Util"%>
 <%
 MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");
     JsonObject result = new JsonObject();
@@ -13,7 +13,7 @@ try {
 
     // update the groups and view
     mergeManager.applyUpdatesAndSave(commands);
-    MergeManager.View view = mergeManager.getView (mergeManager.lastView.filterSpec, mergeManager.lastView.groupViewControl.name(), mergeManager.lastView.rowViewControl.name(), mergeManager.lastView.sortOrder);
+    MergeManager.View view = mergeManager.getView (mergeManager.lastView.filterSpec, mergeManager.lastView.groupViewControl.name(), mergeManager.lastView.secondaryFilterFieldName, mergeManager.lastView.rowViewControl.name(), mergeManager.lastView.sortOrder);
     session.setAttribute("view", view);
     result.addProperty ("status", 0);
 } catch (Exception e) {

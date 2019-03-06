@@ -45,8 +45,8 @@ public class MergeManager {
 
         public final List<List<List<Row>>> viewGroups; // these are the groups
         public final String filterSpec;
-        final String sortOrder;
-        final String secondaryFilterFieldName; /* secondaryFilterFieldName is only for GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD */
+        final public String sortOrder;
+        final public String secondaryFilterFieldName; /* secondaryFilterFieldName is only for GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD */
         private final int nIds;
         private int nRowsInGroups;
 

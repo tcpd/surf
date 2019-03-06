@@ -212,7 +212,7 @@
         if (alg === 'streaks') {
             $('.div-streak-alg-controls').show();
         } else {
-            $('.div-streaks-alg-controls').hide();
+            $('.div-streak-alg-controls').hide();
         }
     }
 

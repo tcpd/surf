@@ -57,10 +57,9 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
         Multimap<String, Row> idToRows = SurfExcel.split (filteredRows, Config.ID_FIELD);
         Multimap<String, Row> streakFieldToRows = SurfExcel.split (filteredRows, streakFieldName);
 
-
-        // go over all ids one by one
+        // go over all ids one by one. use a set on idToRows.keys() because otherwise it returns same key multiple times
         outer:
-        for (String id: idToRows.keys()) {
+        for (String id: new LinkedHashSet<>(idToRows.keys())) {
             Collection<Row> rowsForThisID = idToRows.get(id);
 
             // get all unique vals in the streak field, converted to int
@@ -99,7 +98,7 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
                 continue; // if there are no holes, nothing to look for
 
             log.info("Looking for streak matching candidates for id: " + id + " with " + thisCluster.size() + " rows, holes:" + holeValues.size());
-            thisCluster.stream().forEach(r -> r.set("__is_special", "true"));
+            thisCluster.stream().forEach(r -> { log.info (r.get(Config.MERGE_FIELD)); r.set("__is_special", "true"); });
 
             // select all rows with holeValues, and secondaryField in one of the secondaryValsInNonHoles
             for (int holeValue: holeValues) {

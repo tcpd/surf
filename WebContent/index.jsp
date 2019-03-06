@@ -40,14 +40,14 @@
 	</div>
 	<br/>
 	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Run Surf</button>
+		<button type="submit" class="btn btn-default">Load dataset</button>
 	</div>
 	<br/>
 </form>
 	<hr/>
 <form action="custom-dataset" method="get">
 	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Upload a new Dataset</button>
+		<button type="submit" class="btn btn-default">Upload Dataset</button>
 	</div>
 </form>
 <hr>

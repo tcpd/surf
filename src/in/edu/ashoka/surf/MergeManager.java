@@ -110,7 +110,7 @@ public class MergeManager {
 
     private final List<Command> allCommands = new ArrayList<>(); // compile all the commands, so that they can be replayed some day, if needed
 
-    private MergeAlgorithm algorithm;
+    public MergeAlgorithm algorithm;
     private String splitColumn;
     public View lastView; // currently we assume only 1 view
 
@@ -214,7 +214,10 @@ public class MergeManager {
         groups = algorithm.run();
         rowToLabels.clear(); // remove all the old labels the moment a new alg. is run
         // if the dataset already had some id's the same, merge them
-        updateMergesBasedOnIds();
+
+        if (!"streaks".equals(algo))
+         updateMergesBasedOnIds(); // don't call this for streaks because it unifies very large clusters. for streaks we don't want any further merging.
+
         this.splitColumn = params.get("splitColumn");
         if (!Util.nullOrEmpty(splitColumn))
             splitByColumn (splitColumn);

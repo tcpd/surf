@@ -40,7 +40,9 @@ public class MergeServlet extends HttpServlet {
                 session.setAttribute("mergeManager", mergeManager);
 
                 // call this last, because we should ALWAYS merge based on id's even if it doesn't honor splitColumn
-                mergeManager.updateMergesBasedOnIds();
+                // But wait! Streak alg. doesn't want any merging between PIDs to happen. It wants its groups to be presented as is.
+                if (!(mergeManager.algorithm instanceof StreakMergeAlgorithm))
+                     mergeManager.updateMergesBasedOnIds();
             }
 
             MergeManager mergeManager = (MergeManager) session.getAttribute("mergeManager");

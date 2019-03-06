@@ -47,18 +47,19 @@ public class overwrite extends HttpServlet {
             return;
         }
         Boolean overwrite = Boolean.parseBoolean(request.getParameter("overwrite"));
+        String fileToWrite = Config.SURF_HOME + File.separator + "Temp" + File.separator + filename;
+        File newfile = new File(fileToWrite);
         // write the file, checking first if we're overwriting
         if(overwrite)
         {
-            String fileToWrite = Config.SURF_HOME + File.separator + "Temp" + File.separator + filename;
-            if (new File(fileToWrite).exists()) {
+            if (newfile.exists()) {
                 log.warn ("Warning: overwriting existing file: " + fileToWrite);
             }
             // File oldfile = new File(Config.SURF_HOME + File.separator + filename);
-            File newfile = new File(fileToWrite);
             // log.warn(oldfile.delete());
             File destDir = new File(Config.SURF_HOME);
             FileUtils.copyFileToDirectory(newfile, destDir);
+            newfile.delete();
             // BufferedReader fileContent = new BufferedReader(new FileReader(Config.SURF_HOME + File.separator + filename));
             String firstLine = "";
                 CSVParser parse = CSVParser.parse(new File(Config.SURF_HOME + File.separator + filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
@@ -97,7 +98,10 @@ public class overwrite extends HttpServlet {
             request.getRequestDispatcher("index.jsp").include(request, response);
         }
         else
+        {
+            newfile.delete();
             request.getRequestDispatcher("index.jsp").include(request, response);
+        }
 	}
 
 	public void destroy() {

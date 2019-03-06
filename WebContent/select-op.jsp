@@ -1,6 +1,5 @@
 <%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ page import="in.edu.ashoka.surf.*" %>
-<%@ page import="edu.stanford.muse.util.Util" %>
 
 <!DOCTYPE html>
 <html>
@@ -120,7 +119,7 @@
                             if (col.equalsIgnoreCase(mergeCol) || col.equals(Config.ID_FIELD))
                                 continue;
                     %>
-                    <option value="<%=col%>"><%=col%></option>
+                    <option value="<%=col%>"> <%=col%> </option>
                     <% } %>
                 </select>
                 <span class="help">Secondary field</span>
@@ -176,6 +175,13 @@
     };
 
     $('.run-button').click (function() {
+
+        var data = collect_input_fields();
+        if (('streaks' === data.algorithm) && (!data.streakFieldName || !data.secondaryFieldName)) {
+            alert ('Please specify both the streak field name and the secondary field name');
+            return;
+        }
+
         var $spinner = $('.spinner');
         $spinner.fadeIn();
 
@@ -183,7 +189,7 @@
             type: 'POST',
             url: 'ajax/run-merge',
             datatype: 'json',
-            data: collect_input_fields(),
+            data: data,
             success: function (o) { if (o && o.status === 0) { window.location = 'table?page=1'; } else { alert ('Warning: error ' + o);} $spinner.fadeOut();},
             error: function () { $spinner.fadeOut(); alert ('Warning: Run algorithm failed!');}
         });
@@ -208,7 +214,7 @@
         } else {
             $('.div-streaks-alg-controls').hide();
         }
-    };
+    }
 
     $('#algorithm').change(set_options_for_algorithm);
     $(document).ready(set_options_for_algorithm);

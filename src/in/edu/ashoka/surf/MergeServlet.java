@@ -53,7 +53,9 @@ public class MergeServlet extends HttpServlet {
             if (Util.nullOrEmpty(rowViewControlSpec))
                 rowViewControlSpec = MergeManager.RowViewControl.ALL_ROWS.name();
 
-            MergeManager.View view = mergeManager.getView(request.getParameter("filterSpec"), groupViewControlSpec, rowViewControlSpec, request.getParameter("sortOrder"));
+            String secondaryFilterFieldName = request.getParameter("secondaryFilterFieldName");
+
+            MergeManager.View view = mergeManager.getView(request.getParameter("filterSpec"), groupViewControlSpec, secondaryFilterFieldName, rowViewControlSpec, request.getParameter("sortOrder"));
             session.setAttribute("view", view);
 
             result.addProperty ("status", 0);

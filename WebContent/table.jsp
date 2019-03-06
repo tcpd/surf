@@ -1,15 +1,9 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@ page contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"
-		 import="in.edu.ashoka.surf.Row"
-import="in.edu.ashoka.surf.MergeManager"
-import="java.util.*"
+         import="java.util.*"
 %>
-<%@ page import="edu.stanford.muse.util.Util" %>
-<%@ page import="in.edu.ashoka.surf.Config" %>
-<%@ page import="in.edu.ashoka.surf.Util1" %>
+<%@ page import="in.edu.ashoka.surf.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="org.apache.commons.logging.Log" %>
-<%@ page import="org.apache.commons.logging.LogFactory" %>
 
 <!DOCTYPE html>
 <html>
@@ -59,12 +53,15 @@ import="java.util.*"
         .special { background-color: limegreen; color:white;}
         .special, .unspecial { padding: 3px; }
         .insignificant-row { opacity: 0.7; color: gray;} /* specify opacity separately, so that if it is faded even if some other color overrides */
+        .special-row { background-color: lightblue;} /* specify opacity separately, so that if it is faded even if some other color overrides */
         td { padding: 0px 5px;}
     </style>
 	<title>Surf</title>
 </head>
 <body>
 <%
+    Dataset dataset = (Dataset) session.getAttribute("dataset");
+
     int currentPage = 1;
     try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
     MergeManager.View view = (MergeManager.View) session.getAttribute("view");
@@ -120,10 +117,9 @@ import="java.util.*"
                 <% for (String col: Config.actualColumns.get(key)) { %>
                     <div style="margin: 5px;"><input type="checkbox" name="<%=col%>" id="<%=col%>" value="<%=col%>"> <%=col%> </div>
                 <% } %>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-default" style="margin:0 auto; display:table;">OK</button>
-            </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" style="margin:0 auto; display:table;">OK</button>
+                </div>
             </form>
             </div>
         </div>
@@ -300,7 +296,6 @@ import="java.util.*"
             int prev_ae = -1;
             for (List<Row> rowsForThisId: groupRows) {
             // print out all rows for this id.
-
 		    for (int i = 0; i < rowsForThisId.size(); i++) {
                 boolean firstRowForThisId = (i == 0), lastRowForThisid = (i == rowsForThisId.size() - 1);
                 Row row = rowsForThisId.get(i);
@@ -332,6 +327,9 @@ import="java.util.*"
                 boolean rowInsignificant = Util1.parseInt(row.get("Position"), -1) > 5 && "IND".equals(row.get("Party"));
                 if (rowInsignificant)
                     tr_class += " insignificant-row ";
+                boolean rowisSpecial = "true".equals(row.get("__is_special"));
+                if (rowisSpecial)
+                    tr_class += " special-row ";
 
         %>
 
@@ -643,6 +641,7 @@ import="java.util.*"
             filterSpec: $('#filterSpec').val(),
             sortOrder: $('#sortOrder').val(),
             groupViewControlSpec: $('#groupViewControlSpec').val(),
+            secondaryFilterFieldName: $('#secondaryFilterFieldName').val(),
             rowViewControlSpec: $('#rowViewControlSpec').val()
         };
 

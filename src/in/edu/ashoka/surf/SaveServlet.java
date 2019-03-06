@@ -23,7 +23,7 @@ public class SaveServlet extends HttpServlet {
     }
 
     /** on receiving merge commands, this servlet calls mergemanager with the commands, and updates the view in the session accordingly */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
 
         HttpSession session = request.getSession();
@@ -36,7 +36,7 @@ public class SaveServlet extends HttpServlet {
 
 			// update the groups and view
 			mergeManager.applyUpdatesAndSave(commands);
-			MergeManager.View view = mergeManager.getView (mergeManager.lastView.filterSpec, mergeManager.lastView.groupViewControl.name(), mergeManager.lastView.rowViewControl.name(), mergeManager.lastView.sortOrder);
+			MergeManager.View view = mergeManager.getView (mergeManager.lastView.filterSpec, mergeManager.lastView.groupViewControl.name(), mergeManager.lastView.secondaryFilterFieldName, mergeManager.lastView.rowViewControl.name(), mergeManager.lastView.sortOrder);
 			session.setAttribute("view", view);
 
 			response.getOutputStream().print("{status: 0}");

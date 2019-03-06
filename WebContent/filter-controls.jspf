@@ -1,3 +1,4 @@
+<%@ page import="in.edu.ashoka.surf.util.Util" %>
 <%
     // if we already have filter config, initialize filterSpec, gvc, rvc to the corresponding fields in the config,
     // so we can init the dropdowns to the existing config
@@ -43,9 +44,26 @@ if (Util.nullOrEmpty(filterSpec)) { placeholder = "No filter is set. All rows ma
         <option <%=MergeManager.GroupViewControl.GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS%>">Clusters with one or more rows and two or more IDs matching filter</option>
         <option <%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_ROWS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_ROWS%>">Clusters with two or more rows matching filter</option>
         <option <%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_IDS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_IDS%>">Clusters with two or more IDs matching filter</option>
+        <option <%=MergeManager.GroupViewControl.GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD%>">Clusters with more than 1 value in secondary column</option>
         <option <%=MergeManager.GroupViewControl.ALL_GROUPS.name().equals (gvc.name()) ? "selected":""%> value="<%=MergeManager.GroupViewControl.ALL_GROUPS%>">All clusters</option>
     </select>
     <br/>
+
+    <div class="div-secondaryColumn" style="display:none">
+        <label for="secondaryFilterFieldName">Secondary column</label>
+        <select  class="form-control selectpicker" id="secondaryFilterFieldName" name="secondaryFilterFieldName">
+            <option value="">None</option>
+            <%
+                for (String col: dataset.getColumnDisplayNames()) {
+                    if (col.equalsIgnoreCase(Config.MERGE_FIELD) || col.equals(Config.ID_FIELD))
+                        continue;
+            %>
+            <option value="<%=col%>"><%=col%></option>
+            <% } %>
+        </select>
+        <span class="help">Secondary field</span>
+    </div>
+
 </div>
 
 <div class="form-group">
@@ -56,3 +74,14 @@ if (Util.nullOrEmpty(filterSpec)) { placeholder = "No filter is set. All rows ma
         <option <%=MergeManager.RowViewControl.ROWS_MATCHING_FILTER.name().equals (rvc.name()) ? "selected" : ""%> value="<%=MergeManager.RowViewControl.ROWS_MATCHING_FILTER.name()%>">Only rows matching filter</option>
     </select>
 </div>
+
+<script>
+    $('#groupViewControlSpec').change(function(e) {
+        var clusterOptionSelected = $(e.target).val();
+        if (clusterOptionSelected == '<%=MergeManager.GroupViewControl.GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD%>') {
+            $('.div-secondaryColumn').show();
+        } else {
+            $('.div-secondaryColumn').hide();
+        }
+    });
+</script>

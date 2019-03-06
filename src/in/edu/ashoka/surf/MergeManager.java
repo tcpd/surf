@@ -21,7 +21,7 @@ import static in.edu.ashoka.surf.MergeManager.RowViewControl.ROWS_MATCHING_FILTE
 /** class that takes care of running a merging algorithm and then manual merges to it.
  * Important: these functions should not depend on a web-based frontend. This class should have no dependency on servlets. */
 public class MergeManager {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
+    public static final Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
 
     /** we first decide which groups to show. This determination is independent of which rows are shown. This does not take filter into account, only the algorithmically merged groups */
     public enum GroupViewControl {
@@ -29,7 +29,8 @@ public class MergeManager {
         GROUPS_WITH_TWO_OR_MORE_IDS, /* show all rows in a group, under which any row matches filter */
         GROUPS_WITH_TWO_OR_MORE_ROWS,
         GROUPS_WITH_ONE_OR_MORE_ROWS,
-        GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS
+        GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS,
+        GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD
     } /* this will show a group even if it only has 1 id, but multiple rows for that id. useful to see all id's that have been merged */
 
     /* Next, a filter is applied to rows in the groups selected for showing. */
@@ -43,14 +44,17 @@ public class MergeManager {
     public class View {
 
         public final List<List<List<Row>>> viewGroups; // these are the groups
-        public final String filterSpec, sortOrder;
-        private int nIds, nRowsInGroups;
+        public final String filterSpec;
+        final String sortOrder;
+        final String secondaryFilterFieldName; /* secondaryFilterFieldName is only for GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD */
+        private final int nIds;
+        private int nRowsInGroups;
 
         // there are controls with respect to filter
-        public GroupViewControl groupViewControl;
+        public final GroupViewControl groupViewControl;
 
         // controls with respect to algorithm's grouping. which groups to show?
-        public RowViewControl rowViewControl;
+        public final RowViewControl rowViewControl;
 
         // both controls above have to be satisfied
         // use cases:
@@ -59,10 +63,11 @@ public class MergeManager {
         // 3) see all Ids in dataset that match a search term: showIdsWithAnyRowMatch with filter spec, showAllGroups.
         // 4) See groups with merged all merges that have been performed: showGroupsWithAnyRowMatch (with empty filter) showGroupsWithAtLeast2Rows
 
-        private View (String filterSpec, GroupViewControl groupFilter, RowViewControl rowFilter, String sortOrder, List<List<List<Row>>> viewGroups) {
+        private View (String filterSpec, GroupViewControl groupFilter, String secondaryFilterFieldName, RowViewControl rowFilter, String sortOrder, List<List<List<Row>>> viewGroups) {
             this.filterSpec = filterSpec;
             this.sortOrder = sortOrder;
             this.viewGroups = viewGroups;
+            this.secondaryFilterFieldName = secondaryFilterFieldName;
 
             nRowsInGroups = 0;
             Set<String> idsSeen = new LinkedHashSet<>();
@@ -91,7 +96,7 @@ public class MergeManager {
         public String toString() { return "View: #groups " + viewGroups + " filterSpec = " + filterSpec + " sortOrder = " + sortOrder + " ";}
     }
 
-	private Dataset d;
+	private final Dataset d;
     private List<Collection<Row>> groups; // these are the groups
 
     /** nextAvailableID and idToRows should be updated in sync.
@@ -99,11 +104,11 @@ public class MergeManager {
      * e.g. if nextAvailableID is 5000, any integer > 5000 can be converted to a string and safely used as an ID without conflicting with existing IDs.
      * This is useful when rows under an ID are unmerged and have to be assigned new IDs.
      */
-    private Multimap<String, Row> idToRows = LinkedHashMultimap.create();
-    private SetMultimap<Row, String> rowToLabels = HashMultimap.create();
-    public int nextAvailableId = 0;
+    private final Multimap<String, Row> idToRows = LinkedHashMultimap.create();
+    private final SetMultimap<Row, String> rowToLabels = HashMultimap.create();
+    private int nextAvailableId = 0;
 
-    List<Command> allCommands = new ArrayList<>(); // compile all the commands, so that they can be replayed some day, if needed
+    private final List<Command> allCommands = new ArrayList<>(); // compile all the commands, so that they can be replayed some day, if needed
 
     private MergeAlgorithm algorithm;
     private String splitColumn;
@@ -150,50 +155,60 @@ public class MergeManager {
 
         Tokenizer.setupDesiVersions(dataset.getRows(), Config.MERGE_FIELD);
 
-        if (algo.equals("editDistance")) {
-            int editDistance = Config.DEFAULT_EDIT_DISTANCE;
-            try {
-                editDistance = Integer.parseInt(params.get("edit-distance"));
-            } catch (NumberFormatException e) {
-                Util.print_exception(e, log);
-            }
-            algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance, filter); // run e.d. on the _st_ version of the field
-        } else if (algo.equals("allNames")) {
-            algorithm = new MergeAlgorithm(dataset) {
-                @Override
-                public List<Collection<Row>> run() {
-                    classes = new ArrayList<>();
-                    classes.add(d.getRows().stream().filter (filter::passes).collect(Collectors.toList())); // just one class, with all the rows in it
-                    return classes;
+        switch (algo) {
+            case "editDistance":
+                int editDistance = Config.DEFAULT_EDIT_DISTANCE;
+                try {
+                    editDistance = Integer.parseInt(params.get("edit-distance"));
+                } catch (NumberFormatException e) {
+                    Util.print_exception(e, log);
                 }
-                public String toString() { return "Dummy merge"; }
-            };
-        } else if (algo.equals("compatibleNames")) {
-            int minTokenOverlap = Config.DEFAULT_MIN_TOKEN_OVERLAP;
-            try {
-                minTokenOverlap = Integer.parseInt(params.get("min-token-overlap"));
-            } catch (NumberFormatException e) {
-                Util.print_exception(e, log);
-            }
-            int ignoreTokenFrequency = Config.DEFAULT_IGNORE_TOKEN_FREQUENCY;
-            try {
-                ignoreTokenFrequency = Integer.parseInt(params.get("ignore-token-frequency"));
-            } catch (NumberFormatException e) {
-                Util.print_exception(e, log);
-            }
+                algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance, filter); // run e.d. on the _st_ version of the field
 
-            boolean initialMapping = "on".equals(params.get("initialMapping"));
-            boolean substringAllowed = "on".equals(params.get("substringAllowed"));
+                break;
+            case "allNames":
+                algorithm = new MergeAlgorithm(dataset) {
+                    @Override
+                    public List<Collection<Row>> run() {
+                        classes = new ArrayList<>();
+                        classes.add(d.getRows().stream().filter(filter::passes).collect(Collectors.toList())); // just one class, with all the rows in it
+                        return classes;
+                    }
+
+                    public String toString() {
+                        return "Dummy merge";
+                    }
+                };
+                break;
+            case "compatibleNames":
+                int minTokenOverlap = Config.DEFAULT_MIN_TOKEN_OVERLAP;
+                try {
+                    minTokenOverlap = Integer.parseInt(params.get("min-token-overlap"));
+                } catch (NumberFormatException e) {
+                    Util.print_exception(e, log);
+                }
+                int ignoreTokenFrequency = Config.DEFAULT_IGNORE_TOKEN_FREQUENCY;
+                try {
+                    ignoreTokenFrequency = Integer.parseInt(params.get("ignore-token-frequency"));
+                } catch (NumberFormatException e) {
+                    Util.print_exception(e, log);
+                }
+
+                boolean initialMapping = "on".equals(params.get("initialMapping"));
+                boolean substringAllowed = "on".equals(params.get("substringAllowed"));
 //            String fieldToCompare = "_c_" + Config.MERGE_FIELD; // we run it on the canon version of the name, not the tokenized, because that causes too many merges
-            String fieldToCompare = "_st_" + Config.MERGE_FIELD; // we run it on tokenized version of the name now that we have tightened it. go back to _c_name if this causes too many matches
-            algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency, substringAllowed, initialMapping);
-        } else if (algo.equals("streaks")) {
-            String streakFieldName = params.get("streakFieldName");
-            int streakLength = Integer.parseInt(params.get("streakLength"));
-            int maxHoles = Integer.parseInt(params.get("maxHoles"));
-            String secondaryFieldName = params.get("secondaryFieldName");
+                String fieldToCompare = "_st_" + Config.MERGE_FIELD; // we run it on tokenized version of the name now that we have tightened it. go back to _c_name if this causes too many matches
 
-            algorithm = new StreakMergeAlgorithm(d, filter, streakFieldName, streakLength, maxHoles, secondaryFieldName);
+                algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency, substringAllowed, initialMapping);
+                break;
+            case "streaks":
+                String streakFieldName = params.get("streakFieldName");
+                int streakLength = Integer.parseInt(params.get("streakLength"));
+                int maxHoles = Integer.parseInt(params.get("maxHoles"));
+                String secondaryFieldName = params.get("secondaryFieldName");
+
+                algorithm = new StreakMergeAlgorithm(d, filter, streakFieldName, streakLength, maxHoles, secondaryFieldName);
+                break;
         }
         // this is where the groups are generated
         groups = algorithm.run();
@@ -205,11 +220,11 @@ public class MergeManager {
             splitByColumn (splitColumn);
     }
 
-    public void addLabel (Row r, String label) {
+    private void addLabel(Row r, String label) {
         rowToLabels.put (r, label);
     }
 
-    public boolean removeLabel (Row r, String label) {
+    private boolean removeLabel(Row r, String label) {
         return rowToLabels.remove(r, label);
     }
 
@@ -270,7 +285,7 @@ public class MergeManager {
 
         int maxNumberUsed = 1;
         for (String id: idToRows.keySet()) {
-            int x = 0;
+            int x;
             try { x = Integer.parseInt(id); } catch (NumberFormatException nfe) { continue; }
             if (x > maxNumberUsed)
                 maxNumberUsed = x;
@@ -344,8 +359,8 @@ public class MergeManager {
         d.save();
     }
 
-    public View getView (String filterSpec, GroupViewControl groupFilter, RowViewControl rowFilter, String sortOrder) {
-        List<List<List<Row>>> postFilterGroups = applyFilter(new Filter(filterSpec), groupFilter, rowFilter);
+    private View getView(String filterSpec, GroupViewControl groupFilter, String secondaryFilterFieldName, RowViewControl rowFilter, String sortOrder) {
+        List<List<List<Row>>> postFilterGroups = applyFilter(new Filter(filterSpec), groupFilter, secondaryFilterFieldName, rowFilter);
         Comparator<List<List<Row>>> comparator = GroupOrdering.getComparator (sortOrder);
         postFilterGroups.sort (comparator);
 
@@ -365,13 +380,13 @@ public class MergeManager {
         }
          */
 
-        View view = new View(filterSpec, groupFilter, rowFilter, sortOrder, postFilterGroups);
+        View view = new View(filterSpec, groupFilter, secondaryFilterFieldName, rowFilter, sortOrder, postFilterGroups);
         this.lastView = view;
         return view;
     }
 
-    public View getView (String filterSpec, String groupViewControlSpec, String rowViewControlSpec, String sortOrder) {
-        return getView (filterSpec, GroupViewControl.valueOf(groupViewControlSpec), RowViewControl.valueOf(rowViewControlSpec), sortOrder);
+    public View getView (String filterSpec, String groupViewControlSpec, String secondaryFilterFieldName, String rowViewControlSpec, String sortOrder) {
+        return getView (filterSpec, GroupViewControl.valueOf(groupViewControlSpec), secondaryFilterFieldName, RowViewControl.valueOf(rowViewControlSpec), sortOrder);
     }
 
     /** returns a collection of groups after filtering groups by the given filter.
@@ -381,7 +396,7 @@ public class MergeManager {
 	 * one row is only in one group, i.e. it can't belong to multiple groups.
 	 * and all rows belonging to an id are also in the same group.
 	 * (this should be satisfied if the inputGroupsList has been generated by a Union-Find set. */
-	private List<List<List<Row>>> applyFilter (Filter filter, GroupViewControl gvc, RowViewControl rvc) {
+	private List<List<List<Row>>> applyFilter (Filter filter, GroupViewControl gvc, String secondaryFilterFieldName, RowViewControl rvc) {
 
 		List<List<List<Row>>> result = new ArrayList<>();
 
@@ -398,15 +413,26 @@ public class MergeManager {
                     case GROUPS_WITH_ONE_OR_MORE_ROWS:
                         groupWillBeShown = group.stream().filter(filter::passes).limit(1).count() >= 1; // limit(2) to ensure early out at finding the first row passing the filter
                         break;
+                    case ALL_GROUPS:
+                        break;
                     case GROUPS_WITH_TWO_OR_MORE_IDS:
                         Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
                         groupWillBeShown = (idsInGroup.size() >= 2);
                         break;
-                    case GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS:
+                    case GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS: {
                         Collection<Row> tempGroup = group.stream().filter(filter::passes).collect(Collectors.toList());
                         Set<String> idsInGroupWithOneOrMoreRows = tempGroup.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
                         groupWillBeShown = (idsInGroupWithOneOrMoreRows.size() >= 2);
                         break;
+                    }
+                    case GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD: {
+                        // get the set of values in the secondary field in all rows in this group
+                        Collection<Row> tempGroup = group.stream().filter(filter::passes).collect(Collectors.toList());
+                        // right now requires all rows in group to match filter. an option would be to require only one row in group to match filter.
+                        Set<String> valsInSecondaryField = tempGroup.stream().map(r -> r.get(secondaryFilterFieldName)).limit(2).collect(Collectors.toSet()); // limit(2) to ensure early out
+                        groupWillBeShown = (valsInSecondaryField.size() >= 2);
+                        break;
+                    }
                 }
 
                 if (!groupWillBeShown)
@@ -430,9 +456,7 @@ public class MergeManager {
 
 			// generate a id -> RowsInThisGroup map
 			Multimap<String, Row> idToRowsInThisGroup = LinkedHashMultimap.create();
-			group.forEach(r -> {
-				idToRowsInThisGroup.put(r.get(Config.ID_FIELD), r);
-			});
+			group.forEach(r -> idToRowsInThisGroup.put(r.get(Config.ID_FIELD), r));
 
 			// prepare list of list of rows for this group
 			List<List<Row>> rowsForThisGroup = new ArrayList<>();

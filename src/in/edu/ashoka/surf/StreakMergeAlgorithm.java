@@ -99,6 +99,7 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
                 continue; // if there are no holes, nothing to look for
 
             log.info("Looking for streak matching candidates for id: " + id + " with " + thisCluster.size() + " rows, holes:" + holeValues.size());
+            thisCluster.stream().forEach(r -> r.set("__is_special", "true"));
 
             // select all rows with holeValues, and secondaryField in one of the secondaryValsInNonHoles
             for (int holeValue: holeValues) {

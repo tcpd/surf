@@ -166,6 +166,11 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
                 log.info(holeCandidates.size()  + " rows are candidates for hole: " + holeValue + " in id: " + id);
             }
 
+            // bail out if we have no candidates to fill the hole - can happen if the secondary field in the hole doesn't match up
+            // (e.g. with mismatch of const. names)
+            if (holeCandidateAndDistance.size() == 0)
+                continue outer;
+
             // sort holecandidates by decreasing distance
             Util.sortPairsBySecondElement(holeCandidateAndDistance);
             // but we actually want increasing distance

@@ -86,7 +86,7 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
     }
 
     /** given candidateRow, computes average (edit) distance to each of the first MAX rows of rowCollection */
-    private Pair<Row, Float> rowToStreakRowsDistance (Row candidateRow, Collection<Row> rowCollection) {
+    private Pair<Row, Float> averageRowDistance(Row candidateRow, Collection<Row> rowCollection) {
         int MAX = 5;
         int totalDistance = 0, count = 0;
         for (Row r: rowCollection) {
@@ -161,7 +161,7 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
                 Collection<Row> holeCandidates = rowsInHole.stream().filter(r -> secondaryValsForThisId.contains(r.get(secondaryFieldName))).collect(toSet());
 
                 // for every hole candidate row, create a pair with that row and it's distance from streak rows
-                holeCandidateAndDistance.addAll (holeCandidates.stream().map(r -> rowToStreakRowsDistance(r, rowsForThisID)).collect(toList()));
+                holeCandidateAndDistance.addAll (holeCandidates.stream().map(r -> averageRowDistance(r, rowsForThisID)).collect(toList()));
 
                 log.info(holeCandidates.size()  + "rows as candidates for hole: " + holeValue + " in id: " + id);
             }

@@ -24,6 +24,7 @@
     <select class="form-control selectpicker" id="sortOrder" name="sortOrder">
         <option value="stringLength">Long strings first</option>
         <option value="groupSize">Largest cluster first</option>
+        <option value="maxRowsInOneId">Max. rows in a single ID first</option>
         <option value="approxAlpha">Approximately alphabetical</option>
     </select>
 </div>

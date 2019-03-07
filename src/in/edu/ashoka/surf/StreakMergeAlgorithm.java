@@ -86,11 +86,11 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
     }
 
     /** given candidateRow, computes average (edit) distance to each of the first MAX rows of rowCollection */
-    private Pair<Row, Float> averageRowDistance(Row candidateRow, Collection<Row> rowCollection) {
+    private Pair<Row, Float> averageRowDistance(Row candidateRow, Collection<Row> rowCollection, String fieldName) {
         int MAX = 5;
         int totalDistance = 0, count = 0;
         for (Row r: rowCollection) {
-            totalDistance += minDistance(candidateRow.get(Config.MERGE_FIELD), r.get(Config.MERGE_FIELD));
+            totalDistance += minDistance(candidateRow.get(fieldName), r.get(fieldName));
 
             if (++count >= MAX)
                 break;
@@ -161,7 +161,11 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
                 Collection<Row> holeCandidates = rowsInHole.stream().filter(r -> secondaryValsForThisId.contains(r.get(secondaryFieldName))).collect(toSet());
 
                 // for every hole candidate row, create a pair with that row and it's distance from streak rows
-                holeCandidateAndDistance.addAll (holeCandidates.stream().map(r -> averageRowDistance(r, rowsForThisID)).collect(toList()));
+                // String mergeFieldName = Config.MERGE_FIELD;
+                // can optionally make it "_st" + Config.MERGE_FIELD
+                String mergeFieldName = "_st_" + Config.MERGE_FIELD;
+
+                holeCandidateAndDistance.addAll (holeCandidates.stream().map(r -> averageRowDistance(r, rowsForThisID, mergeFieldName)).collect(toList()));
 
                 log.info(holeCandidates.size()  + " rows are candidates for hole: " + holeValue + " in id: " + id);
             }

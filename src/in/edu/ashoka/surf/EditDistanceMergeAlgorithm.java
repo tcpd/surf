@@ -6,7 +6,6 @@ import edu.tsinghua.dbgroup.EditDistanceClusterer;
 import in.edu.ashoka.surf.util.Timers;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -15,18 +14,18 @@ import java.util.stream.Collectors;
  */
 public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
-    private int editDistance;
+    private int maxEditDistance;
     private String fieldName; // fieldname on which to compute edit distance
     private Filter filter;
 
     /* set up merge algorithm parameters: d, the fieldName (col. name) of the field on which edit distance clustering is to be done, max. editDistance (inclusive) */
-    protected EditDistanceMergeAlgorithm(Dataset dataset, String fieldName, int editDistance, Filter filter) {
+    EditDistanceMergeAlgorithm(Dataset dataset, String fieldName, int editDistance, Filter filter) {
         super (dataset);
         this.filter = filter;
 
         // set up desi versions of the given field. we'll perform edit distance computation on this version of the given field, not the original one.
         this.fieldName = fieldName;
-        this.editDistance = editDistance;
+        this.maxEditDistance = editDistance;
     }
 
     @Override
@@ -36,7 +35,7 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
         // create map of fieldValueToRows
         SetMultimap<String, Row> fieldValueToRows = HashMultimap.create();
-        filteredRows.stream().forEach (r -> { fieldValueToRows.put (r.get(fieldName), r);});
+        filteredRows.forEach (r -> { fieldValueToRows.put (r.get(fieldName), r);});
 
         // do the clustering based on ed (but only if ed > 0)
         Timers.editDistanceTimer.reset();
@@ -44,9 +43,9 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
         List<Set<String>> clusters;
 
-        if (editDistance >= 1) {
-            final EditDistanceClusterer edc = new EditDistanceClusterer(editDistance);
-            filteredRows.stream().forEach(r -> edc.populate(r.get(fieldName)));
+        if (maxEditDistance >= 1) {
+            final EditDistanceClusterer edc = new EditDistanceClusterer(maxEditDistance);
+            filteredRows.forEach(r -> edc.populate(r.get(fieldName)));
             clusters = (List) edc.getClusters();
         } else {
             // handle the case when edit distance is 0 by creating a list of single-element sets with all unique fieldVal's
@@ -68,11 +67,11 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
         for (Set<String> cluster : clusters) {
             final Collection<Row> rowsForThisCluster = new ArrayList<>();
             // cluster just has strings, convert each string in the cluster to its rows, and add it to rowsForThisCluster
-            cluster.stream().forEach (s -> { rowsForThisCluster.addAll (fieldValueToRows.get(s)); });
+            cluster.forEach (s -> { rowsForThisCluster.addAll (fieldValueToRows.get(s)); });
             classes.add (rowsForThisCluster);
         }
         return classes;
     }
 
-    public String toString() { return "Edit distance algorithm with maximum edit distance " + editDistance; }
+    public String toString() { return "Edit distance algorithm with maximum edit distance " + maxEditDistance; }
 }

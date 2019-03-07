@@ -337,7 +337,7 @@ pageEncoding="UTF-8"
 
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
-				<td class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
+				<td style="min-width:300px" class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
 				<%-- <td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td> --%>
 
                 <%
@@ -378,7 +378,7 @@ pageEncoding="UTF-8"
                         %>
 
                         <% if (col.equals("Constituency_Name")) { %>
-                            <td class="cell-table <%=classStr%>"> <a href="<%=pc_href%>"><span class="<%=textClass%>"><%=Util.escapeHTML(row.get(col))%></span></a>   </td>
+                            <td class="cell-table <%=classStr%>"> <a target="_blank" href="<%=pc_href%>"><span class="<%=textClass%>"><%=Util.escapeHTML(row.get(col))%></span></a>   </td>
                         <% } else { %>
                                 <td class="cell-table <%=classStr%>"> <span class="<%=textClass%>"><%=Util.escapeHTML(row.get(col))%></span></td>
                         <% } %>

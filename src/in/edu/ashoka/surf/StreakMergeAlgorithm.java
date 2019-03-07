@@ -163,7 +163,7 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
                 // for every hole candidate row, create a pair with that row and it's distance from streak rows
                 holeCandidateAndDistance.addAll (holeCandidates.stream().map(r -> averageRowDistance(r, rowsForThisID)).collect(toList()));
 
-                log.info(holeCandidates.size()  + "rows as candidates for hole: " + holeValue + " in id: " + id);
+                log.info(holeCandidates.size()  + " rows are candidates for hole: " + holeValue + " in id: " + id);
             }
 
             // sort holecandidates by decreasing distance

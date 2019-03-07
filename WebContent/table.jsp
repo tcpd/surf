@@ -54,7 +54,7 @@ pageEncoding="UTF-8"
         .special, .unspecial { padding: 3px; }
         .insignificant-row { opacity: 0.7; color: gray;} /* specify opacity separately, so that if it is faded even if some other color overrides */
         .special-row { background-color: lightblue;} /* specify opacity separately, so that if it is faded even if some other color overrides */
-        td { padding: 0px 5px;}
+        td, th { padding: 0px 5px;}
     </style>
 	<title>Surf</title>
 </head>
@@ -219,13 +219,13 @@ pageEncoding="UTF-8"
         <!-- main table starts here -->
         <table class="table-header" style="border-collapse: collapse">
             <thead>
-            <tr class="table-row">
+            <tr style="z-index: 200; background-color: white; height: 30px;" class="table-row">
                 <th class="cell-table"></th>
                 <%-- <th class="cell-table">Name</th> 
                 <%-- ask prof about this. why is this hardcoded? 
                 <th class="cell-table">Constituency</th> --%>
                 <%String mcol = Config.MERGE_FIELD;%>
-                <th class="cell-table" id="<%=mcol%>Table" name="<%=mcol%>Table"><%=mcol%></th>
+                <th style="min-width:300px" class="cell-table" id="<%=mcol%>Table" name="<%=mcol%>Table"><%=mcol%></th>
                 <% for (String col: Config.showCols) { %>
                 <% if(col.equalsIgnoreCase(Config.MERGE_FIELD))
                         continue;%>

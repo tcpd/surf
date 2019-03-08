@@ -171,7 +171,7 @@ pageEncoding="UTF-8"
                 Surf is a data cleaning tool for messy data. It enables a user to quickly scan a dataset for rows that have approximately similar values in a column,
                 and confirm when the values are actually the same. Rows confirmed to have the same value in the selected column are assigned the same ID.
                 <p>
-                    <% String gitId = Config.gitProps.getProperty ("git.commit.id.describe-short");
+                    <% String gitId = Config.gitProps.getProperty ("git.commit.id.describe");
                         if (gitId == null)
                             gitId = "(Unavailable)";
                         String gitCommitTime = Config.gitProps.getProperty ("git.commit.time");
@@ -185,7 +185,9 @@ pageEncoding="UTF-8"
                             gitBranch = "(Unavailable)";
                     %>
                     Surf version: <%= gitId%> <br/>
-                    Built <%= gitCommitTime%> by <%=gitBuildUser%> from branch <%=gitBranch%>
+                    Built <%= gitCommitTime%> by <%=gitBuildUser%> from branch <%=gitBranch%><br/>
+                    <br/>
+                    Also see the <a target="_blank" href="user-manual.jsp">Surf user manual</a>
                 </p>
             </div>
         </div>

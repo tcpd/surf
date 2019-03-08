@@ -42,19 +42,22 @@
                 if (nRows > 0) {
                     Row sampleRow = dataset.getRows().iterator().next();
                     nCols = sampleRow.nFields();
-                    // specific hacks for election datasets
-                    if (sampleRow.getAllFieldNames().contains("Cand1"))
-                        dataset.registerColumnAlias("Cand1", "Name");
-                    else if (sampleRow.getAllFieldNames().contains("Cand"))
-                        dataset.registerColumnAlias("Cand", "Name");
 
-                    if (sampleRow.getAllFieldNames().contains("acname"))
-                        dataset.registerColumnAlias("acname", "Constituency");
-                    else if (sampleRow.getAllFieldNames().contains("pcname"))
-                        dataset.registerColumnAlias("pcname", "Constituency");
+                    // HACK ALERT!!! specific hacks for election datasets - remove this when possible
+                    {
+                        if (sampleRow.getAllFieldNames().contains("Cand1"))
+                            dataset.registerColumnAlias("Cand1", "Name");
+                        else if (sampleRow.getAllFieldNames().contains("Cand"))
+                            dataset.registerColumnAlias("Cand", "Name");
 
-                    if (sampleRow.getAllFieldNames().contains("Votes1"))
-                        dataset.registerColumnAlias("Votes1", "Votes");
+                        if (sampleRow.getAllFieldNames().contains("acname"))
+                            dataset.registerColumnAlias("acname", "Constituency");
+                        else if (sampleRow.getAllFieldNames().contains("pcname"))
+                            dataset.registerColumnAlias("pcname", "Constituency");
+
+                        if (sampleRow.getAllFieldNames().contains("Votes1"))
+                            dataset.registerColumnAlias("Votes1", "Votes");
+                    }
                 }
         %>
                 Dataset with <%=Util.commatize(nRows)%> rows and <%=Util.commatize(nCols)%> columns loaded.<br/>
@@ -68,19 +71,26 @@
                 <% } %>
                 <br/>
                 <br/>
-                <label for="columnName">Column to merge:</label>
+                <label for="columnName">Column for IDs:</label>
                 <select class="form-control selectpicker" id="columnName" name="columnName">
                     <% for (String col: Config.actualColumns.get(datasetKey)) { %>
                         <option value="<%=col%>"><%=col%></option>
                     <% } %>
                 </select>
                 <br>
+                <span class="help">This is the column to which you want to assign IDs.</span>
+                <br>
                 <br>
                 <label>Columns to show during merge:</label>
                 <% for (String col: Config.actualColumns.get(datasetKey)) { %>
                     <div style="margin: 5px;"><input checked type="checkbox" name="<%=col%>" value="<%=col%>"> <%=col%> </div>
                 <% } %>
-                <label>Within a cluster, sort rows by:</label>
+
+            <span class="help">Check the columns that will help you resolve merges. You can also select them later, on the merge screen.</span>
+            <br/>
+            <br/>
+
+            <label>Within a cluster, sort rows by:</label>
                 <% for (String col: Config.actualColumns.get(datasetKey)) { %>
                     <div style="margin: 5px;"><input type="checkbox" name="<%=col%>Sort" value="<%=col%>Sort"> <%=col%> </div>
                 <% } %>

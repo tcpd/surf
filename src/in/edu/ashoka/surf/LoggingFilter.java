@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
-class LoggingFilter implements javax.servlet.Filter {
+public class LoggingFilter implements javax.servlet.Filter {
 	private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.LoggingFilter.class);
 
 	public static String getRequestDescription(HttpServletRequest request)

@@ -53,7 +53,7 @@
 <hr>
 <form action="delete-dataset" method="post">
 	<div class="form-group">
-		<label for="delDataset">Select Dataset to Delete</label>
+		<label for="delDataset">Delete Dataset</label>
 		<select id="delDataset" class="form-control selectpicker" name="delDataset"> <!-- called state for historical reasons, TOFIX -->
 		<% for (String key: Config.keyToDescription.keySet()) { %>
 			<option value="<%=key%>"><%=Config.keyToDescription.get(key)%></option>

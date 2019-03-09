@@ -23,6 +23,9 @@ import static in.edu.ashoka.surf.MergeManager.RowViewControl.ROWS_MATCHING_FILTE
 public class MergeManager {
     public static final Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
 
+    public static Dataset toBeReviewed;
+    Row emptyRow; // dummy row to introduce separators in toBeReviewed
+
     /** we first decide which groups to show. This determination is independent of which rows are shown. This does not take filter into account, only the algorithmically merged groups */
     public enum GroupViewControl {
         ALL_GROUPS, /* this will show all groups, including singleton rows */
@@ -297,13 +300,16 @@ public class MergeManager {
         nextAvailableId = maxNumberUsed + 1;
     }
 
-    /** applies the given merge/unmerge commands on the dataset */
+    /** applies the given merge/unmerge/tbr commands on the dataset and saves the main/tbr datasets */
     public void applyUpdatesAndSave(Command[] commands) throws IOException {
         allCommands.addAll (Arrays.asList(commands));
 
         log.info ("Applying " + commands.length + " command(s) to " + d);
+        boolean datasetNeedsToBeSaved = false, tbrNeedsToBeSaved = false;
 
         for (Command command: commands) {
+            log.info ("Executing command: " + command);
+
             if ("merge".equalsIgnoreCase(command.op)) {
                 // we have to merge all the ids in command.ids
                 // the id of the first will be put into firstId, and copied to all the other rows with that id
@@ -325,6 +331,7 @@ public class MergeManager {
                     idToRows.removeAll (id); // remove this id entirely from the map, it will not be used again
                 }
                 updateMergesBasedOnIds(); // is this needed now, or can it be done outside the loop?
+                datasetNeedsToBeSaved = true;
             } else if ("unmerge".equalsIgnoreCase(command.op)) {
                 // create unique id's for all rows
                 for (String id : command.ids) {
@@ -332,9 +339,37 @@ public class MergeManager {
                     for (Row row : rowsForThisId) {
                         row.set(Config.ID_FIELD, Integer.toString(nextAvailableId));
                         nextAvailableId++;
+                        idToRows.put(Config.ID_FIELD, row); // this was a big earlier, we weren't doing this
                     }
                 }
-            } else if ("add-label".equalsIgnoreCase(command.op)) {
+                datasetNeedsToBeSaved = true;
+            } else if ("tbr".equalsIgnoreCase(command.op)) {
+
+                // create toBeReviewed dataset if it doesn't already exist
+                if (toBeReviewed == null) {
+                    toBeReviewed = d.getTBRDataset();
+                    emptyRow = new Row(new LinkedHashMap<>(), toBeReviewed.rows.size(), toBeReviewed);
+                }
+
+                if (command.ids.length == 0) {
+                    log.warn ("No ids in command? " + command);
+                    continue;
+                }
+                // create unique id's for all rows
+                for (String id : command.ids) {
+                    Collection<Row> rowsForThisId = idToRows.get(id);
+                    if (rowsForThisId == null) {
+                        log.warn ("rowsForThisID is null for id " + id);
+                        continue;
+                    }
+                    toBeReviewed.rows.addAll(rowsForThisId);
+                    toBeReviewed.rows.add(emptyRow); // add empty row with no data
+                }
+
+                // add 2 empty rows with no data
+                toBeReviewed.rows.add(emptyRow);
+                tbrNeedsToBeSaved = true;
+            }   else if ("add-label".equalsIgnoreCase(command.op)) {
                 String label = command.label;
                 for (String gid : command.ids) {
                     List<List<Row>> rowsForThisGid = lastView.viewGroups.get(Integer.parseInt(gid));
@@ -359,7 +394,10 @@ public class MergeManager {
             }
         }
 
-        d.save();
+        if (datasetNeedsToBeSaved)
+            d.save();
+        if (tbrNeedsToBeSaved)
+            toBeReviewed.save();
     }
 
     private View getView(String filterSpec, GroupViewControl groupFilter, String secondaryFilterFieldName, RowViewControl rowFilter, String sortOrder) {

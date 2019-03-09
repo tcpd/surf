@@ -5,29 +5,12 @@ import java.util.*;
 
 public class Row implements Comparable<Row> {
     private static PrintStream out = System.out;
-    private static String FIELDSPEC_SEPARATOR = "-";
-    private static Comparator currentComparator = null;
+    private static final String FIELDSPEC_SEPARATOR = "-";
+    private static String[] toStringFields = new String[0];
 
-    int year = -1, position = -1, votes = -1, rowNum = -1;
-    Map<String, Object> fields;
-    static String[] toStringFields = new String[0];
+    int rowNum = -1;
+    private Map<String, Object> fields;
     private Dataset d;
-
-    static Comparator<Row> positionComparator = new Comparator<Row>() {
-        public int compare(Row r1, Row r2) {
-            return r1.getInt("Position") - r2.getInt("Position");
-        }};
-
-    static Comparator<Row> rowNumComparator = new Comparator<Row>() {
-        public int compare(Row r1, Row r2) {
-            return r1.rowNum - r2.rowNum;
-        }};
-
-
-    static Comparator<Row> yearComparator = new Comparator<Row>() {
-        public int compare(Row r1, Row r2) {
-            return r1.getInt("Year") - r2.getInt("Year");
-        }};
 
     public Row(Map<String, String> map, int rowNum, Dataset d) {
         this.fields = new LinkedHashMap<>();
@@ -37,20 +20,10 @@ public class Row implements Comparable<Row> {
             this.fields.put(d.canonicalizeCol(key), map.get(key)); // intern the key to save memory
 
         this.rowNum = rowNum;
-        setup(map.get("Year"), map.get("Position"), map.get("Votes"));
     }
 
-    public static void setToStringFields(String fieldSpec) {
+    static void setToStringFields(String fieldSpec) {
         toStringFields = fieldSpec.split("-");
-    }
-
-    public static void setComparator(Comparator c) {
-        currentComparator = c;
-    }
-    public void setup(String year, String position, String votes) {
-        try { this.year = Integer.parseInt(year); } catch (NumberFormatException nfe ) { }
-        try { this.position = Integer.parseInt(position); } catch (NumberFormatException nfe ) { }
-        try { this.votes = Integer.parseInt(votes); } catch (NumberFormatException nfe ) { }
     }
 
     public String toString() {
@@ -63,16 +36,6 @@ public class Row implements Comparable<Row> {
 
     public int compareTo(Row other)
     {
-        if (currentComparator != null)
-            return currentComparator.compare(this, other);
-
-        // lower positions first
-        if (position != other.position)
-            return (position < other.position) ? -1 : 1;
-        // more votes first
-        if (votes != other.votes)
-            return (votes > other.votes) ? -1 : 1;
-
         // otherwise, more or less random (don't really expect positions and votes to be exactly the same....
         return toString().compareTo(other.toString());
     }
@@ -80,7 +43,13 @@ public class Row implements Comparable<Row> {
     public String get(String col) {
         if (col == null)
             return "";
-        col = d.canonicalizeCol(col);
+
+        // read from the cached col cache (should always work), otherwise, canonicalize col name again
+        String col1 = d.cCache.get(col);
+        if (col1 == null)
+            col1 = d.canonicalizeCol(col); // prob. should not reach here
+        col = col1;
+
         while (true) {
             String alias = d.cColumnAliases.get(col);
             if (alias == null)
@@ -113,7 +82,7 @@ public class Row implements Comparable<Row> {
         return fields.keySet();
     }
 
-    public String getFields (String fields[], String separator) {
+    String getFields(String fields[], String separator) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fields.length; i++) {
             sb.append (this.get(fields[i]));
@@ -123,7 +92,7 @@ public class Row implements Comparable<Row> {
         return sb.toString();
     }
 
-    public int setAsInt(String field) {
+    private int setAsInt(String field) {
         field = d.canonicalizeCol(field);
         int x = Integer.MIN_VALUE;
         if (field == null || "".equals(field)){
@@ -135,13 +104,5 @@ public class Row implements Comparable<Row> {
         }
         fields.put(("_i_" + field).intern(), x);
         return x;
-    }
-
-    public int getInt(String field) {
-        Integer I = (Integer) fields.get("_i_" + field);
-        if (I != null)
-            return I;
-
-        return setAsInt(field);
     }
 }

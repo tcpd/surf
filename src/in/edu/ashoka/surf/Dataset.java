@@ -6,16 +6,22 @@ import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import in.edu.ashoka.surf.util.Util;
 import org.apache.commons.csv.*;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.io.FileExistsException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
-public class Dataset implements Serializable{
-    static Map<String, Dataset> datasetMap= new HashMap<>();
+public class Dataset implements Serializable, Cloneable {
+    public static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Dataset.class);
+
+    static Map<String, Dataset> datasetMap = new LinkedHashMap<>(); // this is a static map of all datasets
+
     static final long TIME_INTERVAL_BETWEEN_BACKUPS = 1000*60*60*4;
     long saveTimeOfBackedUpFile = 0;
     long saveTime = 0;
@@ -35,6 +41,30 @@ public class Dataset implements Serializable{
     		return;
     	else
     		columnsToSave.add(col);
+    }
+
+    /** returns the TBR version of this dataset. reads from disk if available, otherwise creates a new dataset with the same column structure, but no rows */
+    public Dataset getTBRDataset() {
+        Dataset d = null;
+        try {
+            String filename = this.filename;
+            if (filename.endsWith(".csv"))
+                filename = filename.substring (0, filename.length() - ".csv".length());
+            String tbrFilename = filename + ".tbr.csv";
+
+            // if tbr file exists, read from there, otherwise start a clone of this, and clear the rows
+            if (new File(tbrFilename).exists()) {
+                d = new Dataset(tbrFilename);
+            } else {
+                d = (Dataset) this.clone();
+                d.description = "To be reviewed rows for " + this.description;
+                d.rows = new ArrayList<>(); // reset the rows
+                d.filename = tbrFilename; // set the filename to the tbrFilename
+            }
+        } catch (CloneNotSupportedException | IOException cnse) {
+            Util.print_exception("Clone failed", cnse, log);
+        }
+        return d;
     }
 
     /* returns the actual display names of the columns in this dataset */
@@ -208,8 +238,8 @@ public class Dataset implements Serializable{
                     if(!FileUtils.deleteQuietly(oldFile))
                         throw new FileExistsException("failed to delete .old file");
                 }
-                else
-                    throw new FileNotFoundException("file not found");
+               // else
+                //    throw new FileNotFoundException("file not found");
             }
         }
     }
@@ -268,16 +298,18 @@ public class Dataset implements Serializable{
         fileWriter.close();
         csvFilePrinter.close();
 
-        //NOW RENAME THE EXISTING FILE TO OLD FILE
-        String fileWithSuffixOld = file + ".old";
+        //NOW RENAME THE ORIGINAL FILE TO OLD FILE (may not always exist for tbr files, so check if old file even exists)
         File existingFile = new File(file);
-        File suffixFile = new File(fileWithSuffixOld);
-        FileUtils.copyFile(existingFile, suffixFile);
+        if (existingFile.exists()) {
+            String fileWithSuffixOld = file + ".old";
+            File backupFile = new File(fileWithSuffixOld);
+            FileUtils.copyFile(existingFile, backupFile);
+        }
 
         //RENAME THE NEW FILE TO EXISTING FILE
-        suffixFile = new File(fileWithSuffixNew);
-        FileUtils.copyFile(suffixFile, new File(file));
-        if(!FileUtils.deleteQuietly(suffixFile))
+        File newFile = new File(fileWithSuffixNew);
+        FileUtils.copyFile(newFile, new File(file));
+        if(!FileUtils.deleteQuietly(newFile))
             throw new FileExistsException("failed to delete .new file");
     }
 

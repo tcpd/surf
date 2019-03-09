@@ -15,7 +15,6 @@ public class Cell {
 
     public static void main(String[] args) throws IOException {
         Row.setToStringFields("Line");
-        Row.setComparator(Row.rowNumComparator);
         Collection<Row> allRows = Dataset.getDataset(args[0]).rows;
 
         out.println(SEPARATOR + " Identical sentences");

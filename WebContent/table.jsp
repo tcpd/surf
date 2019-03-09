@@ -207,8 +207,11 @@ pageEncoding="UTF-8"
             <ul class="nav navbar-nav navbar-right">
                 <li><button style="margin-left:40px; margin-top: 7px;" onclick="checkBox();" class="btn btn-default colSelect-button" type="button">Column Select <i style="display:none" class="fa fa-spin fa-spinner"></i></button></li>
                 <li><button style="margin-top: 7px;" class="btn btn-default filter-button" type="button">Filter <i style="display:none" class="filter-spinner fa fa-spin fa-spinner"></i></button></li>
-                <li><button style="margin-top: 7px;" class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span style="margin-left: 15px;">Across Groups <input class="across-groups" type="Checkbox"></span></li>
+
+                <li><button style="margin-top: 7px;" class="btn btn-default merge-button" type="button">Merge <i style="display:none" class="merge-spinner fa fa-spin fa-spinner"></i></button> <span style="position:relative; top:5px;margin-left: 15px;">Across Groups <input class="across-groups" type="Checkbox"></span></li>
                 <li><button style="margin-top: 7px;" class="btn btn-default unmerge-button" type="button">Unmerge <i style="display:none" class="unmerge-spinner fa fa-spin fa-spinner"></i></button></li>
+                <li><button style="margin-top: 7px;" class="btn btn-default tbr-button" type="button">Flag for review<i style="display:none" class="tbr-spinner fa fa-spin fa-spinner"></i></button></li>
+
                 <li><button style="margin-top: 7px;" class="btn btn-default help-button" type="button">Help</button></li>
                 <li><button style="margin-top: 7px; margin-right: 10px;" class="btn btn-default dwnld-button" type="button">Download Dataset</button></li>
             </ul>
@@ -556,8 +559,19 @@ pageEncoding="UTF-8"
     }
 
     function save_handler (e) {
-        var op = ($(e.target).hasClass('merge-button')) ? 'merge' : 'unmerge';
-        var $spinner = ($(e.target).hasClass('merge-button')) ? $('.merge-spinner') : $('.unmerge-spinner');
+
+        var op, $spinner;
+
+        if ($(e.target).hasClass('merge-button')) {
+            op = 'merge';
+            $spinner = $('.merge-spinner');
+        } else if ($(e.target).hasClass('tbr-button')) {
+            op = 'tbr';
+            $spinner = $('.tbr-spinner');
+        } else {
+            op = 'unmerge';
+            $spinner = $('.unmerge-spinner');
+        }
 
         $groups = $('tbody'); // find the nearest tbody, which corresponds to a group
         var commands = [];
@@ -577,14 +591,17 @@ pageEncoding="UTF-8"
                 commands[0] = command;
                 $('.across-groups').prop('checked', false); // deliberately set it to false immediately after, we're worried about accidental merges across groups. across-groups should be the exception rather than the rule.
             } else {
-                // merge within clusters
+                // merge or tbr op. within clusters
                 for (var i = 0; i < $groups.length; i++) {
                     var $group = $($groups[i]);
                     var commandForThisGroup = {op: op, groupId: $group.attr('data-groupId'), ids: []}; // groupId is not directly used but we keep it anyway for future use
 
                     $checked = $('input.select-checkbox:checked', $group);
-                    if ($checked.length < 2)
-                        continue; // no id, or 1 id checked, in either case it doesn't matter.
+                    if ($checked.length == 0)
+                        continue; // nothing to do
+
+                    if ($checked.length < 2 && op === 'merge') // for merge only (not for tbr), we need to have at least 2 ids checked, otherwise nothing to do
+                        continue;
 
                     for (var j = 0; j < $checked.length; j++) {
                         commandForThisGroup.ids.push($($checked[j]).attr('data-id'));
@@ -708,8 +725,10 @@ pageEncoding="UTF-8"
     $('.reviewed-button').click (group_reviewed_handler);
     $('.reviewed-till-here-button').click (reviewed_till_here_handler);
 
-    $('.merge-button').click (save_handler);
-    $('.unmerge-button').click (save_handler);
+    $('.merge-button, .unmerge-button, .tbr-button').click (save_handler); // all these 3 buttons have the same handler
+//    $('.unmerge-button').click (save_handler);
+ //   $('.tbr-button').click (save_handler);
+
     $('.filter-button').click (function() { $('#filterModal').modal();});
     $('.filter-submit-button').click (filter_submit_handler);
     $('.colSelect-button').click (function() { $('#colSelectModal').modal();});

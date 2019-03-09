@@ -8,12 +8,12 @@ import org.apache.commons.logging.LogFactory;
  * Created by hangal on 8/13/17.
  */
 public class Timers {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Tokenizer.class);
+    public static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Tokenizer.class);
 
-    public static StopWatch canonTimer = new StopWatch();
-    public static StopWatch tokenizationTimer = new StopWatch();
-    public static StopWatch editDistanceTimer = new StopWatch();
-    public static StopWatch unionFindTimer = new StopWatch();
+    public static final StopWatch canonTimer = new StopWatch();
+    public static final StopWatch tokenizationTimer = new StopWatch();
+    public static final StopWatch editDistanceTimer = new StopWatch();
+    public static final StopWatch unionFindTimer = new StopWatch();
 
     public static void print() {
         log.info ("Canonicalization: " + canonTimer);

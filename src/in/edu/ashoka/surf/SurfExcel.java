@@ -17,40 +17,20 @@ import java.util.stream.Collectors;
 
 public class SurfExcel {
 
-    private static PrintStream out = System.out;
-    private static String SEPARATOR = "========================================\n";
-    static String FIELDSPEC_SEPARATOR = "-";
-    static String ID_PREFIX = "_id_";
+    private static final PrintStream out = System.out;
+    private static final String SEPARATOR = "========================================\n";
+    static final String FIELDSPEC_SEPARATOR = "-";
+    private static final String ID_PREFIX = "_id_";
     // When we want to assign id's to a column, we'll assign it in a special col. called id_<col>.
     // e.g. id for PC will be in col. name _id_PC and id for candName will be in col. name _id_candName.
 
-    static Comparator<String> stringLengthComparator = new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-            return o2.length() - o1.length();
-        }
-    };
+    static final Comparator<String> stringLengthComparator = (o1, o2) -> o2.length() - o1.length();
 
-    static Comparator<Collection<Row>> alphabeticalComparartor = new Comparator<Collection<Row>>() {
-        @Override
-        public int compare(Collection<Row> o1, Collection<Row> o2) {
-            return o1.iterator().next().get("Name").compareTo(o2.iterator().next().get("Name"));
-        }
-    };
+    static Comparator<Collection<Row>> alphabeticalComparartor = (o1, o2) -> o1.iterator().next().get("Name").compareTo(o2.iterator().next().get("Name"));
 
-    static Comparator<Collection<Row>> sizeComparator = new Comparator<Collection<Row>>() {
-        @Override
-        public int compare(Collection<Row> o1, Collection<Row> o2) {
-            return o2.iterator().next().get("Name").length() - o1.iterator().next().get("Name").length();
-        }
-    };
+    static Comparator<Collection<Row>> sizeComparator = (o1, o2) -> o2.iterator().next().get("Name").length() - o1.iterator().next().get("Name").length();
 
-    static Comparator<Collection<Row>> confidenceComparator = new Comparator<Collection<Row>>() {
-        @Override
-        public int compare(Collection<Row> o1, Collection<Row> o2) {
-            return Integer.parseInt(o2.iterator().next().get("confidence")) - Integer.parseInt(o1.iterator().next().get("confidence"));
-        }
-    };
+    static Comparator<Collection<Row>> confidenceComparator = (o1, o2) -> Integer.parseInt(o2.iterator().next().get("confidence")) - Integer.parseInt(o1.iterator().next().get("confidence"));
 
     public static void warn (String s) {
         out.println("WARNING " + s);
@@ -65,7 +45,7 @@ public class SurfExcel {
 
         Multimap<String, Row> fieldToRows = split (rows, "_st_" + field);
         List<String> listStField = new ArrayList<>(fieldToRows.keySet());
-        Collections.sort(listStField, stringLengthComparator);
+        listStField.sort(stringLengthComparator);
         listStField = Collections.unmodifiableList(listStField);
         // ok, now list of stFields is frozen, we can use indexes into it which will be stable.
 
@@ -128,7 +108,7 @@ public class SurfExcel {
                     if (Util1.editDistance(nonSpaceStField, nonSpaceStField1) <= ed) { // make sure to use the space-removed versions to compute edit distance
                         // ok, we found something that looks close enough
                         // out.println("  canonical: " + stname);
-                        result.add(new Pair<String, String>(stField, stField1));
+                        result.add(new Pair<>(stField, stField1));
                     }
                 }
             }
@@ -144,8 +124,8 @@ public class SurfExcel {
 
         // cannot canonicalize by space here because what we return has to be the same string passed in, in keys1/2.
         // sort by length to make edit distance more efficient
-        List<String> stream1 = (List) keys1.stream().sorted(stringLengthComparator).collect(Collectors.toList());
-        List<String> stream2 = (List) keys2.stream().sorted(stringLengthComparator).collect(Collectors.toList());
+        List<String> stream1 = keys1.stream().sorted(stringLengthComparator).collect(Collectors.toList());
+        List<String> stream2 = keys2.stream().sorted(stringLengthComparator).collect(Collectors.toList());
         List<Pair<String, String>> result = new ArrayList<>();
 
         // stream1, stream2 are now sorted by descending length
@@ -178,7 +158,7 @@ public class SurfExcel {
     }
 
     static Collection<Row> select(Collection<Row> rows, String field, String value) {
-        List<Row> result = new ArrayList<Row>();
+        List<Row> result = new ArrayList<>();
         for (Row r: rows)
             if (value.equals(r.get(field)))
                 result.add(r);
@@ -186,7 +166,7 @@ public class SurfExcel {
     }
 
     static Collection<Row> selectNot(Collection<Row> rows, String field, String value) {
-        List<Row> result = new ArrayList<Row>();
+        List<Row> result = new ArrayList<>();
         for (Row r: rows)
             if (!value.equals(r.get(field)))
                 result.add(r);
@@ -346,7 +326,7 @@ public class SurfExcel {
     /** filters given map to retain only those keys whose rows.size() <op> count */
     static<T> Multimap<String, T> sort (Multimap<String, T> map, Comparator<String> comparator) {
         List<String> keyList = new ArrayList<>(map.keySet());
-        Collections.sort(keyList, comparator);
+        keyList.sort(comparator);
 
         Multimap<String, T> sortedMap = LinkedHashMultimap.create(); // required extra memory instead of clearing map in place... can do away with it depending on how map.keySet() iteration works
 

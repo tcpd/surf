@@ -18,9 +18,8 @@ body{
 
 .user-input{
 	display: table;
-    margin: 0 auto;
     background-color: white;
-    margin-top: 3em;
+    margin: 3em auto 0;
     padding: 20px;
     border: 1px solid black;
     border-radius: 2%;
@@ -41,10 +40,8 @@ body{
 	border-top: 1px solid #EFF0F1;
 }
 .table-div{
-	margin:2em;
-	margin-top:0em;
-    margin-bottom: 0em;
-	border:1px solid black;
+    margin: 0em 2em;
+    border:1px solid black;
 	background-color: white;
 }
 
@@ -185,9 +182,7 @@ body{
 
 .table-header {
     width:98%;
-    margin:1em;
-    margin-left: 1.5em;
-    margin-right: 2em;
+    margin: 1em 2em 1em 1.5em;
 }
 
 

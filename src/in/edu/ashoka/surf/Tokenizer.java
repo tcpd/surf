@@ -15,11 +15,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class Tokenizer {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Tokenizer.class);
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Tokenizer.class);
 
-    static String DELIMITERS = " -.,;:/'\\t<>\"`()@1234567890";
+    static final String DELIMITERS = " -.,;:/'\\t<>\"`()@1234567890";
 
-    private static Map<Pattern, String> patternToReplacement = new LinkedHashMap<>(); // VERY IMP: should be linked hashmap so the replacements are applied in order!
+    private static final Map<Pattern, String> patternToReplacement = new LinkedHashMap<>(); // VERY IMP: should be linked hashmap so the replacements are applied in order!
     static {
         // precompile patterns for performance. the patterns to be replaced
         for (int i = 0; i < Config.replacements.length; i += 2) {

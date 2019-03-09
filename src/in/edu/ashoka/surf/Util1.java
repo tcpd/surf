@@ -12,9 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Util1 {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Util1.class);
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Util1.class);
 
-    public static final boolean RUNNING_ON_JETTY = false;
+    private static final boolean RUNNING_ON_JETTY = false;
 
     // key finding after a lot of experimentation with jetty and tomcat.
     // make all pages UTF-8 encoded.
@@ -22,8 +22,7 @@ public class Util1 {
     // even with this, with tomcat, GET requests are iso-8859-1.
     // so convert in that case only...
     // converts an array of strings from iso-8859-1 to utf8. useful for converting i18n chars in http request parameters
-    public static String convertRequestParamToUTF8(String param) throws UnsupportedEncodingException
-    {
+    private static String convertRequestParamToUTF8(String param) {
         if (RUNNING_ON_JETTY)
         {
             log.info("running on jetty: no conversion for " + param);
@@ -43,8 +42,7 @@ public class Util1 {
      * if throwExceptionIfUnsupportedEncoding is true, throws an exception,
      * otherwise returns
      */
-    private static String[] convertRequestParamsToUTF8(String params[], boolean throwExceptionIfUnsupportedEncoding) throws UnsupportedEncodingException
-    {
+    private static String[] convertRequestParamsToUTF8(String params[], boolean throwExceptionIfUnsupportedEncoding) throws UnsupportedEncodingException {
         if (RUNNING_ON_JETTY)
             return params;
         if (params == null)
@@ -54,15 +52,7 @@ public class Util1 {
         // others will be reported and ignored
         List<String> newParams = new ArrayList<>();
         for (String param : params) {
-            try {
-                newParams.add(convertRequestParamToUTF8(param));
-            } catch (UnsupportedEncodingException e) {
-                log.warn("Unsupported encoding exception for " + param);
-                Util.print_exception(e, log);
-                if (throwExceptionIfUnsupportedEncoding)
-                    throw (e);
-                // else swallow it
-            }
+            newParams.add(convertRequestParamToUTF8(param));
         }
         return newParams.toArray(new String[newParams.size()]);
     }
@@ -107,7 +97,7 @@ public class Util1 {
         return dp[len1][len2];
     }
 
-    public static Multimap<String, String> convertRequestToMultimap(HttpServletRequest request) throws UnsupportedEncodingException {
+    public static Multimap<String, String> convertRequestToMultimap(HttpServletRequest request) {
         Multimap<String, String> params = LinkedHashMultimap.create();
         {
             if (true) {
@@ -137,7 +127,7 @@ public class Util1 {
         }
     }
 
-    public static Map<String, String> convertRequestToMap(HttpServletRequest request) throws UnsupportedEncodingException {
+    public static Map<String, String> convertRequestToMap(HttpServletRequest request) {
         Map<String, String> params = new LinkedHashMap<>();
         {
             if (true) {

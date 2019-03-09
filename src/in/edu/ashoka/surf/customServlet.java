@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 @MultipartConfig
 public class customServlet extends HttpServlet {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
 
     public customServlet() {
         super();

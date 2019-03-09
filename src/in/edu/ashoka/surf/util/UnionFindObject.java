@@ -18,24 +18,24 @@ package in.edu.ashoka.surf.util;
 import java.io.*;
 
 // an object for fast union finds
-public class UnionFindObject implements Serializable
+class UnionFindObject implements Serializable
 {
 
     private UnionFindObject _parent;
     private int _rank;
 
-    public UnionFindObject ()
+    UnionFindObject()
     {
         reset();
     }
 
-    public void reset()
+    private void reset()
     {
         _parent = this;
         _rank = 0;
     }
 
-    public UnionFindObject find ()
+    UnionFindObject find()
     {
         UnionFindObject root = this;
         while (root != root._parent)

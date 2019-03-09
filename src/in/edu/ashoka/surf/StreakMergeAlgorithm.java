@@ -20,11 +20,11 @@ import static java.util.stream.Collectors.toList;
  */
 public class StreakMergeAlgorithm extends MergeAlgorithm {
 
-    private String streakFieldName; // fieldname on which to compute edit distance
-    private int streakLength;
-    private int maxHoles;
-    private String secondaryFieldName;
-    private Filter filter;
+    private final String streakFieldName; // fieldname on which to compute edit distance
+    private final int streakLength;
+    private final int maxHoles;
+    private final String secondaryFieldName;
+    private final Filter filter;
 
     /* set up merge algorithm parameters: d, the fieldName (col. name) of the field on which edit distance clustering is to be done, max. editDistance (inclusive) */
     StreakMergeAlgorithm(Dataset dataset, Filter filter, String streakFieldName, int streakLength, int maxHoles, String secondaryFieldName) {
@@ -45,7 +45,7 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
     }
 
     // borrowed from https://www.programcreek.com/2013/12/edit-distance-in-java/, should probably be improved
-    public static int minDistance(String word1, String word2) {
+    private static int minDistance(String word1, String word2) {
         int len1 = word1.length();
         int len2 = word2.length();
 
@@ -173,7 +173,7 @@ public class StreakMergeAlgorithm extends MergeAlgorithm {
             // bail out if we have no candidates to fill the hole - can happen if the secondary field in the hole doesn't match up
             // (e.g. with mismatch of const. names)
             if (holeCandidateAndDistance.size() == 0)
-                continue outer;
+                continue;
 
             // sort holecandidates by decreasing distance
             Util.sortPairsBySecondElement(holeCandidateAndDistance);

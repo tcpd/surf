@@ -9,8 +9,8 @@
         <element id="directory" name="lib">
           <element id="library" level="project" name="Maven: org.apache.commons:commons-csv:1.1" />
           <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.5" />
-          <element id="library" level="project" name="Maven: commons-io:commons-io:2.5" />
           <element id="library" level="project" name="Maven: commons-logging:commons-logging:1.2" />
+          <element id="library" level="project" name="Maven: commons-io:commons-io:2.5" />
           <element id="library" level="project" name="Maven: log4j:log4j:1.2.16" />
           <element id="library" level="project" name="Maven: org.eclipse.jgit:org.eclipse.jgit:4.10.0.201712302008-r" />
           <element id="library" level="project" name="Maven: com.jcraft:jsch:0.1.54" />

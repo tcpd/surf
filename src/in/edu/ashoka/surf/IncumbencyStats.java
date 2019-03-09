@@ -23,7 +23,7 @@ class MatchPredicate {
     }
 }
 
-public class IncumbencyStats {
+class IncumbencyStats {
     private static final String NEW_LINE_SEPARATOR = "\n";
     private static final CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
 

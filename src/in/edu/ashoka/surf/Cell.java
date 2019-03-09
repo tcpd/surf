@@ -9,9 +9,9 @@ import java.util.Collection;
 /**
  * Created by hangal on 9/17/15.
  */
-public class Cell {
-    private static PrintStream out = System.out;
-    private static String SEPARATOR = "========================================\n";
+class Cell {
+    private static final PrintStream out = System.out;
+    private static final String SEPARATOR = "========================================\n";
 
     public static void main(String[] args) throws IOException {
         Row.setToStringFields("Line");

@@ -117,7 +117,7 @@
     <filter>
         <filter-name>LoggingFilter</filter-name>
         <filter-class>
-            edu.stanford.muse.webapp.LoggingFilter
+            in.edu.ashoka.surf.LoggingFilter
         </filter-class>
         <init-param>
             <param-name>test-param</param-name>

@@ -8,7 +8,6 @@ import in.edu.ashoka.surf.util.Util;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -18,9 +17,9 @@ import java.util.List;
  * Looks up Ids that have been mapped manually and judged to be the same.
  * prints their canon versions so we can see why canon didn't map to the same string.
  */
-public class CanonMiner {
+class CanonMiner {
 
-    static PrintStream out = System.out;
+    private static final PrintStream out = System.out;
 
     public static void main (String args[]) throws IOException {
         String file = "/Users/hangal/tcpd_data/AE/Data/Gujarat/primary/candidates_electoral_info.csv";

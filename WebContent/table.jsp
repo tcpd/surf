@@ -63,14 +63,14 @@ pageEncoding="UTF-8"
     Dataset dataset = (Dataset) session.getAttribute("dataset");
 
     int currentPage = 1;
-    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception e) { }
+    try { currentPage = Integer.parseInt (request.getParameter("page")); } catch (Exception ignored) { }
     MergeManager.View view = (MergeManager.View) session.getAttribute("view");
 
     if (view == null) {
         out.println ("Sorry, no view has been set up in the session");
         return;
     }
-    List<List<List<Row>>> groupsToShow = (List<List<List<Row>>>) view.viewGroups;
+    List<List<List<Row>>> groupsToShow = view.viewGroups;
     MergeManager mergeManager = view.getMergeManager();
 
     int numPages = (int) Math.ceil(((double) groupsToShow.size()) / Config.groupsPerPage);
@@ -375,7 +375,7 @@ pageEncoding="UTF-8"
 
                             if (col.equals(POLL_NO_COL)) {
                                 int x = 1; // warn by default
-                                try { x = Integer.parseInt(row.get(col)); } catch (Exception e) { }
+                                try { x = Integer.parseInt(row.get(col)); } catch (Exception ignored) { }
                                 if (x > 0)
                                     textClass = "warn";
                             }
@@ -456,14 +456,13 @@ pageEncoding="UTF-8"
             $('input.select-checkbox', $group).prop('checked', true);
             $('.trow', $group).addClass ('selected-trow');
             $target.text(text2);
-            $group.addClass('reviewed')
+            $group.addClass('reviewed');
             $('.reviewed-button', $group).text ('Mark as unreviewed');
         } else {
             $('input.select-checkbox', $group).prop('checked', false);
             $('.trow', $group).removeClass('selected-trow');
             $target.text(text1);
-            $('')
-            $group.removeClass('reviewed')
+            $group.removeClass('reviewed');
             $('.reviewed-button', $group).text ('Mark as reviewed');
         }
         window.last_name = ($($('td', $group)[2]).text());

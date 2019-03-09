@@ -23,9 +23,10 @@ public class Config {
     private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Config.class);
     // replacements applied at a per-token level
 
-    public static String admin = "hangal@ashoka.edu.in";
-    public static String ID_FIELD = "ID", MERGE_FIELD = "Name";
-    public static int groupsPerPage = 100;
+    public static final String admin = "hangal@ashoka.edu.in";
+    public static final String ID_FIELD = "ID";
+    public static String MERGE_FIELD = "Name";
+    public static final int groupsPerPage = 100;
     public static final int DEFAULT_EDIT_DISTANCE = 2;
     public static final int DEFAULT_MIN_TOKEN_OVERLAP = 2;
     public static final int DEFAULT_IGNORE_TOKEN_FREQUENCY = 200;
@@ -36,7 +37,7 @@ public class Config {
     public static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of surf
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
-    static String[] replacements = new String[]{
+    static final String[] replacements = new String[]{
             "[^A-Za-z\\s]", "",
 
             // remove aspirations. these should happen before things like RAT=>RT, etc. e.g DASHARATHA => DASARATA -> DASARAT
@@ -106,19 +107,19 @@ public class Config {
             "CHH", // for CHHATRAPATI, as in SHRIMANT CHH. UDAYANRAJE PRATAPSINHA BHONSALE. Really?
             "SARDAR", "PANDIT", "PT", "MAULANA", "THIRU"};
 
-    static Set<String> ignoreTokensSet = new LinkedHashSet<>(Arrays.asList(ignoreTokens));
+    static final Set<String> ignoreTokensSet = new LinkedHashSet<>(Arrays.asList(ignoreTokens));
 
-    static boolean removeSuccessiveSameCharacters = true;
+    static final boolean removeSuccessiveSameCharacters = true;
 
     // these will be customized per dataset, or even by the user at run time
-    public static String[] supplementaryColumns = new String[]{"Election_Type","Year", "Party", "Position", "Sex", "Statename", "Votes", "Poll_No"}; // supplementary columns to display. These are emitted as is, without any special processing
+    private static final String[] supplementaryColumns = new String[]{"Election_Type","Year", "Party", "Position", "Sex", "Statename", "Votes", "Poll_No"}; // supplementary columns to display. These are emitted as is, without any special processing
     //public static String[] sortColumns = new String[]{"Constituency_Name", "Year"}; // cols according to which we'll sort rows -- string vals only, integers won't work!
     public static String[] sortColumns;
     public static String[] showCols;
-    public static Map<String, List<String>> actualColumns =  new LinkedHashMap<>(); 
-    public static Map<String, List<String>> actualSortColumns =  new LinkedHashMap<>();
-    public static Map<String, String> keyToPath  = new LinkedHashMap<>();
-    public static Map<String, String> keyToDescription = new LinkedHashMap<>();
+    public static final Map<String, List<String>> actualColumns =  new LinkedHashMap<>();
+    public static final Map<String, List<String>> actualSortColumns =  new LinkedHashMap<>();
+    public static final Map<String, String> keyToPath  = new LinkedHashMap<>();
+    public static final Map<String, String> keyToDescription = new LinkedHashMap<>();
     public static Properties gitProps = null;
 
     static {
@@ -145,12 +146,12 @@ public class Config {
             if (key.endsWith("_Columns"))
             {
                 //keyToColumns.put(key.replace("_Columns", ""), props.getProperty(key));
-                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(props.getProperty(key).split(",")));
+                ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(props.getProperty(key).split(",")));
                 actualColumns.put(key.replace("_Columns", ""), arrayList);
             }
             if (key.endsWith("_SortBy"))
             {
-                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(props.getProperty(key).split(",")));
+                ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(props.getProperty(key).split(",")));
                 actualSortColumns.put(key.replace("_SortBy", ""), arrayList);
             }
         }
@@ -176,7 +177,7 @@ public class Config {
             if (actualColumns.get(key).isEmpty())
             {
                 log.warn("Columns for dataset with key " + key + " are not specified. Reverting to supplementary columns.");
-                ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(supplementaryColumns));
+                ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(supplementaryColumns));
                 actualColumns.put(key, arrayList);
                 writeColumns(key, supplementaryColumns);
             }
@@ -184,7 +185,7 @@ public class Config {
             if (actualSortColumns.get(key).isEmpty())
             {
                 log.warn("Sorting rule for dataset with key " + key + " is not specified. Reverting to default sorting.");
-                ArrayList<String> arrayList = new ArrayList<String>(actualColumns.get(key).subList(0, 1));
+                ArrayList<String> arrayList = new ArrayList<>(actualColumns.get(key).subList(0, 1));
                 actualSortColumns.put(key, arrayList);
             }
         }
@@ -392,7 +393,7 @@ public static void refreshCols(String datasetKey)
                 cols = props.getProperty(key);
             }
         }
-        ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(cols.split(",")));
+        ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(cols.split(",")));
         actualColumns.put(datasetKey, arrayList);            
     }
 }

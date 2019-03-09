@@ -23,8 +23,8 @@ import static in.edu.ashoka.surf.MergeManager.RowViewControl.ROWS_MATCHING_FILTE
 public class MergeManager {
     public static final Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
 
-    public static Dataset toBeReviewed;
-    Row emptyRow; // dummy row to introduce separators in toBeReviewed
+    private static Dataset toBeReviewed;
+    private Row emptyRow; // dummy row to introduce separators in toBeReviewed
 
     /** we first decide which groups to show. This determination is independent of which rows are shown. This does not take filter into account, only the algorithmically merged groups */
     public enum GroupViewControl {

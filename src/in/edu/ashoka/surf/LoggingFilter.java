@@ -8,15 +8,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
-public class LoggingFilter implements javax.servlet.Filter {
-	public static Log log = LogFactory.getLog(in.edu.ashoka.surf.LoggingFilter.class);
+class LoggingFilter implements javax.servlet.Filter {
+	private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.LoggingFilter.class);
 
 	public static String getRequestDescription(HttpServletRequest request)
 	{
 		return getRequestDescription(request, true);
 	}
 
-	public static String ellipsize(String s, int maxChars)
+	private static String ellipsize(String s, int maxChars)
 	{
 		if (s == null)
 			return null;
@@ -37,7 +37,7 @@ public class LoggingFilter implements javax.servlet.Filter {
 		String page = request.getServletPath();
 		Thread.currentThread().setName(page);
 		String userKey = (String) session.getAttribute("userKey");
-		StringBuilder sb = new StringBuilder("Request[" + userKey + "@" + request.getRemoteAddr().toString() + "]: " + request.getRequestURL());
+		StringBuilder sb = new StringBuilder("Request[" + userKey + "@" + request.getRemoteAddr() + "]: " + request.getRequestURL());
 		// return here if params are not to be included
 		if (!includingParams)
 			return sb.toString();
@@ -82,12 +82,12 @@ public class LoggingFilter implements javax.servlet.Filter {
 		log.info("NEW " + getRequestDescription(request, includingParams));
 	}
 
-	public static void logRequest(HttpServletRequest request)
+	private static void logRequest(HttpServletRequest request)
 	{
 		log.info("NEW " + getRequestDescription(request, true));
 	}
 
-	public static void logRequestComplete(HttpServletRequest request)
+	private static void logRequestComplete(HttpServletRequest request)
 	{
 		log.info("COMPLETED " + getRequestDescription(request, true));
 		String page = request.getServletPath();

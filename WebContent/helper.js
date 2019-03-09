@@ -275,10 +275,8 @@ function selectUpTillHereForDone(groupID){
 
 function resetButtonPressed(){
     userConsent = confirm("Warning: All rows in the dataset will be marked \"Not Done\". Are you sure");
-    if(userConsent){
-        return true;
-    }
-    return false;
+    return userConsent;
+
 }
 
 //POPULATES DROPDOWN FOR FILTER VALUES

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  */
 class GroupOrdering {
     // this comparator takes avg. length of all the rows in a group, and sorts group by decreasing avg. length
-    private static Comparator<List<List<Row>>> avgLengthComparator = (group1, group2) -> {
+    private static final Comparator<List<List<Row>>> avgLengthComparator = (group1, group2) -> {
         float avgLengthOfO1, avgLengthOfO2;
 
         // this is somewhat inefficient, we are computing sumLength repeatedly.
@@ -45,7 +45,7 @@ class GroupOrdering {
             return Float.compare(avgLengthOfO2, avgLengthOfO1); // return -1 if avg length of group 1 is more than avg length of group 2
     };
 
-    private static Comparator<List<List<Row>>> largestGroupFirstComparator = (group1, group2) -> {
+    private static final Comparator<List<List<Row>>> largestGroupFirstComparator = (group1, group2) -> {
         return Integer.compare(group2.size(), group1.size()); // return -1 if o2.size < group1.size, ie. bigger groups will come first
     };
 
@@ -57,7 +57,7 @@ class GroupOrdering {
         return listOfListOfRows.stream().map (List::size).max(Comparator.naturalOrder()).get();
     }
 
-    private static Comparator<List<List<Row>>> maxRowsInOneIdComparator = (group1, group2) -> {
+    private static final Comparator<List<List<Row>>> maxRowsInOneIdComparator = (group1, group2) -> {
         int maxRowsInOneId1 = maxRowsInOneId(group1);
         int maxRowsInOneId2 = maxRowsInOneId(group2);
 
@@ -85,7 +85,7 @@ class GroupOrdering {
     };
 
     // this comparator takes first row in a group, and alphabetically compares it to the first row of the second group
-    private static Comparator<List<List<Row>>> approxAlphaComparator = (group1, group2) -> {
+    private static final Comparator<List<List<Row>>> approxAlphaComparator = (group1, group2) -> {
 
         // this is somewhat inefficient, we are computing sumLength repeatedly.
         // could be made faster by computing it just once for each group.

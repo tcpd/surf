@@ -1,23 +1,18 @@
 package edu.tsinghua.dbgroup;
-import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Comparator;
 import edu.tsinghua.dbgroup.*;
 public class EditDistanceClusterer {
-    private EditDistanceJoiner mJoiner;
-    public static class SizeComparator implements Comparator<Set<Serializable>> {
+    private final EditDistanceJoiner mJoiner;
+    static class SizeComparator implements Comparator<Set<Serializable>> {
         public int compare(Set<Serializable> o1, Set<Serializable> o2) {
             return o2.size() - o1.size();
         }
@@ -29,7 +24,7 @@ public class EditDistanceClusterer {
         mJoiner.populate(s);
     }
     public List<Set<Serializable>> getClusters() {
-        Map<Serializable, Set<Serializable>> clusterMap = new HashMap<Serializable, Set<Serializable>>();
+        Map<Serializable, Set<Serializable>> clusterMap = new HashMap<>();
         ArrayList<EditDistanceJoinResult> results = mJoiner.getJoinResults();
         for (EditDistanceJoinResult item : results) {
             String a = item.src;
@@ -39,7 +34,7 @@ public class EditDistanceClusterer {
             if (clusterMap.containsKey(b) && clusterMap.get(b).contains(a)) continue;
             Set<Serializable> l1 = null;
             if (!clusterMap.containsKey(a)) {
-                l1 = new TreeSet<Serializable>();
+                l1 = new TreeSet<>();
                 l1.add(a);
                 clusterMap.put(a, l1);
             } else {
@@ -48,7 +43,7 @@ public class EditDistanceClusterer {
             l1.add(b);
             Set<Serializable> l2 = null;
             if (!clusterMap.containsKey(b)) {
-                l2 = new TreeSet<Serializable>();
+                l2 = new TreeSet<>();
                 l2.add(b);
                 clusterMap.put(b, l2);
             } else {
@@ -56,16 +51,16 @@ public class EditDistanceClusterer {
             }
             l2.add(a);
         }
-        Set<Set<Serializable>> clusters = new HashSet<Set<Serializable>>();
+        Set<Set<Serializable>> clusters = new HashSet<>();
         for (Entry<Serializable, Set<Serializable>> e : clusterMap.entrySet()) {
             Set<Serializable> v = e.getValue();
             if (v.size() > 1) {
                 clusters.add(v);
             }
         }
-        List<Set<Serializable>> sortedClusters = new ArrayList<Set<Serializable>>(clusters);
+        List<Set<Serializable>> sortedClusters = new ArrayList<>(clusters);
 
-        Collections.sort(sortedClusters, new SizeComparator());
+        sortedClusters.sort(new SizeComparator());
 
         return sortedClusters;
     }

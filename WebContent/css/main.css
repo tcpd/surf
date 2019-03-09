@@ -2054,8 +2054,7 @@ ul.dropdown-menu.inner li:first-child {
 .advanced-search .bootstrap-select.btn-group.show-tick .dropdown-menu li.selected a span.check-mark {
   display: none !important; }
 .advanced-search .btn.dropdown-toggle.btn-default {
-  background: #fff url("../images/angle-up.png") no-repeat;
-  background-position: top 12px right 15px;
+  background: #fff url("../images/angle-up.png") no-repeat top 12px right 15px;
   background-size: 12px 8px;
   color: #999999; }
 .advanced-search .extension .btn.dropdown-toggle.btn-default {
@@ -2163,8 +2162,7 @@ ul.dropdown-menu.inner li:first-child {
   -moz-appearance: none;
   -ms-appearance: none;
   appearance: none;
-  background: #fff url("../images/angle-up.png") no-repeat;
-  background-position: top 14px right 15px;
+  background: #fff url("../images/angle-up.png") no-repeat top 14px right 15px;
   background-size: 12px 8px;
   color: #999999; }
 
@@ -2335,9 +2333,9 @@ main:after {
   -webkit-transform: translateX(300px);
   -ms-transform: translateX(300px);
   transform: translateX(300px);
-  -webkit-transform: translateX(300px) tranlateZ(0);
-  -ms-transform: translateX(300px) tranlateZ(0);
-  transform: translateX(300px) tranlateZ(0);
+  -webkit-transform: translateX(300px) translateZ(0);
+  -ms-transform: translateX(300px) translateZ(0);
+  transform: translateX(300px) translateZ(0);
   -webkit-transform: translate3d(300px, 0, 0);
   transform: translate3d(300px, 0, 0);
   transition: all 0.6s; }
@@ -2370,9 +2368,9 @@ main:after {
   -webkit-transform: translateX(-350px);
   -ms-transform: translateX(-350px);
   transform: translateX(-350px);
-  -webkit-transform: translateX(-350px) tranlateZ(0);
-  -ms-transform: translateX(-350px) tranlateZ(0);
-  transform: translateX(-350px) tranlateZ(0);
+  -webkit-transform: translateX(-350px) translateZ(0);
+  -ms-transform: translateX(-350px) translateZ(0);
+  transform: translateX(-350px) translateZ(0);
   -webkit-transform: translate3d(-350px, 0, 0);
   transform: translate3d(-350px, 0, 0);
   transition: all 0.6s; }

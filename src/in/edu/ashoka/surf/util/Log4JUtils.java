@@ -32,7 +32,8 @@ public class Log4JUtils {
 	private static final String BACKUP_FILE_SIZE = "100MB";
 	private static final int N_BACKUP_FILES = 30;
 
-	public static String LOG_FILE, WARNINGS_LOG_FILE;
+	public static String LOG_FILE;
+    private static String WARNINGS_LOG_FILE;
 
 	public static synchronized void initialize()
 	{

@@ -10,11 +10,11 @@ import java.util.*;
 /**
  * Created by hangal on 10/21/15.
  */
-public class Shell {
+class Shell {
 
     private Map<String, String> aliases = new LinkedHashMap<>();
 
-    private static String[] commandsArray = new String[]{"commands",
+    private static final String[] commandsArray = new String[]{"commands",
             "read", "write",
             "showrows",
             "alias", "call",
@@ -34,7 +34,7 @@ public class Shell {
             "morethan", "atmost", "echo"
     };
 
-    private static String[] rewriteTokens = new String[]{
+    private static final String[] rewriteTokens = new String[]{
             "one", "1",
             "two", "2",
             "three", "3",
@@ -48,8 +48,8 @@ public class Shell {
             "multiple", "more than 1",
     };
 
-    private static List<String> commands = new ArrayList<String>();
-    private static Map<String, String> rewriteTokensMap = new LinkedHashMap<>();
+    private static final List<String> commands = new ArrayList<>();
+    private static final Map<String, String> rewriteTokensMap = new LinkedHashMap<>();
 
     static {
         for (String s: commandsArray) { commands.add(s); }
@@ -58,7 +58,7 @@ public class Shell {
         }
     }
 
-    private static Map<String, Object> vars = new LinkedHashMap<String, Object>();
+    private static final Map<String, Object> vars = new LinkedHashMap<>();
 
     // strip out everything before a valid command
     private static List<String> relayout_cmdline(List<String> args) {
@@ -66,7 +66,7 @@ public class Shell {
             String arg = args.get(i).toLowerCase();
             if (commands.contains(arg))
             {
-                List<String> result = new ArrayList<String>();
+                List<String> result = new ArrayList<>();
                 for (int j = i; j < args.size(); j++)
                     result.add(args.get(j));
                 return result;
@@ -95,9 +95,9 @@ public class Shell {
     private static List<String> rewrite (List<String> tokens) {
         tokens = rewriteTokens(tokens);
         String s = Util.join (tokens, " ");
-        s.replaceAll("more than", "morethan");
-        s.replaceAll("less than", "lessthan");
-        s.replaceAll("look for", "lookfor");
+        s = s.replaceAll("more than", "morethan");
+        s = s.replaceAll("less than", "lessthan");
+        s = s.replaceAll("look for", "lookfor");
         return rewriteTokens(Util.tokenize(s));
     }
 
@@ -112,7 +112,7 @@ public class Shell {
     private static int getIndexOfNumber(List<String> args, Dataset d) {
         for (int i = 0; i < args.size(); i++) {
             try { Integer.parseInt(args.get(i)); return i; }
-            catch (NumberFormatException nfe) { }
+            catch (NumberFormatException ignored) { }
         }
         return 1;
     }
@@ -215,16 +215,16 @@ public class Shell {
             return getLineFromUser();
     }
 
-    Iterator<String> linesIterator = null;
+    private Iterator<String> linesIterator = null;
 
-    public Shell(String[] args) throws IOException {
+    private Shell(String[] args) throws IOException {
         if (args.length >= 1) {
             List<String> lines = Util.getLinesFromFile(args[0], true /* ignore comment lines */);
             linesIterator = lines.iterator();
         }
     }
 
-    private void start() throws IOException {
+    private void start() {
         Dataset d = null;
 
         while (true) {

@@ -39,7 +39,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
@@ -57,7 +56,7 @@ public class Util
 	public static final String[]	stopwords	= new String[] { "but", "be", "with", "such", "then", "for", "no", "will", "not", "are", "and", "their", "if", "this", "on", "into", "a", "there", "in", "that", "they", "was", "it", "an", "the", "as", "at", "these", "to", "of" };
 	private static boolean	BLUR		= true;																																																								// blurring of fnames
 	private static final long KB = 1024;
-	public static final char OR_DELIMITER = ';'; // used to separate parts of fields that can have multipled OR'ed clauses
+	private static final char OR_DELIMITER = ';'; // used to separate parts of fields that can have multipled OR'ed clauses
 
 	public static void setBlur(boolean b) {
 		BLUR = b;
@@ -86,7 +85,7 @@ public class Util
 		return s;
 	}
 
-	public static void ASSERT(boolean b)
+	private static void ASSERT(boolean b)
 	{
 		if (!b)
 		{
@@ -126,7 +125,7 @@ public class Util
 	 * like email folder names
 	 * e.g. SECRET is returned as S....T
 	 */
-	public static String blur(String s)
+	private static String blur(String s)
 	{
 		if (!BLUR)
 			return s;
@@ -190,7 +189,7 @@ public class Util
 		return true;
 	}
 
-	public static void warnIf(boolean b, String message, Log log)
+	private static void warnIf(boolean b, String message, Log log)
 	{
 		if (b)
 		{
@@ -222,7 +221,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		ASSERT(false);
 	}
 
-	public static void breakpoint()
+	private static void breakpoint()
 	{
 		// permanent breakpoint
 	}
@@ -258,7 +257,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		throw new RuntimeException(t);
 	}
 
-	public static String stackTrace(Throwable t)
+	private static String stackTrace(Throwable t)
 	{
 		StringWriter sw = new StringWriter(0);
 		PrintWriter pw = new PrintWriter(sw);
@@ -409,18 +408,13 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		return b.length;
 	}
 
-	public static long copy_stream_to_file(InputStream is, String filename) throws IOException
+	private static long copy_stream_to_file(InputStream is, String filename) throws IOException
 	{
 		int bufsize = 64 * 1024;
 		long nBytes = 0;
-		BufferedInputStream bis = null;
-		BufferedOutputStream bos = null;
-		try {
-			bis = new BufferedInputStream(is, bufsize);
-			bos = new BufferedOutputStream(new FileOutputStream(filename), bufsize);
+		try (BufferedInputStream bis = new BufferedInputStream(is, bufsize); BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filename), bufsize)) {
 			byte buf[] = new byte[bufsize];
-			while (true)
-			{
+			while (true) {
 				int n = bis.read(buf);
 				if (n <= 0)
 					break;
@@ -428,11 +422,6 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 				nBytes += n;
 
 			}
-		} finally {
-			if (bis != null)
-				bis.close();
-			if (bos != null)
-				bos.close();
 		}
 		return nBytes;
 	}
@@ -471,7 +460,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 				});
 	}
 
-	public static void copy_file(String from_filename, String to_filename) throws IOException
+	private static void copy_file(String from_filename, String to_filename) throws IOException
 	{
 		copy_stream_to_file(new FileInputStream(from_filename), to_filename);
 	}
@@ -512,7 +501,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	}
 
 	/** return byte array from reading entire inputstream given */
-	public static byte[] getBytesFromStream(InputStream is) throws IOException
+	private static byte[] getBytesFromStream(InputStream is) throws IOException
 	{
 		BufferedInputStream bis = new BufferedInputStream(is);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -578,7 +567,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		return lines;
 	}
 
-	public static List<String> getLinesFromInputStream(InputStream in, boolean ignoreCommentLines) throws IOException
+	private static List<String> getLinesFromInputStream(InputStream in, boolean ignoreCommentLines) throws IOException
 	{
 		return getLinesFromReader(new InputStreamReader(in, StandardCharsets.UTF_8), ignoreCommentLines);
 	}
@@ -692,7 +681,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 			return null;
 		String tmp;
 		do{
-			tmp = new String(str);
+			tmp = str;
 			str = unescapeHTML(str);
 		}while(!tmp.equals(str));
 		return tmp;
@@ -701,7 +690,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	 * escapes the 5 special html chars - see
 	 * http://www.w3schools.com/tags/ref_entities.asp
 	 */
-	public static String unescapeHTML(String str)
+	private static String unescapeHTML(String str)
 	{
 		if (str == null)
 			return null;
@@ -783,7 +772,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		return true;
 	}
 
-	public static String ellipsize(String s, int maxChars)
+	private static String ellipsize(String s, int maxChars)
 	{
 		if (s == null)
 			return null;
@@ -870,7 +859,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	}
 
 	/** returns file's extension, and null if it has no extension. Extension has be < MAX_EXTENSION_LENGTH chars */
-	public static String getExtension(String filename)
+	private static String getExtension(String filename)
 	{
 		if (filename == null)
 			return null;
@@ -908,7 +897,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	 * converts a very long name.doc -> a very lon...g.doc.
 	 * tries to fit s into maxChars, with a best effort to keep the extension
 	 */
-	public static String ellipsizeKeepingExtension(String s, int maxChars)
+	private static String ellipsizeKeepingExtension(String s, int maxChars)
 	{
 		if (s.length() <= maxChars)
 			return s;
@@ -1160,7 +1149,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	}
 
 	/** returns yyyy-mm-dd format for given calendar object */
-	public static String formatDate(Calendar c)
+	private static String formatDate(Calendar c)
 	{
 		if (c == null)
 			return "??-??";
@@ -1178,7 +1167,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		return formatDate(c);
 	}
 
-	public static String formatDateLong(Calendar d)
+	private static String formatDateLong(Calendar d)
 	{
 		if (d == null)
 			return "??-??";
@@ -1773,7 +1762,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
         return content;
     }
 
-    public static class MyFilenameFilter implements FilenameFilter {
+    static class MyFilenameFilter implements FilenameFilter {
 		private final String	prefix;
 		private String suffix; // suffix is optional
 
@@ -1781,7 +1770,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 			this.prefix = prefix;
 		}
 
-		public MyFilenameFilter(String prefix, String suffix) {
+		MyFilenameFilter(String prefix, String suffix) {
 			this.prefix = prefix;
 			this.suffix = suffix;
 		}
@@ -1823,7 +1812,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		return sb.toString();
 	}
 
-	public static Set<String> filesWithPrefixAndSuffix(String dir, String prefix, String suffix)
+	private static Set<String> filesWithPrefixAndSuffix(String dir, String prefix, String suffix)
 	{
 		Set<String> result = new LinkedHashSet<>();
 
@@ -1920,14 +1909,9 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		});
 	}
 
-	public static <T extends Comparable<? super T>, S> void sortPairsByFirstElement(List<Pair<T, S>> input)
+	private static <T extends Comparable<? super T>, S> void sortPairsByFirstElement(List<Pair<T, S>> input)
 	{
-		input.sort((p1, p2) -> {
-			return p1.getFirst().compareTo(p2.getFirst());
-			// int i1 = p1.getFirst();
-			// int i2 = p2.getFirst();
-			// return i2 - i1;
-		});
+		input.sort(Comparator.comparing(Pair::getFirst));
 	}
 
 	private static <T> List<T> permuteList(List<T> in, int seed)
@@ -1980,7 +1964,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	 * takes in a map K,V and returns a List of Pairs <K,V> sorted by
 	 * (descending) value
 	 */
-	public static <K, V> List<Pair<K, V>> mapToListOfPairs(Map<K, V> map)
+	private static <K, V> List<Pair<K, V>> mapToListOfPairs(Map<K, V> map)
 	{
 		List<Pair<K, V>> result = new ArrayList<>();
 		for (Map.Entry<K, V> e : map.entrySet())
@@ -2260,7 +2244,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	 * (fields may be non-public
 	 * if running without security manager). expand=true expands collections
 	 */
-	public static String fieldsToString(Object o, boolean expand)
+	private static String fieldsToString(Object o, boolean expand)
 	{
 		if (o == null)
 			return "null";
@@ -2791,7 +2775,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	 * Returns the input cast as Set (modifiable) if it is indeed one,
 	 * or clone it as a Set. Returns null if the input is null.
 	 */
-	public static <E> Set<E> castOrCloneAsSet(Collection<E> c)
+	private static <E> Set<E> castOrCloneAsSet(Collection<E> c)
 	{
 		return (c == null || c instanceof HashSet) ? (Set<E>) c : new LinkedHashSet<>(c);
 	}
@@ -2799,7 +2783,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	/**
 	 * Returns an intersection as Set
 	 */
-	public static <E> Set<E> setIntersection(Collection<E> set1, Collection<E> set2)
+	private static <E> Set<E> setIntersection(Collection<E> set1, Collection<E> set2)
 	{
 		// see
 		// http://stackoverflow.com/questions/7574311/efficiently-compute-intersection-of-two-sets-in-java
@@ -2829,7 +2813,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 	/**
 	 * Returns a union as Set
 	 */
-	public static <E> Set<E> setUnion(Collection<E> s1, Collection<E> s2)
+	private static <E> Set<E> setUnion(Collection<E> s1, Collection<E> s2)
 	{
 		// if (s1 == null || s2 == null) return null; // let's trigger exception
 		// as caller may want null to represent "all"
@@ -2910,7 +2894,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 
 	// both arguments have to agree on being or not being URL escaped (probably
 	// have to be escaped since we assume "&" is the delimiter)
-	public static int indexOfUrlParam(String allParams, String param)
+	private static int indexOfUrlParam(String allParams, String param)
 	{
 		allParams += "&"; // sentinel
 		param += "&"; // to prevent prefix matching (e.g., param = "foo=12"

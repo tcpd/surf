@@ -18,12 +18,12 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
     private String primaryFieldName;
     private Filter filter;
-    private Set<String> ignoredTokens = new LinkedHashSet<>(); // these are common tokens that won't be considered for matching
+    private final Set<String> ignoredTokens = new LinkedHashSet<>(); // these are common tokens that won't be considered for matching
 	private int minTokenOverlap;
-	public int ignoreTokenFrequency; /* beyond this freq. threshold in the dataset, the token will not be considered */
+	private int ignoreTokenFrequency; /* beyond this freq. threshold in the dataset, the token will not be considered */
     private boolean substringAllowed = true, initialMapping = true;
 
-	public CompatibleNameAlgorithm(Dataset d) {
+	private CompatibleNameAlgorithm(Dataset d) {
 		super(d);
 	}
 
@@ -106,7 +106,8 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
     }
 
 	// core compatibility function: at least (minTokenOverlap) multi-letter tokens common, or whether all tokens in one can map to the other modulo initials (if initialMapping is true)
-	private int compatibility (String x, String y, int minTokenOverlap, boolean substringAllowed, boolean initialMapping) {
+	@SuppressWarnings("SuspiciousNameCombination")
+    private int compatibility (String x, String y, int minTokenOverlap, boolean substringAllowed, boolean initialMapping) {
 		Multiset<String> xTokens = LinkedHashMultiset.create();
 		xTokens.addAll(Util.tokenize(x));
         Multiset<String> yTokens = LinkedHashMultiset.create();
@@ -140,6 +141,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
         }
 
         // # x and y each have some tokens that are not the same. check if these tokens can map
+        //noinspection SuspiciousNameCombination
         if (initialMapping && (canTokensMap(xTokens, yTokens) || canTokensMap(yTokens, xTokens)))
 			return 1;
 		else
@@ -147,7 +149,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 	}
 
 
-	private List<List<Row>> computeClasses (List<Row> filteredRows, int minTokenOverlap, boolean substringAllowed, boolean initialMapping) throws FileNotFoundException {
+	private List<List<Row>> computeClasses (List<Row> filteredRows, int minTokenOverlap, boolean substringAllowed, boolean initialMapping) {
 	    log.info ("Compute classes called. #rows = " + filteredRows.size() + " minTokenOverlap: " + minTokenOverlap + " substringAllowed: " + substringAllowed + " initialMapping: " + initialMapping);
         String field = primaryFieldName;
         List<Pair<String, String>> edges = new ArrayList<>(); // for debugging only
@@ -293,7 +295,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 	    return rows.stream().map (row -> row.get(Config.ID_FIELD)).collect(Collectors.toSet()).size();
     }
 
-    private void runRecursive(List<Collection<Row>> result, List<Row> rows, int tokenOverlap, boolean substringAllowed, boolean initialMapping) throws FileNotFoundException {
+    private void runRecursive(List<Collection<Row>> result, List<Row> rows, int tokenOverlap, boolean substringAllowed, boolean initialMapping) {
 
         String params = " (params: #rows: "+ rows.size() + "tokenOverlap: " + tokenOverlap + " substringAllowed: " + substringAllowed + " initialMapping: " + initialMapping + ")";
 

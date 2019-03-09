@@ -18,8 +18,8 @@ package in.edu.ashoka.surf.util;
 import java.io.Serializable;
 
 public class Pair<N, V> implements Serializable {
-	public N first;
-	public V second;
+	private N first;
+	private V second;
 
 	public Pair(N name, V value) {
 		this.first = name;

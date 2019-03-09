@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Counter {
+class Counter {
     public static void main (String args[]) {
         long N = 10L * 1000 * 1000;
         List<Integer> list = new ArrayList<>();

@@ -8,7 +8,7 @@ import java.util.List;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
-public class Test2 {
+class Test2 {
 
 	public static void main(String[] args) throws IOException {
 		Dataset d = Dataset.getDataset("/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv");
@@ -34,7 +34,7 @@ public class Test2 {
         }
         
         //only keep duplicates
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for(String key:resultMap.keySet()){
         	if(resultMap.get(key).size()<2)
         		list.add(key);

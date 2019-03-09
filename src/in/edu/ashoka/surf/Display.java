@@ -13,10 +13,10 @@ import com.google.common.collect.Multimap;
 import in.edu.ashoka.surf.util.Pair;
 import in.edu.ashoka.surf.util.Util;
 
-public class Display {
-    private static PrintStream out = System.out;
+class Display {
+    private static final PrintStream out = System.out;
 
-    static void displayCollection(Collection<String> c, Collection<String> reference) {
+    private static void displayCollection(Collection<String> c, Collection<String> reference) {
         int i = 1;
         Map<String, String> cStrings = Tokenizer.canonicalizeDesi(c);
         Map<String, String> cReference = Tokenizer.canonicalizeDesi(reference);

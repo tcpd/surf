@@ -1,5 +1,5 @@
 package edu.tsinghua.dbgroup;
-public class EditDistanceJoinResult {
+class EditDistanceJoinResult {
     public String src;
     public String dst;
     public int similarity;

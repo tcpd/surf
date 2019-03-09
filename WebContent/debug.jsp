@@ -69,7 +69,7 @@ If you have encountered a problem, please save this page and send it <%=in.edu.a
       String key = (String)keys.nextElement();
 	  out.println("<b>" + key + "</b>: not printed<br>");
     }
-    String documentRootPath = application.getRealPath("/").toString();
+    String documentRootPath = application.getRealPath("/");
 	%>
 	<br/>
 	<%

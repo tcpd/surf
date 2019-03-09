@@ -19,12 +19,11 @@ import java.util.*;
 
 class UnionFindBox<T> extends UnionFindObject {
 
-	private T payload;
 	public int classNum;
 	
 	public UnionFindBox(T t)
 	{
-		payload = t;
+		T payload = t;
 	}
 	
 	/** returns #of distinct equiv. classes */

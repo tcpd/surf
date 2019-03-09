@@ -20,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 @MultipartConfig
 public class DeleteDatasetServlet extends HttpServlet {
-    public static Log log = LogFactory.getLog(DeleteDatasetServlet.class);
+    private static final Log log = LogFactory.getLog(DeleteDatasetServlet.class);
 
     public DeleteDatasetServlet() {
         super();

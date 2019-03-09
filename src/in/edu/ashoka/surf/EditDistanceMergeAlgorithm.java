@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
  */
 public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
-    private int maxEditDistance;
-    private String fieldName; // fieldname on which to compute edit distance
-    private Filter filter;
+    private final int maxEditDistance;
+    private final String fieldName; // fieldname on which to compute edit distance
+    private final Filter filter;
 
     /* set up merge algorithm parameters: d, the fieldName (col. name) of the field on which edit distance clustering is to be done, max. editDistance (inclusive) */
     EditDistanceMergeAlgorithm(Dataset dataset, String fieldName, int editDistance, Filter filter) {
@@ -35,7 +35,7 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
         // create map of fieldValueToRows
         SetMultimap<String, Row> fieldValueToRows = HashMultimap.create();
-        filteredRows.forEach (r -> { fieldValueToRows.put (r.get(fieldName), r);});
+        filteredRows.forEach (r -> fieldValueToRows.put (r.get(fieldName), r));
 
         // do the clustering based on ed (but only if ed > 0)
         Timers.editDistanceTimer.reset();

@@ -4,13 +4,13 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class Row implements Comparable<Row> {
-    private static PrintStream out = System.out;
+    private static final PrintStream out = System.out;
     private static final String FIELDSPEC_SEPARATOR = "-";
     private static String[] toStringFields = new String[0];
 
     int rowNum = -1;
-    private Map<String, Object> fields;
-    private Dataset d;
+    private final Map<String, Object> fields;
+    private final Dataset d;
 
     public Row(Map<String, String> map, int rowNum, Dataset d) {
         this.fields = new LinkedHashMap<>();

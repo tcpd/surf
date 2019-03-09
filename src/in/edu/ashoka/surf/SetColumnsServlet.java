@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 @MultipartConfig
 public class SetColumnsServlet extends HttpServlet {
 
-    private static Log log = LogFactory.getLog(SetColumnsServlet.class);
+    private static final Log log = LogFactory.getLog(SetColumnsServlet.class);
     public SetColumnsServlet() {
         super();
     }

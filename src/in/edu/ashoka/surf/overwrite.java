@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 @MultipartConfig
 public class overwrite extends HttpServlet {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.overwrite.class);
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.overwrite.class);
 
     public overwrite() {
         super();
@@ -46,7 +46,7 @@ public class overwrite extends HttpServlet {
             doGet(request, response);
             return;
         }
-        Boolean overwrite = Boolean.parseBoolean(request.getParameter("overwrite"));
+        boolean overwrite = Boolean.parseBoolean(request.getParameter("overwrite"));
         String fileToWrite = Config.SURF_HOME + File.separator + "Temp" + File.separator + filename;
         File newfile = new File(fileToWrite);
         // write the file, checking first if we're overwriting

@@ -12,10 +12,10 @@ import java.util.List;
  * Created by hangal on 8/13/17.
  */
 abstract public class MergeAlgorithm {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
+    static final Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeManager.class);
 
     public List<Collection<Row>> classes; // these are the groups
-    Dataset dataset;
+    final Dataset dataset;
 
     /** after run(), returns the groups of merged rows. the field classes should also be set up with the same */
     abstract public List<Collection<Row>> run() throws FileNotFoundException;

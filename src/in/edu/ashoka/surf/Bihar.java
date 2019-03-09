@@ -13,9 +13,9 @@ import java.util.*;
 /**
  * Created by hangal on 9/17/15.
  */
-public class Bihar extends Object {
-    private static PrintStream out = System.out;
-    private static String SEPARATOR = "========================================\n";
+class Bihar {
+    private static final PrintStream out = System.out;
+    private static final String SEPARATOR = "========================================\n";
 
     public static void main(String[] args) throws IOException {
         /*
@@ -236,7 +236,7 @@ public class Bihar extends Object {
         return resultMap;
     }
     
-    public static Pair<Row, Row> getSimilarPairs (Collection<Row> allRows, Dataset d, int distance) throws IOException {
+    public static Pair<Row, Row> getSimilarPairs (Collection<Row> allRows, Dataset d, int distance) {
         
         out.println(SEPARATOR + "New attempt: Similar names (ST edit distance = "+distance+")");
         return null; //  SurfExcel.similarPairsForField(allRows, "Name", distance);
@@ -273,7 +273,7 @@ public class Bihar extends Object {
         Tokenizer.setupDesiVersions(allRows, "Name");
     }
     
-    public static Multimap<String, Row> getExactSamePairs (Collection<Row> allRows, Dataset d) throws IOException {
+    private static Multimap<String, Row> getExactSamePairs(Collection<Row> allRows, Dataset d) {
     	
         
     		//initRowFormat(allRows, d);
@@ -337,21 +337,20 @@ public class Bihar extends Object {
         return resultMap;
     }
 
-    public static Multimap<String, Row> getExactSameNameWithConstituency (Collection<Row> allRows, Dataset d, int startStringSize) throws IOException {
+    public static Multimap<String, Row> getExactSameNameWithConstituency (Collection<Row> allRows, Dataset d, int startStringSize) {
         //split based on cname and constituency
         Multimap<String, Row> tempMap = SurfExcel.split(allRows, "PC_Name");
         Multimap<String, Row> resultMap = HashMultimap.create();
         List<String> listCField = new ArrayList<>(tempMap.keySet());
-        Collections.sort(listCField, SurfExcel.stringLengthComparator);
-        Collections.unmodifiableList(listCField);
-        for(int i=0; i<listCField.size(); i++){
-            Collection<Row> constituencyGroup = tempMap.get(listCField.get(i));
-            for(Row row:constituencyGroup){
-                if(row.get("c"+SurfExcel.FIELDSPEC_SEPARATOR+"Name").length()>=startStringSize){
-                    resultMap.put(row.get("PC_Name")+SurfExcel.FIELDSPEC_SEPARATOR+row.get("c"+SurfExcel.FIELDSPEC_SEPARATOR+"Name").substring(0,startStringSize),row);
-                }
-                else{
-                    resultMap.put(row.get("PC_Name")+SurfExcel.FIELDSPEC_SEPARATOR+row.get("c"+SurfExcel.FIELDSPEC_SEPARATOR+"Name"),row);
+        listCField.sort(SurfExcel.stringLengthComparator);
+        listCField = Collections.unmodifiableList(listCField);
+        for (String aListCField : listCField) {
+            Collection<Row> constituencyGroup = tempMap.get(aListCField);
+            for (Row row : constituencyGroup) {
+                if (row.get("c" + SurfExcel.FIELDSPEC_SEPARATOR + "Name").length() >= startStringSize) {
+                    resultMap.put(row.get("PC_Name") + SurfExcel.FIELDSPEC_SEPARATOR + row.get("c" + SurfExcel.FIELDSPEC_SEPARATOR + "Name").substring(0, startStringSize), row);
+                } else {
+                    resultMap.put(row.get("PC_Name") + SurfExcel.FIELDSPEC_SEPARATOR + row.get("c" + SurfExcel.FIELDSPEC_SEPARATOR + "Name"), row);
                 }
             }
         }

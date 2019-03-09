@@ -18,27 +18,28 @@ import org.apache.commons.logging.LogFactory;
 
 
 public class Dataset implements Serializable, Cloneable {
-    public static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Dataset.class);
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Dataset.class);
 
-    static Map<String, Dataset> datasetMap = new LinkedHashMap<>(); // this is a static map of all datasets
+    private static final Map<String, Dataset> datasetMap = new LinkedHashMap<>(); // this is a static map of all datasets
 
-    static final long TIME_INTERVAL_BETWEEN_BACKUPS = 1000*60*60*4;
-    long saveTimeOfBackedUpFile = 0;
-    long saveTime = 0;
-    String filename;
+    private static final long TIME_INTERVAL_BETWEEN_BACKUPS = 1000*60*60*4;
+    private long saveTimeOfBackedUpFile = 0;
+    private long saveTime = 0;
+    private String filename;
 
-	public static String NEW_LINE_SEPARATOR = "\n";
+	private static final String NEW_LINE_SEPARATOR = "\n";
     Collection<Row> rows;
     private Collection<String> columnsToSave; // this is what is used to decide which columns get written out when the dataset is saved
-    String name, description;
-    Set<String> cColumns = new LinkedHashSet<>(); // this is the real list of col names (canonical) available (no aliases) for each row in this dataset.
-    Multimap<String, String> cColumnToDisplayName = LinkedHashMultimap.create(); // display col names (both real and aliases)
-    Map<String, String> cColumnAliases = new LinkedHashMap<>(); // cCol -> cCol as aliases.
-    Timer timer;
+    private String name;
+    String description;
+    final Set<String> cColumns = new LinkedHashSet<>(); // this is the real list of col names (canonical) available (no aliases) for each row in this dataset.
+    final Multimap<String, String> cColumnToDisplayName = LinkedHashMultimap.create(); // display col names (both real and aliases)
+    final Map<String, String> cColumnAliases = new LinkedHashMap<>(); // cCol -> cCol as aliases.
+    private final Timer timer;
     
-    public void addToColumnsToSave(String col){
-    	if(columnsToSave.contains(col))
-    		return;
+    private void addToColumnsToSave(String col){
+    	if(columnsToSave.contains(col)) {
+        }
     	else
     		columnsToSave.add(col);
     }
@@ -102,7 +103,7 @@ public class Dataset implements Serializable, Cloneable {
     }
 
     // maintain a map for canonicalization, otherwise computing lower case, remove plurals etc takes a lot of time when reading a large dataset
-    Map<String, String> cCache = new LinkedHashMap<>();
+    final Map<String, String> cCache = new LinkedHashMap<>();
     String canonicalizeCol(String col) {
         String s = cCache.get(col);
         if (s != null)
@@ -116,14 +117,14 @@ public class Dataset implements Serializable, Cloneable {
         return ccol;
     }
 
-    void warnIfColumnExists(String col) {
+    private void warnIfColumnExists(String col) {
         if (hasColumnName(col))
             System.err.println("Error: duplicate columns for repeated: " + col);
     }
 
-    void registerColumn(String col) { registerColumn(col, false); }
+    private void registerColumn(String col) { registerColumn(col, false); }
 
-    void registerColumn(String col, boolean isAlias) {
+    private void registerColumn(String col, boolean isAlias) {
         warnIfColumnExists(col);
         String cCol = canonicalizeCol(col);
         cColumns.add(cCol);
@@ -251,7 +252,7 @@ public class Dataset implements Serializable, Cloneable {
     
     public Collection<Row> getRows(){return rows;}
 
-    public int nCols(){
+    private int nCols(){
         if (rows == null || rows.size() == 0)
             return 0;
         Row row = rows.iterator().next();
@@ -273,7 +274,7 @@ public class Dataset implements Serializable, Cloneable {
 
     /** saves this dataset as a CSV  in the given file 
      * @throws IOException */
-    synchronized public void save(String file) throws IOException {
+    private synchronized void save(String file) throws IOException {
         saveTime = System.currentTimeMillis();
     	
         //FIRST WRITE TO A NEW FILE
@@ -319,7 +320,7 @@ public class Dataset implements Serializable, Cloneable {
         lastBackUpTime = System.currentTimeMillis();
     * */
 
-    synchronized public void performBackup(File file) throws IOException{
+    private synchronized void performBackup(File file) throws IOException{
         saveTimeOfBackedUpFile = saveTime;
         //CREATE BACKUP FILE
         //first check for directory; if doesn't exist create

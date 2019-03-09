@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
  * Position=1,2,3;Sex=M;Name=/Mo.*di/,Shah
  * will match records with all of the following: 1) Position = 1 or 2 or 3, 2) Sex = M and 3) Name matching regex Mo.*di or (exactly) Shah
  */
-public class Filter {
-    public static Log log = LogFactory.getLog(in.edu.ashoka.surf.Filter.class);
+class Filter {
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.Filter.class);
 
-    private SetMultimap<String, String> colNameToAllowedValues = LinkedHashMultimap.create(); // normalized to lower case
-    private SetMultimap<String, Pattern> colNameToAllowedRegexPatterns = LinkedHashMultimap.create(); // pattenrs are case-insensitive
+    private final SetMultimap<String, String> colNameToAllowedValues = LinkedHashMultimap.create(); // normalized to lower case
+    private final SetMultimap<String, Pattern> colNameToAllowedRegexPatterns = LinkedHashMultimap.create(); // pattenrs are case-insensitive
 
     /**
      *
@@ -107,7 +107,7 @@ public class Filter {
         for (String colName: colNameToAllowedRegexPatterns.keySet()) {
             sb.append (colName + "=");
             Set<Pattern> allowedPatterns = colNameToAllowedRegexPatterns.get(colName);
-            sb.append(String.join (",", allowedPatterns.stream().map (p -> p.toString()).collect (Collectors.toSet())));
+            sb.append(String.join (",", allowedPatterns.stream().map (Pattern::toString).collect (Collectors.toSet())));
             sb.append (";");
         }
         return sb.toString();

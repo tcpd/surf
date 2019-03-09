@@ -15,7 +15,7 @@ import com.google.gson.JsonObject;
 
 /* servlet called when a new algorithm is first run */
 public class MergeServlet extends HttpServlet {
-    private static Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeServlet.class);
+    private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.MergeServlet.class);
 
     public MergeServlet() {
         super();
@@ -28,7 +28,7 @@ public class MergeServlet extends HttpServlet {
 	 * 2) just refreshes filter without rerunning the algorithm
      * uses the request params algorithm, algo-arg, splitColumn, filterSpec, sortOrder.
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         JsonObject result = new JsonObject();
         response.setContentType("application/json");
         HttpSession session = request.getSession();
@@ -69,7 +69,7 @@ public class MergeServlet extends HttpServlet {
         response.getOutputStream().print(result.toString());
     }
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// TODO Auto-generated method stub
 		doGet(request, response);
 	}

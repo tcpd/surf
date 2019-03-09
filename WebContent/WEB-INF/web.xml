@@ -28,7 +28,7 @@
 
     <servlet>
         <servlet-name>delete-dataset</servlet-name>
-        <servlet-class>in.edu.ashoka.surf.delete</servlet-class>
+        <servlet-class>in.edu.ashoka.surf.DeleteDatasetServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>delete-dataset</servlet-name>
@@ -45,12 +45,12 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>columnUpdate</servlet-name>
-        <servlet-class>in.edu.ashoka.surf.columnUpdateServlet</servlet-class>
+        <servlet-name>set-columns</servlet-name>
+        <servlet-class>in.edu.ashoka.surf.SetColumnsServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>columnUpdate</servlet-name>
-        <url-pattern>/columnUpdate</url-pattern>
+        <servlet-name>set-columns</servlet-name>
+        <url-pattern>/set-columns</url-pattern>
     </servlet-mapping>
 
     <servlet>

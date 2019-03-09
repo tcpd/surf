@@ -29,7 +29,7 @@
 <div class="logo" style="text-align:center">Surf</div>
 
 <div class="user-input">
-<form action="read-dataset" method="get">
+<form class="read-dataset-form" action="read-dataset" method="get">
 	<div class="form-group">
 		<label for="datasetKey">Select Dataset</label>
 		<select id="datasetKey" class="form-control selectpicker" name="datasetKey"> <!-- called state for historical reasons, TOFIX -->
@@ -40,31 +40,56 @@
 	</div>
 	<br/>
 	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Load dataset</button>
+		<button type="submit" class="read-dataset-btn btn btn-default">Load dataset</button>
 	</div>
 	<br/>
 </form>
-	<hr/>
+
+    <script>
+        $('.read-dataset-btn').click(function() {
+            if (!$('#datasetKey').val())
+                alert ("Please select a dataset");
+            else {
+                $('.read-dataset-form').submit();
+            }
+            return false;
+        });
+    </script>
+
+    <hr/>
 <form action="custom-dataset" method="get">
 	<div class="submit-button">
 		<button type="submit" class="btn btn-default">Upload Dataset</button>
 	</div>
 </form>
-<hr>
-<form action="delete-dataset" method="post">
-	<div class="form-group">
-		<label for="delDataset">Delete Dataset</label>
-		<select id="delDataset" class="form-control selectpicker" name="delDataset"> <!-- called state for historical reasons, TOFIX -->
-		<% for (String key: Config.keyToDescription.keySet()) { %>
-			<option value="<%=key%>"><%=Config.keyToDescription.get(key)%></option>
-		<% } %>
-		</select>
-	</div>
-	<br/>
-	<div class="submit-button">
-		<button type="submit" class="btn btn-default">Delete Selected Dataset</button>
-	</div>
-</form>
-</div>						
+
+	<hr>
+	<form class="delete-dataset-form" action="delete-dataset" method="post">
+		<div class="form-group">
+			<label for="dataset">Delete Dataset</label>
+			<select id="dataset" class="form-control selectpicker" name="dataset"> <!-- called state for historical reasons, TOFIX -->
+			<% for (String key: Config.keyToDescription.keySet()) { %>
+				<option value="<%=key%>"><%=Config.keyToDescription.get(key)%></option>
+			<% } %>
+			</select>
+		</div>
+		<br/>
+		<div class="submit-button">
+			<button type="submit" class="delete-dataset-button btn btn-default">Delete Selected Dataset</button>
+		</div>
+	</form>
+
+	<script>
+		$('.delete-dataset-button').click(function() {
+			if (confirm("Are you sure?")) {
+				$('.delete-dataset-form').submit();
+			} else {
+				LOG ('delete dataset cancelled');
+			}
+			return false;
+		});
+	</script>
+
+</div>
 </body>
 </html>

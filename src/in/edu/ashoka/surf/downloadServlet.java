@@ -30,12 +30,12 @@ public class downloadServlet extends HttpServlet {
         HttpSession session = request.getSession();
         String key = (String) session.getAttribute("datasetKey");
         response.setHeader("Content-disposition", "attachment; filename="+key+"_surf.csv");
-        if(!(new File(System.getProperty("user.home")+File.separator+"Surf Data"+File.separator+key+".csv").exists()))
+        if(!(new File(Config.SURF_HOME + File.separator + key + ".csv").exists()))
             request.getRequestDispatcher("table.jsp").include(request, response);
         else
         {
             //https://www.baeldung.com/servlet-download-file
-            FileInputStream file = new FileInputStream(System.getProperty("user.home")+File.separator+"Surf Data"+File.separator+key+".csv");
+            FileInputStream file = new FileInputStream(Config.SURF_HOME + File.separator+key+".csv");
             OutputStream out = response.getOutputStream();
             byte[] buffer = new byte[512];
             int numBytesRead;

@@ -356,7 +356,7 @@ function new_pid() { "pid-" + (1 + Math.floor(Math.random() * 20000000)); }
 			inited = true;
 			setup(data);
 		} catch (e) { 
-			// delete the old one and use a new PID. inited must be false.
+			// DeleteDatasetServlet the old one and use a new PID. inited must be false.
 			localStorage.removeItem(PID); PID = new_pid(); 
 		}
 	} else 

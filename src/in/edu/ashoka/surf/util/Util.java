@@ -1734,7 +1734,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 
 	// Deletes all files and subdirectories under dir.
 	// Returns true if all deletions were successful.
-	// If a deletion fails, the method stops attempting to delete and returns
+	// If a deletion fails, the method stops attempting to DeleteDatasetServlet and returns
 	// false.
 	private static boolean deleteDir(File f, Log log)
 	{
@@ -1744,13 +1744,13 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 			for (String aChildren : children) {
 				boolean success = deleteDir(new File(f, aChildren), log);
 				if (!success) {
-					System.err.println("warning: failed to delete file " + f);
+					System.err.println("warning: failed to DeleteDatasetServlet file " + f);
 					return false;
 				}
 			}
 		}
 
-		// The directory is now empty so delete it
+		// The directory is now empty so DeleteDatasetServlet it
 		return f.delete();
 	}
 
@@ -1762,10 +1762,10 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 		if (f.exists())
 		{
 		boolean success = deleteDir(f,log);
-			warnIf(!success, "Unable to delete file: " + f.getPath(), log);
+			warnIf(!success, "Unable to DeleteDatasetServlet file: " + f.getPath(), log);
 		}
 		else
-			warnIf(true, "Sorry, can't delete path because it doesn't even exist: " + path,log);
+			warnIf(true, "Sorry, can't DeleteDatasetServlet path because it doesn't even exist: " + path,log);
 	}
 
     private static String cleanEmailStuff(String content){
@@ -1869,7 +1869,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 					if (success)
 						log.info("Deleted file: " + f.getName());
 					else
-						log.warn("Failed to delete file: " + f.getName());
+						log.warn("Failed to DeleteDatasetServlet file: " + f.getName());
 				}
 			}
 	}
@@ -2689,7 +2689,7 @@ public static void aggressiveWarn(String message, long sleepMillis, Log log)
 
 		if (!(temp.delete()))
 		{
-			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+			throw new IOException("Could not DeleteDatasetServlet temp file: " + temp.getAbsolutePath());
 		}
 
 		if (!(temp.mkdir()))

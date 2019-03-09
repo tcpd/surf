@@ -32,7 +32,8 @@ public class Config {
     public static final int DEFAULT_MIN_SPLITWEIGHT = 10; // a token in a field will be split only if it's constituent parts have appeared independently > 10 times. (However, there is an additional factor of 2x needed if the fields are only of length 3)
     public static final int DEFAULT_STREAK_LENGTH = 5;
     public static final int DEFAULT_MAX_HOLES = 1;
-    public static final String SURF_HOME = System.getProperty("user.home")+File.separator+"Surf Data";
+    public static final String SURF_HOME = System.getProperty("user.home") + File.separator + "surf-data";
+    public static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of surf
 
     /** SEE ALSO: we could refer to Metaphone 3 https://en.wikipedia.org/wiki/Metaphone#Metaphone_3 */
     static String[] replacements = new String[]{
@@ -116,7 +117,6 @@ public class Config {
     public static String[] showCols;
     public static Map<String, List<String>> actualColumns =  new LinkedHashMap<>(); 
     public static Map<String, List<String>> actualSortColumns =  new LinkedHashMap<>();
-    private static String PROPS_FILE = System.getProperty("user.home") + File.separator + "surf.properties"; // this need not be visible to the rest of surf
     public static Map<String, String> keyToPath  = new LinkedHashMap<>();
     public static Map<String, String> keyToDescription = new LinkedHashMap<>();
     public static Properties gitProps = null;
@@ -215,11 +215,11 @@ public class Config {
         File f = new File(PROPS_FILE);
         if(!f.exists())
         {
-            String npath = System.getProperty("user.home") + File.separator + "surf.properties";
+            String npath = Config.PROPS_FILE;
             File file = new File(npath);
             try{file.createNewFile();}
             catch(Exception e){
-                log.warn("Unable to create surf.properties");
+                log.warn("Unable to create " + PROPS_FILE);
             }
         }
         f = new File(PROPS_FILE);
@@ -295,7 +295,7 @@ public class Config {
 
         File f = new File(PROPS_FILE);
         if (!f.exists()) {
-            String npath = System.getProperty("user.home") + File.separator + "surf.properties";
+            String npath = Config.PROPS_FILE;
             File file = new File(npath);
             try {
                 file.createNewFile();

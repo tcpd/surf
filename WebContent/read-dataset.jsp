@@ -28,7 +28,7 @@
     <div class="user-input">
 
         <%-- <form method="get" action="select-op"> --%>
-        <form method="post" action="columnUpdate">
+        <form method="post" action="set-columns">
         <%
             // Set up dataset in the session
             Dataset dataset = MergeServlet.loadDataset(request);

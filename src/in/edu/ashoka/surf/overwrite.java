@@ -56,7 +56,7 @@ public class overwrite extends HttpServlet {
                 log.warn ("Warning: overwriting existing file: " + fileToWrite);
             }
             // File oldfile = new File(Config.SURF_HOME + File.separator + filename);
-            // log.warn(oldfile.delete());
+            // log.warn(oldfile.DeleteDatasetServlet());
             File destDir = new File(Config.SURF_HOME);
             FileUtils.copyFileToDirectory(newfile, destDir);
             newfile.delete();

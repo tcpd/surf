@@ -229,14 +229,14 @@ public class Dataset implements Serializable, Cloneable {
             if(newFile.exists()) {
                 FileUtils.copyFile(newFile, new File(fileWithSuffixNew));
                 if(!FileUtils.deleteQuietly(newFile))
-                    throw new FileExistsException("failed to delete .new file");
+                    throw new FileExistsException("failed to DeleteDatasetServlet .new file");
             }
             else{
                 File oldFile = new File(fileWithSuffixOld);
                 if(oldFile.exists()) {
                     FileUtils.copyFile(oldFile, new File(filename));
                     if(!FileUtils.deleteQuietly(oldFile))
-                        throw new FileExistsException("failed to delete .old file");
+                        throw new FileExistsException("failed to DeleteDatasetServlet .old file");
                 }
                // else
                 //    throw new FileNotFoundException("file not found");
@@ -310,7 +310,7 @@ public class Dataset implements Serializable, Cloneable {
         File newFile = new File(fileWithSuffixNew);
         FileUtils.copyFile(newFile, new File(file));
         if(!FileUtils.deleteQuietly(newFile))
-            throw new FileExistsException("failed to delete .new file");
+            throw new FileExistsException("failed to DeleteDatasetServlet .new file");
     }
 
     /*
@@ -346,7 +346,7 @@ public class Dataset implements Serializable, Cloneable {
         inputStream.close();
         outputStream.close();
 
-        //delete old backups here if needed in future
+        //DeleteDatasetServlet old backups here if needed in future
 
     }
 

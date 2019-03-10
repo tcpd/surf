@@ -55,12 +55,12 @@ This is useful, for example, when a dataset has a column of person names, and yo
 primarily for the purpose of tracking career trajectories of candidates in Indian elections. However, it is a standalone tool that can be used for other purposes as well.
 
 <p>
-Surf does nothing automatically, but it throws up rows that have possibly similar values in the column. A human analyst makes all judgements
-about deciding whether the values in 2 rows should have the same ID (for example, whether 2 names refer to the same person or city).
+Surf does not assign IDs automatically, but it throws up rows that have possibly similar values in the column. A human analyst makes all judgements
+about deciding whether 2 rows should have the same ID.
 
 <h3>Clustering in Surf</h3>
 <p>
-Surf's fundamental operation is to cluster rows that may have the same ID. For this purpose, Surf has a range of clustering options for
+Surf's fundamental operation is to cluster rows that may have the same ID by grouping together rows that have "similar" values in a specified column. For this purpose, Surf has a range of clustering options for
 names that have small mispellings, different formatting or ordering (<span class="data">Lal Krishna Advani; Lalkrushna Advani; ADVANI, LAL KISHAN</span>),
     to names that are "compatible" using initialization (<span class="data">L.K. Advani; Lal Krishna Advani </span>)
     to names that are contained in another (<span class="data">PRAFUL PATEL; PRAFUL CHANDRA PATEL</span>)
@@ -92,31 +92,36 @@ Tools like OpenRefine allow you to create clusters of rows and harmonize the val
 you assign IDs to the rows, they are not useful when the main goal is to disambiguate different identities. Let's say you used Open Refine to harmonize
 names with slightly different spellings; there is still the possibility that two names are exactly the same, but need to have a different ID. You cannot
 capture this information since OpenRefine does not track IDs. All other data cleaning tools we are aware of have this limitation, and that is why
-we had do develop Surf. However, Surf does use some of the same edit distance clustering code that is in OpenRefine.
+we developed Surf. However, Surf does use some of the same edit distance clustering code that is in OpenRefine.
 
 This kind of data cleaning for ID assignment is slow, painful, and incomplete with spreadsheets like MS Excel.
 Real-life datasets need a lot of data preparation (normalization, tokenization etc.), along with sophisticated algorithms for
 clustering. (We used to assign IDs by sorting on the person name, and hoping names for the same person would
 be visible close by, but realized how unworkable that was. It is also extremely difficult to track IDs manually.)
-While we still use spreadsheets to sometimes eyeball our data to perform spot checks, we have completely switched to Surf for ID assignment.
+While we still use spreadsheets to sometimes eyeball data and perform spot checks, we have completely switched to Surf for ID assignment.
 
 <h3>What is the workflow with Surf?</h3>
 
 To work with a dataset, you upload it into Surf, run different clustering algorithms, perform merges, and then download the
-dataset back when you are done. The downloaded dataset will have the same number of rows as the original one; the only difference is that
+dataset back when you are done. The downloaded dataset will have all the rows and columns as the original one; the only difference is that
 there is now an ID column.
 <p>
 
-You can run Surf in multiple sessions; if IDs have already been assigned, they will be used. The clustering algorithms and the display of rows will treat all rows with the same ID field as equivalent.
+You can run Surf in multiple sessions; if IDs have already been assigned, they will be used, and rows with the same ID will be shown together.
+    The clustering algorithms and the display of rows will treat all rows with the same ID field as equivalent.
 
 <h3>How is Surf distributed?</h3>
 
 Surf is distributed as a web-hosted or standalone browser-based application.
-In either mode, Surf operates with a familiar, browser-based frontend. (Surf is best tested with the Chrome browser.)
+In either mode, Surf operates with a familiar, browser-based frontend. (Surf is best used with the Chrome browser, although other browsers should also work.)
 In the standalone mode, Surf starts a local webserver which means everything happens in the privacy of your own machine.
 Your browser connects to this standalone browser.
 
-This packaging is similar to other data management tools like OpenRefine and Tabula.
+This packaging is similar to other open-source data management tools like <a href="http://openrefine.org">OpenRefine</a> and <a href="https://tabula.technology/">Tabula</a>.
+
+<h3>FAQ</h3>
+
+A FAQ will be available soon. Send suggested questions for the FAQ to hangal@ashoka.edu.in.
 
 <h3>Support</h3>
 

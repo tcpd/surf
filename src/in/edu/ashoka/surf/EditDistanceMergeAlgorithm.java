@@ -56,6 +56,8 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
                 set.add(fieldVal);
                 clusters.add(set);
             }
+
+            // fieldValueToRows.keys().stream().map(val -> { Set set = new LinkedHashSet<String>(); set.add(val); return set;}).collect(Collectors.toList());
         }
 
         Timers.editDistanceTimer.stop();

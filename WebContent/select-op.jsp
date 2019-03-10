@@ -47,8 +47,7 @@
         <div style="display:none" class="div-edit-distance">
             <label for="edit-distance">Maximum edit distance</label>
             <input type="text" class="form-control" id="edit-distance" name="edit-distance" placeholder="<%=Config.DEFAULT_EDIT_DISTANCE%>">
-            <span class="help">Edit distance 0 not included</span>
-
+            <span id="edit-distance-0-help" class="help">Edit distance 0 not included</span>
         </div>
 
         <div class="div-compat-alg-controls">

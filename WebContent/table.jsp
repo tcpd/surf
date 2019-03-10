@@ -187,7 +187,9 @@ pageEncoding="UTF-8"
                     Surf version: <%= gitId%> <br/>
                     Built <%= gitCommitTime%> by <%=gitBuildUser%> from branch <%=gitBranch%><br/>
                     <br/>
-                    Also see the <a target="_blank" href="user-manual.jsp">Surf user manual</a>
+                    New to Surf? See the <a target="_blank" href="user-manual.jsp">Surf user manual</a>.
+                    <br/>
+                    Find a bug in Surf? Got a suggestion for improvement? Please file it <a target="_blank" href="https://github.com/tcpd/surf/issues">here</a>.
                 </p>
             </div>
         </div>

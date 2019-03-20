@@ -212,6 +212,10 @@ public class MergeManager {
 
                 algorithm = new StreakMergeAlgorithm(d, filter, streakFieldName, streakLength, maxHoles, secondaryFieldName);
                 break;
+
+            case "oneClusterPerID":
+                algorithm = new OneClusterPerIDMergeAlgorithm(d, filter);
+                break;
         }
         // this is where the groups are generated
         groups = algorithm.run();

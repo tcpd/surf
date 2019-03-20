@@ -42,7 +42,7 @@
 			<option value="compatibleNames">Compatible names</option>
             <option value="streaks">Streaks</option>
             <option value="allNames">All names</option>
-            <option value="oneClusterPerID">One cluster per ID(for review)</option>
+            <option value="oneClusterPerID">One cluster per ID (for review)</option>
 		</select>
         <br/>
         <div style="display:none" class="div-edit-distance">

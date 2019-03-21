@@ -80,6 +80,11 @@
 	</form>
 
 	<script>
+
+        function LOG(s) {
+            if (console) console.log(s);
+        }
+
 		$('.delete-dataset-button').click(function() {
 			if (confirm("Are you sure?")) {
 				$('.delete-dataset-form').submit();

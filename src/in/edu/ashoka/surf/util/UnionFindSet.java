@@ -39,6 +39,7 @@ public class UnionFindSet<T> {
 		boxA.unify(boxB);
 	}
 
+	/** note, will essentially ignore any collection of size 1 or 0. only useful if collection is of size 2 or more */
 	public void unifyAllElementsOfCollection(Collection<T> collection)
 	{
 		T first = null;
@@ -72,11 +73,7 @@ public class UnionFindSet<T> {
 	public List<List<T>> getClassesSortedByClassSize()
 	{
 		List<List<T>> result = getClasses();
-		result.sort(new Comparator<List>() {
-			public int compare(List l1, List l2) {
-				return l2.size() - l1.size();
-			}
-		});
+		result.sort((Comparator<List>) (l1, l2) -> l2.size() - l1.size());
 		
 		return result;
 	}

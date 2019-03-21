@@ -41,7 +41,7 @@ public class MergeServlet extends HttpServlet {
 
                 // call this last, because we should ALWAYS merge based on id's even if it doesn't honor splitColumn
                 // But wait! Streak alg. doesn't want any merging between PIDs to happen. It wants its groups to be presented as is.
-                if (!(mergeManager.algorithm instanceof StreakMergeAlgorithm))
+                if (!(mergeManager.algorithm instanceof StreakMergeAlgorithm) & !(mergeManager.algorithm instanceof OneClusterPerIDMergeAlgorithm))
                      mergeManager.updateMergesBasedOnIds();
             }
 
@@ -49,8 +49,11 @@ public class MergeServlet extends HttpServlet {
 
             // read view control specs
             String groupViewControlSpec = request.getParameter ("groupViewControlSpec");
-            if (Util.nullOrEmpty(groupViewControlSpec))
-                groupViewControlSpec = MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_ROWS.name();
+            if (Util.nullOrEmpty(groupViewControlSpec)) {
+                // if nothing is specified, show groups with 2 or more rows.
+                // but for OneClusterPerIDMergeAlgorithm, we show all groups, even those with only one row.
+                groupViewControlSpec = (mergeManager.algorithm instanceof OneClusterPerIDMergeAlgorithm) ? MergeManager.GroupViewControl.ALL_GROUPS.name() : MergeManager.GroupViewControl.GROUPS_WITH_TWO_OR_MORE_ROWS.name();
+            }
             String rowViewControlSpec = request.getParameter ("rowViewControlSpec");
             if (Util.nullOrEmpty(rowViewControlSpec))
                 rowViewControlSpec = MergeManager.RowViewControl.ALL_ROWS.name();

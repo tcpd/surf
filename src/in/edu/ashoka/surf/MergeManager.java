@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static in.edu.ashoka.surf.MergeManager.RowViewControl.IDS_MATCHING_FILTER;
 import static in.edu.ashoka.surf.MergeManager.RowViewControl.ROWS_MATCHING_FILTER;
+import static java.util.stream.Collectors.toList;
 
 /** class that takes care of running a merging algorithm and then manual merges to it.
  * Important: these functions should not depend on a web-based frontend. This class should have no dependency on servlets. */
@@ -174,7 +175,8 @@ public class MergeManager {
                     @Override
                     public List<Collection<Row>> run() {
                         classes = new ArrayList<>();
-                        classes.add(d.getRows().stream().filter(filter::passes).collect(Collectors.toList())); // just one class, with all the rows in it
+                        Collection<Row> filteredRows = filter.isEmpty() ? dataset.getRows() : dataset.getRows().stream().filter(filter::passes).collect(toList());
+                        classes.add(filteredRows);
                         return classes;
                     }
 
@@ -205,6 +207,7 @@ public class MergeManager {
                 algorithm = new CompatibleNameAlgorithm(d, fieldToCompare, filter, minTokenOverlap, ignoreTokenFrequency, substringAllowed, initialMapping);
                 break;
             case "streaks":
+
                 String streakFieldName = params.get("streakFieldName");
                 int streakLength = Integer.parseInt(params.get("streakLength"));
                 int maxHoles = Integer.parseInt(params.get("maxHoles"));
@@ -222,8 +225,10 @@ public class MergeManager {
         rowToLabels.clear(); // remove all the old labels the moment a new alg. is run
         // if the dataset already had some id's the same, merge them
 
-        if (!"streaks".equals(algo))
-         updateMergesBasedOnIds(); // don't call this for streaks because it unifies very large clusters. for streaks we don't want any further merging.
+        // don't call this for streaks because it unifies very large clusters. for streaks we don't want any further merging.
+        // also don't call it for oneClusterPerId because it's not needed, and also because updateMergesBasedOnIds would wipe out any clusters and return nothing
+        if (!"streaks".equals(algo) && !"oneClusterPerID".equals(algo))
+         updateMergesBasedOnIds();
 
         this.splitColumn = params.get("splitColumn");
         if (!Util.nullOrEmpty(splitColumn))
@@ -260,7 +265,8 @@ public class MergeManager {
     }
 
     /** updates groups based on id's as well as existing groups.
-     * MUST be called after id's are changed */
+     * MUST be called after id's are changed.
+     * Note: groups will not have singleton groups! */
     void updateMergesBasedOnIds() {
         Timers.unionFindTimer.reset();
         Timers.unionFindTimer.start();

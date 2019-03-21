@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 /* A class that performs loose merging on a dataset based on a primaryField, but only when the secondaryField is exactly the same. */
 public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
@@ -335,7 +337,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
     @Override
 	public List<Collection<Row>> run() throws FileNotFoundException {
 
-        List<Row> filteredRows = dataset.getRows().stream().filter(filter::passes).collect(Collectors.toList());
+        List<Row> filteredRows = filter.isEmpty() ? (List<Row>) dataset.getRows() : dataset.getRows().stream().filter(filter::passes).collect(toList());
 
 		// now translate the row#s back to the actual rows
         classes = new ArrayList<>();

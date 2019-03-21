@@ -202,7 +202,7 @@ pageEncoding="UTF-8"
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="logo navbar-brand" style="font-size:30px;margin-left:20px;" href="#">Surf</a>
+            <a class="logo navbar-brand" style="font-size:30px;margin-left:20px;" href="/surf">Surf</a>
         </div>
 
         <div id="navbar" class="navbar-collapse collapse">

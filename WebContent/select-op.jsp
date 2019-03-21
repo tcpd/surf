@@ -41,7 +41,7 @@
             <option value="editDistance">Edit distance</option>
 			<option value="compatibleNames">Compatible names</option>
             <option value="streaks">Streaks</option>
-            <option value="allNames">All names</option>
+            <option value="allNames">All IDs in a single cluster</option>
             <option value="oneClusterPerID">One cluster per ID (for review)</option>
 		</select>
         <br/>

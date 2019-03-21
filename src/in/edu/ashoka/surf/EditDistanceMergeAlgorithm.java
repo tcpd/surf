@@ -8,6 +8,8 @@ import in.edu.ashoka.surf.util.Timers;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * Created by hangal on 8/12/17.
  * New simplified edit distance merge manager.
@@ -31,7 +33,7 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
     @Override
     public List<Collection<Row>> run() {
 
-        Collection<Row> filteredRows = dataset.getRows().stream().filter(filter::passes).collect(Collectors.toList());
+        Collection<Row> filteredRows = filter.isEmpty() ? dataset.getRows() : dataset.getRows().stream().filter(filter::passes).collect(toList());
 
         // create map of fieldValueToRows
         SetMultimap<String, Row> fieldValueToRows = HashMultimap.create();

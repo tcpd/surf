@@ -22,6 +22,9 @@ class Filter {
 
     private final SetMultimap<String, String> colNameToAllowedValues = LinkedHashMultimap.create(); // normalized to lower case
     private final SetMultimap<String, Pattern> colNameToAllowedRegexPatterns = LinkedHashMultimap.create(); // pattenrs are case-insensitive
+    private boolean isEmpty = false; /* set to true if filter is empty, i.e. it passes all rows, which is a common case */
+
+    public boolean isEmpty() { return this.isEmpty; }
 
     /**
      *
@@ -35,8 +38,11 @@ class Filter {
      */
     public Filter (String filterSpec) {
 
-        if (filterSpec == null)
+        if (filterSpec == null) {
             filterSpec = "";
+        }
+        isEmpty = Util.nullOrEmpty(filterSpec);
+
         List<String> directives = Util.tokenize (filterSpec, ";");
 
         for (String directive: directives) {

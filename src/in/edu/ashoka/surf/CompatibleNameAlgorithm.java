@@ -337,7 +337,7 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
     @Override
 	public List<Collection<Row>> run() throws FileNotFoundException {
 
-        List<Row> filteredRows = filter.isEmpty() ? (List<Row>) dataset.getRows() : dataset.getRows().stream().filter(filter::passes).collect(toList());
+        List<Row> filteredRows = filter.isEmpty() ? (List<Row>) new ArrayList<>(dataset.getRows()) : dataset.getRows().stream().filter(filter::passes).collect(toList());
 
 		// now translate the row#s back to the actual rows
         classes = new ArrayList<>();

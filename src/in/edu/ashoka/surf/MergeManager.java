@@ -475,7 +475,7 @@ public class MergeManager {
                     }
                     case GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS: {
                         Collection<Row> rowsMatchingFilter = group.stream().filter(filter::passes).collect(Collectors.toList());
-                        Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet());
+                        Set<String> idsInGroup = group.stream().map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet());
                         groupWillBeShown = (rowsMatchingFilter.size() > 0 && idsInGroup.size() >= 2);
                         break;
                     }

@@ -344,7 +344,8 @@ pageEncoding="UTF-8"
 
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
-				<td style="min-width:300px" class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
+                <!-- need word-wrap: break-all to break very long names -->
+				<td style="min-width:300px;word-wrap:break-all" class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
 				<%-- <td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td> --%>
 
                 <%

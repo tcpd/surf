@@ -344,7 +344,9 @@ public class MergeManager {
                 datasetNeedsToBeSaved = true;
             } else if ("unmerge".equalsIgnoreCase(command.op)) {
                 // create unique id's for all rows
+
                 for (String id : command.ids) {
+                    log.info("Unmerging id " + id);
                     Collection<Row> rowsForThisId = idToRows.get(id);
                     for (Row row : rowsForThisId) {
                         row.set(Config.ID_FIELD, Integer.toString(nextAvailableId));
@@ -466,14 +468,15 @@ public class MergeManager {
                         break;
                     case ALL_GROUPS:
                         break;
-                    case GROUPS_WITH_TWO_OR_MORE_IDS:
+                    case GROUPS_WITH_TWO_OR_MORE_IDS: {
                         Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
                         groupWillBeShown = (idsInGroup.size() >= 2);
                         break;
+                    }
                     case GROUPS_WITH_ONE_OR_MORE_ROWS_AND_TWO_OR_MORE_IDS: {
-                        Collection<Row> tempGroup = group.stream().filter(filter::passes).collect(Collectors.toList());
-                        Set<String> idsInGroupWithOneOrMoreRows = tempGroup.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet()); // limit(2) to ensure early out at finding the first row passing the filter
-                        groupWillBeShown = (idsInGroupWithOneOrMoreRows.size() >= 2);
+                        Collection<Row> rowsMatchingFilter = group.stream().filter(filter::passes).collect(Collectors.toList());
+                        Set<String> idsInGroup = group.stream().filter(filter::passes).map(r -> r.get(Config.ID_FIELD)).collect(Collectors.toSet());
+                        groupWillBeShown = (rowsMatchingFilter.size() > 0 && idsInGroup.size() >= 2);
                         break;
                     }
                     case GROUPS_WITH_MULTIPLE_VALUES_IN_SECONDARY_FIELD: {

@@ -75,14 +75,10 @@ public class customServlet extends HttpServlet {
         String fileToWrite = Config.SURF_HOME + File.separator + filename;
         if (new File(fileToWrite).exists()) {
             log.warn ("Warning: overwriting existing file: " + fileToWrite);
-            log.warn(filePart);
-            request.setAttribute("filename", filename);
-            request.setAttribute("desc", description);
-            request.setAttribute("head", Boolean.parseBoolean(request.getParameter("head")));
-            filePart.write(Config.SURF_HOME+File.separator+"Temp"+File.separator+filename);
             request.getRequestDispatcher("warning.jsp").forward(request, response);
             return;
         }
+
         filePart.write(fileToWrite);
 
         // BufferedReader fileContent = new BufferedReader(new FileReader(Config.SURF_HOME + File.separator + filename));

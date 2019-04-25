@@ -20,24 +20,12 @@
 
 <div class="logo" style="text-align:center">Surf</div>
 
-<div class="user-input">
-	<form name="myform" id="myform" action="overwrite" method="post" enctype="multipart/form-data">
-		<div class="form-group">
-			<div>
-				<p style="margin: 0px; font-weight: 600; padding-bottom: 4px">Warning: You are overwriting an existing dataset!<br>Do you wish to continue?</p>	
-			</div>
-        	<br>
-			<input id="overwrite" type="radio" name="overwrite" value="true" checked="checked"> Yes<br>
-			<input id="overwrite" type="radio" name="overwrite" value="false"> No<br>
-			<input style="visibility: hidden" id="filename" name="filename" value="<%=request.getAttribute("filename")%>">
-			<input style="visibility: hidden" id="head" name="head" value="<%=request.getAttribute("head")%>">
-    		<input style="visibility: hidden" id="desc" name="desc" value="<%=request.getAttribute("desc")%>">
-		</div>
-		<div class="submit-button">
-			<button type="submit" class="btn btn-default" style="margin: 5px">Submit</button>
-		</div>
-		<br>
-	</form>
-</div>						
+<br/>
+	<div style="width:50%; margin-left:25%; text-align: center; border:solid 1px rgba(0,0,0,0.5)">
+		<p style="margin: 0px; padding-bottom: 4px">
+			Warning: You are trying to overwriting an existing dataset!<br>
+			You'll first have to delete the dataset before you can upload a new one with the same file name.<br/>
+			Or rename the file you are uploading to something else.</p>
+	</div>
 </body>
 </html>

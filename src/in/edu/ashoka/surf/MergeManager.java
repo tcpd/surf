@@ -334,6 +334,9 @@ public class MergeManager {
                     // also remember to update the idToRows map
                     log.info("Merging id " + id + " into " + firstId);
                     Collection<Row> rowsForThisId = idToRows.get(id);
+                    if (rowsForThisId.size() == 0)
+                        log.warn ("While trying to merge into id " + firstId + ", not found any rows for id: " + id);
+
                     for (Row row : rowsForThisId) {
                         row.set(Config.ID_FIELD, firstId); // we wipe out the old id for this row
                         idToRows.get(firstId).add (row);
@@ -349,9 +352,10 @@ public class MergeManager {
                     log.info("Unmerging id " + id);
                     Collection<Row> rowsForThisId = idToRows.get(id);
                     for (Row row : rowsForThisId) {
+                        log.info ("assigning id " + nextAvailableId);
                         row.set(Config.ID_FIELD, Integer.toString(nextAvailableId));
+                        idToRows.put(Integer.toString(nextAvailableId), row); // this was a bug earlier, we weren't doing this
                         nextAvailableId++;
-                        idToRows.put(Config.ID_FIELD, row); // this was a big earlier, we weren't doing this
                     }
                 }
                 datasetNeedsToBeSaved = true;

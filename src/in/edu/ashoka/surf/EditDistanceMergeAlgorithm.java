@@ -77,5 +77,12 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
         return classes;
     }
 
+    /* debug method */
+    void dumpClasses() {
+        for (Collection<Row> rows: classes) {
+            log.info (rows.iterator().next().get(fieldName));
+        }
+    }
+
     public String toString() { return "Edit distance algorithm with maximum edit distance " + maxEditDistance; }
 }

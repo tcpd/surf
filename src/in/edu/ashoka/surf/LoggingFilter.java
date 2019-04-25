@@ -99,7 +99,7 @@ public class LoggingFilter implements javax.servlet.Filter {
 		String requestURL = ((HttpServletRequest) request).getRequestURL().toString();
 		// we want to log only pages, not every little resource
 		boolean logRequest = !requestURL.endsWith(".gif") && !requestURL.endsWith(".svg") && !requestURL.endsWith(".png") && !requestURL.endsWith(".jpg") && !requestURL.endsWith(".js") && !requestURL.endsWith(".css");
-		if (requestURL.endsWith("muselog.jsp") || requestURL.endsWith("status") || requestURL.contains("serveImage") || requestURL.contains("serveAttachment"))
+		if (requestURL.endsWith("muselog.jsp") || requestURL.endsWith("status") || requestURL.contains("serveImage") || requestURL.contains("serveAttachment") || requestURL.contains("/fonts/"))
 			logRequest = false;
 		
 		if (logRequest)

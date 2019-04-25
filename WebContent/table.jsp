@@ -338,6 +338,9 @@ pageEncoding="UTF-8"
                 if (rowisSpecial)
                     tr_class += " special-row ";
 
+                String mergeFieldVal = row.get(Config.MERGE_FIELD).toUpperCase();
+                if (Util.nullOrEmpty(mergeFieldVal))
+                    mergeFieldVal = "(blank)";
         %>
 
 			<tr class="<%=tr_class%> trow" data-id=<%=id%>>
@@ -345,7 +348,7 @@ pageEncoding="UTF-8"
                 <td class="cell-table table-cell-merge"><%=mergeCheckboxHTML%></td>
 
                 <!-- need word-break: break-all to break very long names -->
-				<td style="min-width:300px;word-break:break-all" class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(row.get(Config.MERGE_FIELD).toUpperCase())%></a></td>
+				<td style="min-width:300px;word-break:break-all" class="cell-table table-cell-name"><a href="<%=href%>" title="<%=hoverText%>" target="_blank"><%=Util.escapeHTML(mergeFieldVal)%></a></td>
 				<%-- <td class="cell-table table-cell-constituency"><a href="<%=pc_href%>" title="<%=pcInfo%>" target="_blank"><%=Util.escapeHTML(row.get("Constituency_Name").toUpperCase())%></a></td> --%>
 
                 <%
@@ -370,14 +373,16 @@ pageEncoding="UTF-8"
                             classStr += warnGender ? " warn-gender " : "";
                             classStr += consecutive_aes ? " consecutive " : "";
 
+                            // special case for elections dataset
                             if (col.equals(POSITION_COL)) {
                                 int pos = Util1.parseInt(colVal, -1);
                                 if (pos > 0 && pos <= 3)
                                     textClass = "special";
                             }
 
+                            // special case for elections dataset
                             if (col.equals(POLL_NO_COL)) {
-                                int x = 1; // warn by default
+                                int x = 0; // warn by default
                                 try { x = Integer.parseInt(row.get(col)); } catch (Exception ignored) { }
                                 if (x > 0)
                                     textClass = "warn";

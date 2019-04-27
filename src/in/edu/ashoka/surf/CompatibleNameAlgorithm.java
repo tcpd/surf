@@ -110,13 +110,14 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 	// core compatibility function: at least (minTokenOverlap) multi-letter tokens common, or whether all tokens in one can map to the other modulo initials (if initialMapping is true)
 	@SuppressWarnings("SuspiciousNameCombination")
     private int compatibility (String x, String y, int minTokenOverlap, boolean substringAllowed, boolean initialMapping) {
-		Multiset<String> xTokens = LinkedHashMultiset.create();
+	    
+        Multiset<String> xTokens = LinkedHashMultiset.create();
 		xTokens.addAll(Util.tokenize(x));
         Multiset<String> yTokens = LinkedHashMultiset.create();
         yTokens.addAll (Util.tokenize(y));
 
         // remove all ignored tokens
-        xTokens.removeAll(ignoredTokens);
+            xTokens.removeAll(ignoredTokens);
         yTokens.removeAll(ignoredTokens);
 
         // if either x or y consists only of ignored tokens, it is effectively an empty token, return 0
@@ -158,6 +159,8 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
         // setup tokenToFieldIdx: is a map of token (of at least 3 chars) -> all indexes that contain that token
         // since compat computation is expensive, we'll only compute it for pairs that have at least 1 token in common
+        // another optimization we could do is to compute the version of the field with ignoreTokens stripped out
+        // this computation happens on each string many times.
         Multimap<String, Integer> tokenToFieldIdx = HashMultimap.create();
         for (int i = 0; i < filteredRows.size(); i++) {
             String fieldVal = filteredRows.get(i).get(field);
@@ -367,5 +370,6 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 		CompatibleNameAlgorithm alg = new CompatibleNameAlgorithm(null);
 		System.out.println (alg.compatibility("BISAN DUT LAKAN PAL", "BISAN DUT", 2, true, true));
 
+        System.out.println (alg.compatibility("BABAR CH OUHAN PARSOTAM", "AN IMTIIAS KAN KAN PAT SAED", 2, true, true));
 	}
 }

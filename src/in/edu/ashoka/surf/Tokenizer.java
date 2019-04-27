@@ -29,7 +29,7 @@ public class Tokenizer {
     }
 
     /** generates weighted token counts for tokens in each key. the count of a key (token) in the multiset is its weight. */
-    private static Multiset<String> generateTokens(Multimap<String, Row> map) {
+    private static Multiset<String> generateTokenCounts(Multimap<String, Row> map) {
         // tokenize the names
         Multiset<String> tokens = HashMultiset.create();
         int nSingleWordKeys = 0;
@@ -74,8 +74,39 @@ public class Tokenizer {
             String first = s.substring(0, i);
             String second = s.substring(i);
 
-
             // first and second must be both at least 2 chars long
+
+            {
+                // we can break s into first and second, only if first and second have been seen at least once in the dataset
+                // this means RAMLAL can break into RAM and LAL if RAM and LAL are words in the dataset
+                // RAMJI can break into RAM and JI if RAM and JI ...
+                // but RAMESH will not break into RAM and ESH because "ESH" may not be in the dataset. this is what we want.
+                // further if we are breaking up in a way that we are introducing new tokens of length, we expect that 2 letter word to have a freq. of at least 5.
+                // and similarly for 3 letter words to have a freq. of at least 2.
+                // for 4 letter words, can have freq. of just 1.
+                boolean skip = false;
+                if (validTokens.count(first) == 0 || validTokens.count(second) == 0) {
+                    skip = true;
+                }
+
+                final int MIN_FREQ_FOR_TOKENS_OF_LEN_2 = 5;
+                final int MIN_FREQ_FOR_TOKENS_OF_LEN_3 = 2;
+                // = 1 for the others
+
+                if ((first.length() <= 2 && validTokens.count(first) < MIN_FREQ_FOR_TOKENS_OF_LEN_2) ||
+                    (second.length() <= 2 && validTokens.count(second) < MIN_FREQ_FOR_TOKENS_OF_LEN_2)) {
+                    skip = true;
+                }
+
+                if ((first.length() <= 3 && validTokens.count(first) < MIN_FREQ_FOR_TOKENS_OF_LEN_3) ||
+                    (second.length() <= 3 && validTokens.count(first) < MIN_FREQ_FOR_TOKENS_OF_LEN_3)) {
+                    skip = true;
+                }
+
+                if (skip)
+                    continue;
+            }
+
             int splitWeight = validTokens.count(first) + validTokens.count(second);
 
             // we penalize splits that result in tokens of length just 2
@@ -125,6 +156,8 @@ public class Tokenizer {
                 String val = r.get(field);
                 val = val.toUpperCase();
                 String cval = canonicalizeDesi(val);
+                if (log.isDebugEnabled())
+                    log.debug ("canonicalization result, val: " + val + " cval: " + cval);
                 r.set(cfield, cval);
             }
         }
@@ -136,12 +169,19 @@ public class Tokenizer {
         Timers.tokenizationTimer.start();
         {
             Multimap<String, Row> cfieldValToRows = SurfExcel.split(allRows, cfield);
-            Multiset<String> tokens = generateTokens(cfieldValToRows);
+            Multiset<String> tokens = generateTokenCounts(cfieldValToRows);
 
             for (String val : cfieldValToRows.keySet()) {
                 // compute and set retokenized val
+                if (log.isDebugEnabled()) {
+
+                }
                 List<String> result = retokenize(val, tokens);
                 String tval = Joiner.on(" ").join(result);
+                if (log.isDebugEnabled()) {
+                    log.debug ("Retokenization result val:" + val + " retokenized: " + tval);
+                }
+                log.info ("Retokenization result val:" + val + " retokenized: " + tval);
 
                 // compute and set sorted-retokenized val
                 List<String> sortedResult = new ArrayList<>(result);

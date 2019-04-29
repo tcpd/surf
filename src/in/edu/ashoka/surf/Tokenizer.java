@@ -173,15 +173,12 @@ public class Tokenizer {
 
             for (String val : cfieldValToRows.keySet()) {
                 // compute and set retokenized val
-                if (log.isDebugEnabled()) {
-
-                }
                 List<String> result = retokenize(val, tokens);
                 String tval = Joiner.on(" ").join(result);
                 if (log.isDebugEnabled()) {
                     log.debug ("Retokenization result val:" + val + " retokenized: " + tval);
                 }
-                log.info ("Retokenization result val:" + val + " retokenized: " + tval);
+                // log.info ("Retokenization result val:" + val + " retokenized: " + tval);
 
                 // compute and set sorted-retokenized val
                 List<String> sortedResult = new ArrayList<>(result);

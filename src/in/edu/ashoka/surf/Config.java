@@ -120,6 +120,7 @@ public class Config {
     public static final Map<String, List<String>> actualSortColumns =  new LinkedHashMap<>();
     public static final Map<String, String> keyToPath  = new LinkedHashMap<>();
     public static final Map<String, String> keyToDescription = new LinkedHashMap<>();
+    public static final Map<String, String> keytoIDColumn = new LinkedHashMap<>();
     public static Properties gitProps = null;
 
     static {
@@ -153,6 +154,10 @@ public class Config {
             {
                 ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(props.getProperty(key).split(",")));
                 actualSortColumns.put(key.replace("_SortBy", ""), arrayList);
+            }
+            if(key.endsWith("_IDCol")) /*added by Prashanthi*/
+            {
+                keytoIDColumn.put(key.replace("_IDCol", ""), props.getProperty(key));
             }
         }
 
@@ -204,7 +209,7 @@ public class Config {
     }
 
     // return properties set from epadd.properties file and/or system properties
-    private static Properties readProperties() {
+    public static Properties readProperties() { // changed to public access by Prashanthi for use in SetColumnsServlet.java (13/01/20)
         Properties props = new Properties();
 
         // PROPS_FILE is where the config is read from.
@@ -276,18 +281,21 @@ public class Config {
         return is;
     }
 
-    public static void addDatasetToConfig(String path, String desc, String name, String headers) {
+    public static void addDatasetToConfig(String path, String desc, String name, String headers, String idcolumn/*added by Prashanthi*/) {
         String nkey = name.substring(0, name.lastIndexOf("."));  // strip out the ext. after the last part (.csv) and use that as the key
         String pathLabel = nkey + "_Path=";
         String descLabel = nkey + "_Description=";
         String colLabel = nkey + "_Columns=";
         String sortLabel = nkey + "_SortBy=";
+        String idLabel = nkey + "_IDCol="; /*added by Prashanthi*/
+     
         Properties props = new Properties();
         String pathValue = pathLabel.concat(path.replaceAll("\\\\", "\\\\\\\\")); //hacky fix for windows
         String descriptionValue = descLabel.concat(desc);
         String columnsValue = colLabel.concat(headers);
         String sortColValue = sortLabel.concat(headers.substring(0,headers.indexOf(",")));
-
+        String idColValue = idLabel.concat(idcolumn); /*added by Prashanthi*/
+       
         // PROPS_FILE is where the config is read from.
         // default <HOME>/surf.properties, but can be overridden by system property surf.properties
         String propsFile = System.getProperty("surf.properties");
@@ -338,7 +346,7 @@ public class Config {
             log.info("Updating configuration in: " + PROPS_FILE);
             try {   
                 FileWriter fw = new FileWriter(PROPS_FILE, true);
-                fw.write(System.lineSeparator()+pathValue+System.lineSeparator()+descriptionValue+System.lineSeparator()+columnsValue+System.lineSeparator()+sortColValue);
+                fw.write(System.lineSeparator()+pathValue+System.lineSeparator()+descriptionValue+System.lineSeparator()+columnsValue+System.lineSeparator()+sortColValue+System.lineSeparator()+idColValue);
                 fw.close();
             } catch (Exception e) {
                 log.warn("Error reading Surf properties file " + PROPS_FILE + " " + e);

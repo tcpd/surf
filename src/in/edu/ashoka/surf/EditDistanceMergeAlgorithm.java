@@ -33,7 +33,7 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
     @Override
     public List<Collection<Row>> run() {
 
-        Collection<Row> filteredRows = filter.isEmpty() ? dataset.getRows() : dataset.getRows().stream().filter(filter::passes).collect(toList());
+        Collection<Row> filteredRows = filter.isEmpty() ? dataset.getRows() : dataset.getRows().stream().filter(filter::passes).collect(toList()); 
 
         // create map of fieldValueToRows
         SetMultimap<String, Row> fieldValueToRows = HashMultimap.create();
@@ -68,11 +68,22 @@ public class EditDistanceMergeAlgorithm extends MergeAlgorithm {
 
         // compute the result of this algorithm
         classes = new ArrayList<>();
+        int i = 0;
         for (Set<String> cluster : clusters) {
             final Collection<Row> rowsForThisCluster = new ArrayList<>();
             // cluster just has strings, convert each string in the cluster to its rows, and add it to rowsForThisCluster
             cluster.forEach (s -> { rowsForThisCluster.addAll (fieldValueToRows.get(s)); });
+            // rowsForThisCluster.forEach(p -> {if(p.get("Candidate").equals("THOMAS HANSDA")) log.info("found THOMAS in cluster "+i);});
+            for(Row R: rowsForThisCluster) /*Added by Prashanthi (02/02/20)*/
+            {
+                if(R.get("Candidate").equals("THOMAS HANSDA") & R.get("Party").equals("INC")) 
+                {    
+                    log.info("found THOMAS in cluster "+i);
+                    log.info("normalized string = "+Tokenizer.canonicalizeDesi(R.get("Candidate")));
+                }
+            } /*prashanthi's code ends*/
             classes.add (rowsForThisCluster);
+            i = i+1;
         }
         return classes;
     }

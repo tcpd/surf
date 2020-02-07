@@ -27,7 +27,7 @@ public class Dataset implements Serializable, Cloneable {
     private long saveTime = 0;
     private String filename;
 
-	private static final String NEW_LINE_SEPARATOR = "\n";
+    private static final String NEW_LINE_SEPARATOR = "\n";
     Collection<Row> rows;
     private Collection<String> columnsToSave; // this is what is used to decide which columns get written out when the dataset is saved
     private String name;
@@ -38,10 +38,10 @@ public class Dataset implements Serializable, Cloneable {
     private final Timer timer;
     
     private void addToColumnsToSave(String col){
-    	if(columnsToSave.contains(col)) {
+        if(columnsToSave.contains(col)) {
         }
-    	else
-    		columnsToSave.add(col);
+        else
+            columnsToSave.add(col);
     }
 
     /** returns the TBR version of this dataset. reads from disk if available, otherwise creates a new dataset with the same column structure, but no rows */
@@ -138,11 +138,13 @@ public class Dataset implements Serializable, Cloneable {
         Collection<Row> allRows = getRows();
         for (Row row:allRows) {
             if (row.get(Config.ID_FIELD).equals(""))
+            {
                 return false;
+            }
         }
         return true;
-    }
 
+    }
     //initialize the id's for each row
     final public void initializeIds(){
         if (!hasColumnName(Config.ID_FIELD))
@@ -206,7 +208,7 @@ public class Dataset implements Serializable, Cloneable {
 
             if (nRows == 1) {
                 for (String col : map.keySet()) {
-                	columnsToSave.add(col);
+                    columnsToSave.add(col);
                     registerColumn(col);
                 }
             }
@@ -276,7 +278,7 @@ public class Dataset implements Serializable, Cloneable {
      * @throws IOException */
     private synchronized void save(String file) throws IOException {
         saveTime = System.currentTimeMillis();
-    	
+        
         //FIRST WRITE TO A NEW FILE
         String fileWithSuffixNew = file + ".new";
         Writer fileWriter = new FileWriter(fileWithSuffixNew);
@@ -288,11 +290,11 @@ public class Dataset implements Serializable, Cloneable {
         csvFilePrinter.printRecord(columnList);
         
         for(Row row:rows){
-        	List<String> recordList = new ArrayList<>();
-        	for(String column:columnList){
-        		recordList.add(row.get(column));
-        	}
-        	csvFilePrinter.printRecord(recordList);
+            List<String> recordList = new ArrayList<>();
+            for(String column:columnList){
+                recordList.add(row.get(column));
+            }
+            csvFilePrinter.printRecord(recordList);
         }
         
         fileWriter.flush();

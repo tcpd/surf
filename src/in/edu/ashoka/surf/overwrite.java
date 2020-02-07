@@ -26,7 +26,7 @@ public class overwrite extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html; charset=UTF-8");
 
         // create the surf home dir if it doesn't exist
@@ -36,10 +36,13 @@ public class overwrite extends HttpServlet {
         request.getRequestDispatcher("custom-dataset.jsp").include(request, response);
     }
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html; charset=UTF-8");
         String description = request.getParameter("desc");
         String filename = request.getParameter("filename");
+
+        String IDcolumn = request.getParameter("uid"); /*added by Prashanthi on 09/01/2020*/
+        
         if(description==null)
         {
             log.warn("Descript is null.");
@@ -62,22 +65,35 @@ public class overwrite extends HttpServlet {
             newfile.delete();
             // BufferedReader fileContent = new BufferedReader(new FileReader(Config.SURF_HOME + File.separator + filename));
             String firstLine = "";
-                CSVParser parse = CSVParser.parse(new File(Config.SURF_HOME + File.separator + filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
-                Map<String, Integer> headers = parse.getHeaderMap();
-                int length=headers.size();
-                if(length==0)
-                {
-                    log.warn("0 columns!");
-                    return;
-                }
-                int flag=0;
-                for(String key : headers.keySet())
-                {
-                    firstLine+=key;
-                    if (flag < length - 1)
-                        firstLine = firstLine + ",";
-                    flag++;
-                }
+            CSVParser parse = CSVParser.parse(new File(Config.SURF_HOME + File.separator + filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
+            Map<String, Integer> headers = parse.getHeaderMap();
+            int length=headers.size();
+            if(length==0)
+            {
+                log.warn("0 columns!");
+                return;
+            }
+            int flag=0;
+            for(String key : headers.keySet())
+            {
+                // if(key.equals(IDcolumn))
+                // {
+                //     key = Config.ID_FIELD;
+                // }
+
+                firstLine+=key;
+                if (flag < length - 1)
+                    firstLine = firstLine + ",";
+                flag++;
+            }
+            log.info("New first line: " + firstLine);
+
+            // FileWriter csvWriter = new FileWriter(fileToWrite);
+            // csvWriter.append(firstLine);
+            // csvWriter.flush();
+            // csvWriter.close();
+
+
 
             //firstLine = firstLine.replaceAll("\"", ""); // isn't this unsafe?
             //fileContent.close();
@@ -94,16 +110,21 @@ public class overwrite extends HttpServlet {
                 }
             }
 
-            Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine);
-            request.getRequestDispatcher("index.jsp").include(request, response);
-        }
+            // if(IDcolumn.equals(""))
+            //     Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine, "ID");
+            // else
+            //     Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine, IDcolumn);
+            Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine, IDcolumn);
+            
+                request.getRequestDispatcher("index.jsp").include(request, response);
+            }
         else
         {
             newfile.delete();
             request.getRequestDispatcher("index.jsp").include(request, response);
         }
-	}
+    }
 
-	public void destroy() {
-	}
+    public void destroy() {
+    }
 }

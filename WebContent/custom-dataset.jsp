@@ -36,6 +36,11 @@
 		<br>
         <label for="desc">Description (required)</label>
         <input class="form-control" type="text" placeholder="Description" id="desc" name="desc">
+        <br>
+        <label for="uid">Enter the name of your ID column, if exists</label> 
+        <input class="form-control" type="text" placeholder="ID column" id="uid" name="uid">
+        <span class="help">You can skip this if your ID column is called "ID".</span>
+
 	</div>
 	<br/>
 	<div class="submit-button">

@@ -1,3 +1,4 @@
+<%@ page import="in.edu.ashoka.surf.Config" %>
 <%@ page import="in.edu.ashoka.surf.*" %>
 <%@ page import="edu.stanford.muse.util.Util" %>
 
@@ -9,14 +10,14 @@
     <link rel="icon" type="image/png" href="images/surf-favicon.png">
     <link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
 
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
-	<link rel="stylesheet" type="text/css" href="css/surf.css">
+    <link rel="stylesheet" type="text/css" href="css/surf.css">
 
-	<script src="js/jquery-1.12.1.min.js"></script>
-	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
-	<script src="js/selectpicker.js"></script>
+    <script src="js/jquery-1.12.1.min.js"></script>
+    <script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="js/selectpicker.js"></script>
     <script type="text/javascript">if(performance.navigation.type == 2 || performance.navigation.type == 255){
    location.reload(true);
     }</script>
@@ -35,6 +36,9 @@
             String datasetKey = (String) session.getAttribute("datasetKey");
             Config.refreshCols(datasetKey);
             session.setAttribute("dataset", dataset);
+
+            String idcolumn = Config.keytoIDColumn.get(datasetKey);/*added by Prashanthi on 09/01/2020 */
+
 
             if (dataset != null) {
                 int nRows = dataset.getRows().size();
@@ -71,6 +75,7 @@
                 <% } %>
                 <br/>
                 <br/>
+
                 <label for="columnName">Column for IDs:</label>
                 <select class="form-control selectpicker" id="columnName" name="columnName">
                     <% for (String col: Config.actualColumns.get(datasetKey)) { %>

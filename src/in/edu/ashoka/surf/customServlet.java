@@ -17,6 +17,20 @@ import javax.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.FileWriter;
+import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.Scanner;
+/* Prashanthi (13/01/20): have to remove packages we don't require */
+
 @MultipartConfig
 public class customServlet extends HttpServlet {
     private static final Log log = LogFactory.getLog(in.edu.ashoka.surf.customServlet.class);
@@ -26,7 +40,7 @@ public class customServlet extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html; charset=UTF-8");
 
         // create the surf home dir if it doesn't exist
@@ -38,9 +52,11 @@ public class customServlet extends HttpServlet {
         request.getRequestDispatcher("custom-dataset.jsp").include(request, response);
     }
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html; charset=UTF-8");
         String description = request.getParameter("desc");
+        String IDcolumn = request.getParameter("uid"); /*added by Prashanthi on 09/01/2020*/
+
 
         Part filePart = request.getPart("myfile");
         if(filePart==null || description==null)
@@ -94,11 +110,33 @@ public class customServlet extends HttpServlet {
             int flag=0;
             for(String key : headers.keySet())
             {
+                 if(key.equals(IDcolumn))
+                {
+                    key = Config.ID_FIELD;
+                }
+
                 firstLine+=key;
                 if (flag < length - 1)
                     firstLine = firstLine + ",";
                 flag++;
             }
+
+        Scanner sc = new Scanner(new File(fileToWrite));
+        
+        StringBuffer lines = new StringBuffer();
+        lines.append(firstLine+System.lineSeparator());
+
+        sc.nextLine();
+        while (sc.hasNextLine()) {
+            lines.append(sc.nextLine()+System.lineSeparator());
+        }
+        String fileContents = lines.toString();
+        fileContents = fileContents.substring(0, fileContents.length() - 1); // Prashanthi (11/01/20): to truncate trailing new line from file. do we need this? 
+        sc.close();
+
+        FileWriter writer = new FileWriter(fileToWrite);
+        writer.append(fileContents);
+        writer.flush();
 
         //firstLine = firstLine.replaceAll("\"", ""); // isn't this unsafe?
         //fileContent.close();
@@ -115,10 +153,15 @@ public class customServlet extends HttpServlet {
             }
         }
         parse.close();
-        Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine);
-        request.getRequestDispatcher("index.jsp").include(request, response);
-	}
 
-	public void destroy() {
-	}
+        if(IDcolumn.equals(""))
+            Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine, "ID");
+        else
+            Config.addDatasetToConfig(Config.SURF_HOME + File.separator + filename, description, filename, firstLine, IDcolumn); 
+       
+        request.getRequestDispatcher("index.jsp").include(request, response);
+    }
+
+    public void destroy() {
+    }
 }

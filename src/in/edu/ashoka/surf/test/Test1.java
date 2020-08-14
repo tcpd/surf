@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
  */
 class Test1 {
 
-    private static final String path = "/Users/hangal/Gujarat_worksheet.csv";
+    private static final String path = "/Users/priyamgarrg21/Documents/Aditya/Internship@Ashoka/TCPD_GE_Delhi_2020-6-18.csv";
     public static void main(String args[]) throws IOException {
         Dataset d = Dataset.getDataset(path);
-        Set<String> names = d.getRows().stream().map (r -> r.get("Name")).collect (Collectors.toSet());
+        Set<String> names = d.getRows().stream().map (r -> r.get("Candidate")).collect (Collectors.toSet());
 
-        EditDistanceClusterer edc = new EditDistanceClusterer(1);
+        EditDistanceClusterer edc = new EditDistanceClusterer(5);
         names.forEach (edc::populate);
         List<Set<String>> clusters = (List) edc.getClusters();
 

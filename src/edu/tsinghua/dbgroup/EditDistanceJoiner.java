@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import edu.tsinghua.dbgroup.*;
+
 class EditDistanceJoiner {
     private List<String> mStrings;
     private final TreeMap<Integer, ArrayList<HashMap<String, ArrayList<Integer>>>> mGlobalIndex;

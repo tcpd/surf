@@ -77,6 +77,14 @@ public class Row implements Comparable<Row> {
     public int nFields () {
         return this.fields.keySet().size();
     }
+    
+    public String alldata() {
+    	String ss = "";
+    	for(String str : fields.keySet()) {
+    		ss = ss + (" " + str + ":" + fields.get(str));
+    	}
+    	return ss;
+    }
 
     public Set<String> getAllFieldNames () {
         return fields.keySet();

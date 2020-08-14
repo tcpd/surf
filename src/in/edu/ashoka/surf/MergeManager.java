@@ -111,6 +111,7 @@ public class MergeManager {
     private final Multimap<String, Row> idToRows = LinkedHashMultimap.create();
     private final SetMultimap<Row, String> rowToLabels = HashMultimap.create();
     private int nextAvailableId = 0;
+    private int uniqueval = 0;
 
     private final List<Command> allCommands = new ArrayList<>(); // compile all the commands, so that they can be replayed some day, if needed
 
@@ -170,6 +171,23 @@ public class MergeManager {
                 algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, editDistance, filter); // run e.d. on the _st_ version of the field
 
                 break;
+                
+            case "reviewalgo":
+                  algorithm = new NewReviewAlgorithm(d, Config.MERGE_FIELD, filter);
+                break;
+                
+            case "cosinesimilarity":
+            	int accuracy = 90;
+                try {
+                    accuracy = Integer.parseInt(params.get("cosine-similarity"));
+                } catch (NumberFormatException e) {
+                    Util.print_exception(e, log);
+                }
+//                algorithm = new EditDistanceMergeAlgorithm(d, "_st_" + Config.MERGE_FIELD, 5, filter); // run e.d. on the _st_ version of the field
+                  System.out.println("---------------------------------------------------------" + accuracy + "-------------------------------------------------------------------------");
+                  algorithm = new CosineSimilarityAlgo(d, "_st_" + Config.MERGE_FIELD, accuracy, filter);
+                break;
+                
             case "allNames":
                 algorithm = new MergeAlgorithm(dataset) {
                     @Override
@@ -296,8 +314,19 @@ public class MergeManager {
 
     /* computes idToRows and also updates nextAvailableId */
     private void computeIdToRows (Collection<Row> rows) {
-        for (Row r: rows)
+//    	int i = 1;
+        for (Row r: rows) {
             idToRows.put (r.get(Config.ID_FIELD), r);
+//            System.out.println(r.get("Candidate") + "->" + i + "->" + r.get(Config.ID_FIELD));
+//            i++;
+        }
+        int maxn = 0;
+        for(Row r: rows) {
+        	if(Integer.parseInt(r.get("Rid")) >= maxn) {
+        		maxn = Integer.parseInt(r.get("Rid"));
+        	}
+        }
+        uniqueval = maxn + 1;
 
         int maxNumberUsed = 1;
         for (String id: idToRows.keySet()) {
@@ -329,15 +358,20 @@ public class MergeManager {
                         firstId = id;
                         continue;
                     }
+//                    System.out.println(id);
+//                    System.out.println("aaaaaaaaaaaa");
 
                     // update all the rows for this id to firstId
                     // also remember to update the idToRows map
                     log.info("Merging id " + id + " into " + firstId);
                     Collection<Row> rowsForThisId = idToRows.get(id);
+//                    System.out.println(rowsForThisId);
+                    
                     if (rowsForThisId.size() == 0)
                         log.warn ("While trying to merge into id " + firstId + ", not found any rows for id: " + id);
 
                     for (Row row : rowsForThisId) {
+//                    	System.out.println(row);
                         row.set(Config.ID_FIELD, firstId); // we wipe out the old id for this row
                         idToRows.get(firstId).add (row);
                     }
@@ -373,18 +407,69 @@ public class MergeManager {
                 }
                 // create unique id's for all rows
                 for (String id : command.ids) {
+//                	System.out.println(id);
+                	emptyRow = new Row(new LinkedHashMap<>(), toBeReviewed.rows.size(), toBeReviewed);
                     Collection<Row> rowsForThisId = idToRows.get(id);
                     if (rowsForThisId == null) {
                         log.warn ("rowsForThisID is null for id " + id);
                         continue;
                     }
+//                    System.out.println(rowsForThisId);
                     toBeReviewed.rows.addAll(rowsForThisId);
-                    toBeReviewed.rows.add(emptyRow); // add empty row with no data
+//                    toBeReviewed.rows.add(emptyRow); // add empty row with no data
                 }
-
-                // add 2 empty rows with no data
+                
+                emptyRow = new Row(new LinkedHashMap<>(), toBeReviewed.rows.size(), toBeReviewed);
+//                System.out.println("a");
                 toBeReviewed.rows.add(emptyRow);
+//                System.out.println("b");
+                toBeReviewed.rows.add(emptyRow);
+//                System.out.println("c");
                 tbrNeedsToBeSaved = true;
+                
+                System.out.println("--------------Review Algorithm Stats-----------");
+                
+                
+                int temp = 0;
+                for(String id: command.ids) {
+                	Collection<Row> rowsForThisId = idToRows.get(id);
+//                	if (rowsForThisId == null) {
+//                        System.out.println("No Row for this ID");
+//                        continue;
+//                    }
+                	for(Row row: rowsForThisId) {
+                		if(Integer.parseInt(row.get("Rid")) >= temp) {
+                			temp = Integer.parseInt(row.get("Rid"));
+                		}
+                	}
+                }
+                
+                System.out.println("If existing rows are changed then temp!=0 otherwise it is 0:- "+ temp);
+                System.out.println("These rows will be given rid = "+ uniqueval);
+                if(temp != 0) {
+                	for(String id: command.ids) {
+                    	Collection<Row> rowsForThisId = idToRows.get(id);
+                    	for(Row row: rowsForThisId) {
+                    		System.out.println("Candidate Name:- " + row.get("Candidate"));
+                    		row.set("Rid", Integer.toString(temp));
+                    		System.out.println("Its Given Rid:- " + row.get("Rid"));
+                    	}
+                    }
+                }
+                else {
+                	for(String id: command.ids) {
+                    	Collection<Row> rowsForThisId = idToRows.get(id);
+                    	for(Row row: rowsForThisId) {
+                    		System.out.println("Candidate Name:- " + row.get("Candidate"));
+                    		row.set("Rid", Integer.toString(uniqueval));
+                    		System.out.println("Its Given Rid:- " + row.get("Rid"));
+                    	}
+                    }
+                	uniqueval++;
+                }
+                
+                d.save();
+                
             }   else if ("add-label".equalsIgnoreCase(command.op)) {
                 String label = command.label;
                 for (String gid : command.ids) {

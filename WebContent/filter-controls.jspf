@@ -1,4 +1,5 @@
 <%@ page import="in.edu.ashoka.surf.util.Util" %>
+<%@ page import="in.edu.ashoka.surf.*" %>
 <%
     // if we already have filter config, initialize filterSpec, gvc, rvc to the corresponding fields in the config,
     // so we can init the dropdowns to the existing config

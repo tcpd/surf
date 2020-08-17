@@ -1,6 +1,6 @@
 <%@ page import="in.edu.ashoka.surf.*" %>
-<%@ page import="edu.stanford.muse.util.Util" %>
-
+<%@ page import="in.edu.ashoka.surf.util.Util" %>
+<%-- <%@ page import="edu.stanford.muse.util.Util" %>--%>
 <!DOCTYPE html>
 <html>
 <head>

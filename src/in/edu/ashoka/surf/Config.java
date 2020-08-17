@@ -28,6 +28,7 @@ public class Config {
     public static String MERGE_FIELD = "Name";
     public static final int groupsPerPage = 100;
     public static final int DEFAULT_EDIT_DISTANCE = 2;
+//    public static final int DEFAULT_COSINE_ACCURACY = 90;
     public static final int DEFAULT_MIN_TOKEN_OVERLAP = 2;
     public static final int DEFAULT_IGNORE_TOKEN_FREQUENCY = 200;
     public static final int DEFAULT_MIN_SPLITWEIGHT = 10; // a token in a field will be split only if it's constituent parts have appeared independently > 10 times. (However, there is an additional factor of 2x needed if the fields are only of length 3)

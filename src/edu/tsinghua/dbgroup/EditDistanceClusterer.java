@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.io.Serializable;
 import java.util.Comparator;
 import edu.tsinghua.dbgroup.*;
+
 public class EditDistanceClusterer {
     private final EditDistanceJoiner mJoiner;
     static class SizeComparator implements Comparator<Set<Serializable>> {

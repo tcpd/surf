@@ -39,6 +39,8 @@
 		<label for="algorithm">Algorithm for clustering <%=mergeCol%></label>
 		<select class="form-control selectpicker" id="algorithm" name="algorithm">
             <option value="editDistance">Edit distance</option>
+<!--             <option value="cosinesimilarity">Cosine Similarity</option> -->
+            <option value="reviewalgo">Review Algorithm</option>
 			<option value="compatibleNames">Compatible names</option>
             <option value="streaks">Streaks</option>
             <option value="allNames">All IDs in a single cluster</option>
@@ -50,7 +52,18 @@
             <input type="text" class="form-control" id="edit-distance" name="edit-distance" placeholder="<%=Config.DEFAULT_EDIT_DISTANCE%>">
             <span id="edit-distance-0-help" class="help">Edit distance 0 not included</span>
         </div>
-
+        
+        <div style="display:none" class="div-review-algo">
+        </div>
+        
+        
+<%--         <div style="display:none" class="div-cosine-similarity">
+            <label for="cosine-similarity">Input value</label>
+            <input type="text" class="form-control" id="cosine-similarity" name="cosine-similarity" placeholder="<%=Config.DEFAULT_EDIT_DISTANCE%>">
+            <span id="cosine-similarity-0-help" class="help">Cosine similarity AlGo does not require any user input</span>
+        </div> --%>
+        
+        
         <div class="div-compat-alg-controls">
             <div class="div-min-token-overlap">
                 <label for="min-token-overlap">Token overlap</label>
@@ -214,6 +227,19 @@
         } else {
             $('.div-streak-alg-controls').hide();
         }
+        
+/*         if (alg === 'cosinesimilarity') {
+            $('.div-cosine-similarity').show();
+        } else {
+            $('.div-cosine-similarity').hide();
+        } */
+        
+        if (alg === 'reviewalgo') {
+            $('.div-review-algo').show();
+        } else {
+            $('.div-review-algo').hide();
+        }
+        
     }
 
     $('#algorithm').change(set_options_for_algorithm);

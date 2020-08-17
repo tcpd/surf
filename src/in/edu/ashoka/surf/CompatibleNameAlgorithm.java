@@ -2,6 +2,7 @@ package in.edu.ashoka.surf;
 
 import com.google.common.collect.*;
 import in.edu.ashoka.surf.util.Pair;
+import in.edu.ashoka.surf.util.Timers;
 import in.edu.ashoka.surf.util.UnionFindSet;
 import in.edu.ashoka.surf.util.Util;
 import org.json.JSONArray;
@@ -342,9 +343,15 @@ public class CompatibleNameAlgorithm extends MergeAlgorithm {
 
         List<Row> filteredRows = filter.isEmpty() ? (List<Row>) new ArrayList<>(dataset.getRows()) : dataset.getRows().stream().filter(filter::passes).collect(toList());
 
+        Timers.CompatibleNameTimer.reset();
+        Timers.CompatibleNameTimer.start();
 		// now translate the row#s back to the actual rows
         classes = new ArrayList<>();
         runRecursive (classes, filteredRows, minTokenOverlap, substringAllowed, initialMapping);
+        
+        Timers.CompatibleNameTimer.stop();
+
+        Timers.log.info ("Time for Compatible Name computation: " + Timers.CompatibleNameTimer.toString());
 
 		return classes;
 	}

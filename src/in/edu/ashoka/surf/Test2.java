@@ -11,7 +11,7 @@ import com.google.common.collect.Multimap;
 class Test2 {
 
 	public static void main(String[] args) throws IOException {
-		Dataset d = Dataset.getDataset("/home/sudx/surf.java/surf/GE/candidates/csv/candidates_info.csv");
+		Dataset d = Dataset.getDataset("/Users/priyamgarrg21/Documents/Aditya/EX/TCPD_GE_Delhi_2020-6-18.csv");
 		Collection<Row> rows = d.rows;
 		
 		//set ups what toString() of Row needs to print

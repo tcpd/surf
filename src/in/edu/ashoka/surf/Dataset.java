@@ -193,19 +193,31 @@ public class Dataset implements Serializable, Cloneable {
 
         checkFilesForFailure(filename);
         this.name = filename;
+        
+//        System.out.println("hellllllllllllllloooooooooooo");
 
         Set<Row> allRows = new LinkedHashSet<>();
         columnsToSave = new ArrayList<>();
         int nRows = 0;
+        boolean isr = false;
 //        Reader in = new FileReader("GE.csv");
         // read the names from CSV
         Iterable<CSVRecord> records = CSVParser.parse(new File(filename), Charset.forName("UTF-8"), CSVFormat.EXCEL.withHeader());
         for (CSVRecord record : records) {
+        	
             nRows++;
             Map<String, String> map = record.toMap();
+            
+            if(map.containsKey("Rid") == false) {
+                map.put("Rid", "0");
+                isr = true;
+            }
+
+//            System.out.println(map);
 
             if (nRows == 1) {
                 for (String col : map.keySet()) {
+//                	System.out.println(col);
                 	columnsToSave.add(col);
                     registerColumn(col);
                 }
@@ -216,6 +228,11 @@ public class Dataset implements Serializable, Cloneable {
         }
         this.rows = allRows;
         this.filename = filename;
+//        System.out.println(columnsToSave);
+        
+        if(isr == true) {
+        	save();
+        }
     }
 
     private void checkFilesForFailure(String filename) throws IOException{
